@@ -1,0 +1,104 @@
+{% load static %}
+
+<!-- Pie Charts
+
+1. pc_title
+2. pc_month
+3. pc_data
+
+
+-->
+
+<div class="w-full bg-white rounded-lg shadow dark:bg-gray-800 p-4 md:p-6 mb-2">
+
+    <div class="flex justify-between items-start w-full">
+        <div class="flex-col items-center">
+            <div class="flex items-center mb-1">
+                <h5 class="text-xl sm:text-2xl font-bold leading-none text-gray-900 dark:text-white me-1">{{ pc_title }}
+                </h5>
+            </div>
+        </div>
+    </div>
+
+    <!-- Line Chart -->
+    <div class="py-2" id="pie-chart"></div>
+
+    <div class="grid grid-cols-1 items-center border-gray-200 border-t dark:border-gray-700 justify-between">
+        <div class="flex justify-between items-center pt-5">
+            <!-- Teks -->
+            <p class="text-sm font-medium text-gray-500 dark:text-gray-400 text-center inline-flex items-center">
+                {{ day_ago }} Hari Terakhir
+            </p>
+            <p class="text-sm font-medium text-gray-500 dark:text-gray-400 text-center inline-flex items-center">
+                {{ pc_month }}
+            </p>
+        </div>
+    </div>
+</div>
+
+<script src="{% static 'dist/apexcharts.js' %}"></script>
+
+<script>
+    const getChartOptions = () => {
+        return {
+            series: JSON.parse('{{ pc_data|safe }}'),
+            colors: ["#1C64F2", "#EC3BF2", "#9061F9", "#FFD700"],
+            chart: {
+                height: 420,
+                width: "100%",
+                type: "pie",
+            },
+            stroke: {
+                colors: ["white"],
+                lineCap: "",
+            },
+            plotOptions: {
+                pie: {
+                    labels: {
+                        show: true,
+                    },
+                    size: "100%",
+                    dataLabels: {
+                        offset: -25
+                    }
+                },
+            },
+            labels: JSON.parse('{{ pc_labels|safe }}'),
+            dataLabels: {
+                enabled: true,
+                style: {
+                    fontFamily: "Inter, sans-serif",
+                },
+            },
+            legend: {
+                position: "bottom",
+                fontFamily: "Inter, sans-serif",
+            },
+            yaxis: {
+                labels: {
+                    formatter: function(value) {
+                        return value + "%"
+                    },
+                },
+            },
+            xaxis: {
+                labels: {
+                    formatter: function(value) {
+                        return value + "%"
+                    },
+                },
+                axisTicks: {
+                    show: false,
+                },
+                axisBorder: {
+                    show: false,
+                },
+            },
+        }
+    }
+
+    if (document.getElementById("pie-chart") && typeof ApexCharts !== 'undefined') {
+        const chart = new ApexCharts(document.getElementById("pie-chart"), getChartOptions());
+        chart.render();
+    }
+</script>

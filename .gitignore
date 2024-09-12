@@ -1,0 +1,14 @@
+*.pyc
+*.pyo
+*.pyd
+*.log
+*.db
+*.sqlite3
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+*.DS_Store
+./dist
+./media
+./node_modules
+./venv

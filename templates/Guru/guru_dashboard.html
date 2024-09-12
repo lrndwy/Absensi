@@ -1,0 +1,80 @@
+{% extends 'base.html' %} {% load static %} {% block content %}
+<c-dashboard title="Dashboard Guru" logo="{{ logoimage }}">
+    <div class="flex flex-col mt-14 gap-4 dark:bg-gray-700">
+    {% include 'notification.html' %}
+        <c-heading title="Dashboard Guru" subtitle="Selamat datang di dashboard guru">
+            <img src="https://img.icons8.com/?size=100&id=DUi0tw0LJ06n&format=png&color=000000" alt="Dashboard Icon" class="w-12 h-12 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white">
+        </c-heading>
+        {% if status_verifikasi == 'menunggu' %}
+        <div class="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 mb-4" role="alert">
+            <p class="font-bold">Absensi Menunggu Verifikasi</p>
+            <p>Anda telah melakukan absensi hari ini. Tunggu sampai admin memverifikasi.</p>
+        </div>
+        {% elif status_verifikasi == 'diterima' %}
+            {% if status_absensi == 'hadir' %}
+            <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4" role="alert">
+                <p class="font-bold">Absensi Berhasil</p>
+                <p>Anda telah berhasil melakukan absensi hari ini dengan status Hadir.</p>
+            </div>
+            {% elif status_absensi == 'sakit' %}
+            <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4" role="alert">
+                <p class="font-bold">Absensi Sakit</p>
+                <p>Anda telah melakukan absensi hari ini dengan status Sakit.</p>
+            </div>
+            {% elif status_absensi == 'izin' %}
+            <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4" role="alert">
+                <p class="font-bold">Absensi Izin</p>
+                <p>Anda telah melakukan absensi hari ini dengan status Izin.</p>
+            </div>
+            {% endif %}
+        {% elif status_verifikasi == 'ditolak' %}
+        <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4" role="alert">
+            <p class="font-bold">Absensi Ditolak</p>
+            <p>Absensi Anda hari ini telah ditolak. Silakan hubungi admin untuk informasi lebih lanjut.</p>
+        </div>
+        {% elif status_absensi == 'belum_absen' %}
+            <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4" role="alert">
+                <p class="font-bold">Absensi Belum Dilakukan</p>
+                <p>Silakan isi form berikut untuk melakukan absensi dengan status Sakit atau Izin.</p>
+            </div>
+            <div class="flex flex-col gap-4 p-4 bg-white rounded-md shadow dark:bg-gray-800">
+                <form method="POST" action="{% url 'guru_dashboard' %}" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <h1 class="text-xl sm:text-2xl font-bold text-gray-700 dark:text-gray-300 mb-4">Buat Absensi untuk hari ini
+                    </h1>
+                    <div class="mb-4">
+                        <label for="status_absensi" class="block text-sm font-medium text-gray-700 dark:text-white">Status Absensi</label>
+                        <select id="status_absensi" name="status_absensi" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" onchange="handleStatusChange(this.value)">
+                            <option value="">Pilih Status</option>
+                            <option value="sakit">Sakit</option>
+                            <option value="izin">Izin</option>
+                        </select>
+                    </div>
+                    <div id="surat_sakit_container" style="display: none;" class="mb-4">
+                        <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-white" for="surat_sakit">Upload
+                            Surat Sakit</label>
+                        <input class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400" id="surat_sakit" name="surat_sakit" type="file">
+                    </div>
+                    <div class="mb-4">
+                        <label for="keterangan" class="block text-sm font-medium text-gray-700 dark:text-white">Keterangan</label>
+                        <textarea id="keterangan" name="keterangan" rows="3" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 mt-1 block w-full sm:text-sm border border-gray-300 rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"></textarea>
+                    </div>
+                    <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        Submit Absensi
+                    </button>
+                </form>
+                <script>
+                    function handleStatusChange(value) {
+                        var suratSakitContainer = document.getElementById('surat_sakit_container');
+                        if (value === 'sakit') {
+                            suratSakitContainer.style.display = 'block';
+                        } else {
+                            suratSakitContainer.style.display = 'none';
+                        }
+                    }
+                </script>
+            </div>
+        {% endif %}
+    </div>
+</c-dashboard>
+{% endblock %}

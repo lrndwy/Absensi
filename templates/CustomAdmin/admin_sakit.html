@@ -1,0 +1,39 @@
+{% extends 'base.html' %} {% load static %} {% block content %}
+<c-dashboard title="Dashboard Absensi" logo="{{ logoimage }}">
+    <div class="flex flex-col mt-14 gap-4 dark:bg-gray-700">
+    {% include 'notification.html' %}
+        <c-heading title="Sakit" subtitle="Data Sakit">
+            <img src="https://img.icons8.com/?size=100&id=UOcrd7WBnwWW&format=png&color=000000" alt="Sakit Icon" class="w-12 h-12 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white">
+        </c-heading>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {% if fitur_siswa == True %}
+            <a href="{% url 'admin_sakit_siswa' %}" class="block p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">
+                <div class="flex items-center mb-3">
+                    <img src="https://img.icons8.com/?size=100&id=2HnyYObAxn8V&format=png&color=000000" alt="Siswa Icon" class="w-10 h-10 mr-3">
+                    <h5 class="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Sakit Siswa</h5>
+                </div>
+                <p class="font-normal text-gray-700 dark:text-gray-400">Kelola data sakit siswa</p>
+            </a>
+            {% endif %}
+            {% if fitur_guru == True %}
+            <a href="{% url 'admin_sakit_guru' %}" class="block p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">
+                <div class="flex items-center mb-3">
+                    <img src="https://img.icons8.com/?size=100&id=DUi0tw0LJ06n&format=png&color=000000" alt="Guru Icon" class="w-10 h-10 mr-3">
+                    <h5 class="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Sakit Guru</h5>
+                </div>
+                <p class="font-normal text-gray-700 dark:text-gray-400">Kelola data sakit guru</p>
+            </a>
+            {% endif %} {% if fitur_karyawan == True %}
+            <a href="{% url 'admin_sakit_karyawan' %}" class="block p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">
+                <div class="flex items-center mb-3">
+                    <img src="https://img.icons8.com/?size=100&id=AbCtmdbp1IVO&format=png&color=000000" alt="Karyawan Icon" class="w-10 h-10 mr-3">
+                    <h5 class="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Sakit Karyawan</h5>
+                </div>
+                <p class="font-normal text-gray-700 dark:text-gray-400">Kelola data sakit karyawan</p>
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</c-dashboard>
+
+{% endblock %}
