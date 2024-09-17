@@ -1,5 +1,6 @@
 import json
 import time
+from threading import Thread
 
 import requests
 from django.contrib import messages
@@ -139,53 +140,53 @@ def instalasi(request):
 def webhook_kehadiran(request):
     try:
         data = json.loads(request.body)
+        
+        # Menggunakan bulk_create untuk efisiensi
+        new_records = []
+        messages_to_send = []
+        
         for item in data:
             pin = item['pin']
-            tanggal = timezone.localtime(timezone.now())
+            tanggal = timezone.make_aware(timezone.datetime.fromisoformat(item['date']))
+            today = tanggal.date()
             
-            # Cari user berdasarkan PIN
             user = CustomUser.objects.filter(userid=pin).first()
-            siswa = Siswa.objects.filter(user=user).first()
-            if siswa:
-                chat_id = siswa.telegram_chat_id
-            else:
-                chat_id = None
+            if not user:
+                continue
             
-            if user:
-                # Periksa apakah sudah ada catatan kehadiran untuk hari ini
-                today = tanggal.date()
-                existing_record = record_absensi.objects.filter(
+            siswa = Siswa.objects.filter(user=user).first()
+            chat_id = siswa.telegram_chat_id if siswa else None
+            
+            existing_record = record_absensi.objects.filter(
+                user=user,
+                checktime__date=today
+            ).order_by('-checktime').first()
+            
+            if not existing_record or (tanggal - existing_record.checktime).total_seconds() > 900:  # 15 menit
+                new_records.append(record_absensi(
                     user=user,
-                    checktime__date=today,
-                    status='hadir'
-                ).exists()
+                    checktime=tanggal,
+                    status='hadir',
+                    status_verifikasi='diterima'
+                ))
                 
-                if not existing_record:
-                    # Buat catatan kehadiran baru jika belum ada
-                    record_absensi.objects.create(
-                        user=user,
-                        checktime=tanggal,
-                        status='hadir',
-                        status_verifikasi='diterima'
-                    )
-                    
-                    telegram_token = Instalasi.objects.first().telegram_token
-                    
-                    if chat_id is not None:
-                        message = f"Selamat {cek_waktu()} Bapak/Ibu Orang Tua/Wali Murid. Informasi bahwa {siswa.nama} hadir pada {today} jam {tanggal.time().strftime('%H.%M.%S')}"
-                        telegram_url = f"https://api.telegram.org/bot{telegram_token}/sendMessage?chat_id={chat_id}&text={message}"
-                        requests.get(telegram_url)
-                    messages.success(request, f'Kehadiran {user.username} berhasil dicatat.')
-                else:
-                    messages.info(request, f"User {user.username} sudah memiliki catatan kehadiran untuk hari ini")
-            else:
-                messages.warning(request, f"User dengan PIN {pin} tidak ditemukan")
+                if chat_id:
+                    status = "masuk" if not existing_record else "pulang"
+                    message = f"Selamat {cek_waktu()} Bapak/Ibu Orang Tua/Wali Murid. Informasi bahwa {siswa.nama} {status} pada {today} jam {tanggal.time().strftime('%H.%M.%S')}"
+                    messages_to_send.append((chat_id, message))
         
-        return HttpResponse("OK", status=200)
+        # Bulk create untuk record absensi
+        record_absensi.objects.bulk_create(new_records)
+        
+        # Kirim pesan Telegram secara asinkron
+        telegram_token = Instalasi.objects.first().telegram_token
+        for chat_id, message in messages_to_send:
+            telegram_url = f"https://api.telegram.org/bot{telegram_token}/sendMessage?chat_id={chat_id}&text={message}"
+            Thread(target=lambda: requests.get(telegram_url)).start()
+        
+        return HttpResponse(f"Berhasil mencatat {len(new_records)} kehadiran", status=200)
     except Exception as e:
-        messages.error(request, f"Error dalam memproses webhook: {str(e)}")
-        return HttpResponse("Error", status=500)
-
+        return HttpResponse(f"Error dalam memproses webhook: {str(e)}", status=500)
 
 import csv
 import json
