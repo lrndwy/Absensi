@@ -1,3 +1,5 @@
+from datetime import date, datetime
+
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
@@ -11,6 +13,16 @@ class Instalasi(models.Model):
     fitur_guru = models.BooleanField(default=True)
     fitur_karyawan = models.BooleanField(default=True)
     telegram_token = models.CharField(max_length=500, null=True, blank=True)
+    jam_masuk = models.TimeField(null=True, blank=True)
+    jam_pulang = models.TimeField(null=True, blank=True)
+    jam_kerja = models.DurationField(null=True, blank=True)
+    
+    def save(self, *args, **kwargs):
+        if self.jam_masuk and self.jam_pulang:
+            jam_masuk = datetime.combine(date.today(), self.jam_masuk)
+            jam_pulang = datetime.combine(date.today(), self.jam_pulang)
+            self.jam_kerja = jam_pulang - jam_masuk
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.nama_sekolah
@@ -90,6 +102,7 @@ class record_absensi(models.Model):
     checktime = models.DateTimeField(null=True, blank=True)
     status = models.CharField(max_length=20, choices=[('hadir', 'Hadir'), ('sakit', 'Sakit'), ('izin', 'Izin')], default='hadir')
     status_verifikasi = models.CharField(max_length=20, choices=[('menunggu', 'Menunggu'), ('diterima', 'Diterima'), ('ditolak', 'Ditolak')], default='menunggu')
+    tipe_absensi = models.CharField(max_length=20, choices=[('masuk', 'Masuk'), ('pulang', 'Pulang')], null=True, blank=True)
     
     def __str__(self):
         return str(self.id)

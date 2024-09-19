@@ -27,11 +27,22 @@
                     <div>
                         <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Status</label>
                         <select id="status" name="status" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                            required onchange="toggleIdInput(this.value)">
+                            required onchange="toggleInputs(this.value)">
                             <option value="{{ data.status }}" selected>{{ data.status }}</option>
                             {% for status in status_list %}
                             {% if status != data.status %}
                             <option value="{{ status }}">{{ status }}</option>
+                            {% endif %}
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div id="tipe_absensi_container" style="display: none;">
+                        <label for="tipe_absensi" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Tipe Absensi</label>
+                        <select id="tipe_absensi" name="tipe_absensi" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                            <option value="{{ data.tipe_absensi }}" selected>{{ data.tipe_absensi }}</option>
+                            {% for tipe in tipe_absensi_list %}
+                            {% if tipe != data.tipe_absensi %}
+                            <option value="{{ tipe }}">{{ tipe }}</option>
                             {% endif %}
                             {% endfor %}
                         </select>
@@ -77,25 +88,37 @@
                 </div>
             </form>
             <script>
-                function toggleIdInput(status) {
+                function toggleInputs(status) {
                     const idIzinContainer = document.getElementById('id_izin_container');
                     const idSakitContainer = document.getElementById('id_sakit_container');
+                    const tipeAbsensiContainer = document.getElementById('tipe_absensi_container');
+                    const tipeAbsensi = document.getElementById('tipe_absensi');
 
                     if (status.toLowerCase() === 'izin') {
                         idIzinContainer.style.display = 'block';
                         idSakitContainer.style.display = 'none';
+                        tipeAbsensiContainer.style.display = 'none';
+                        tipeAbsensi.value = null;
                     } else if (status.toLowerCase() === 'sakit') {
                         idIzinContainer.style.display = 'none';
                         idSakitContainer.style.display = 'block';
+                        tipeAbsensiContainer.style.display = 'none';
+                        tipeAbsensi.value = null;
+                    } else if (status.toLowerCase() === 'hadir') {
+                        idIzinContainer.style.display = 'none';
+                        idSakitContainer.style.display = 'none';
+                        tipeAbsensiContainer.style.display = 'block';
                     } else {
                         idIzinContainer.style.display = 'none';
                         idSakitContainer.style.display = 'none';
+                        tipeAbsensiContainer.style.display = 'none';
+                        tipeAbsensi.value = null;
                     }
                 }
 
                 // Call the function when the page loads to set the initial display
                 document.addEventListener('DOMContentLoaded', function() {
-                    toggleIdInput(document.getElementById('status').value);
+                    toggleInputs(document.getElementById('status').value);
                 });
             </script>
         </div>
@@ -167,6 +190,16 @@
                                 {% endfor %}
                             </select>
                         </div>
+                        <div>
+                            <label for="tipe_absensi" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Tipe Absensi</label>
+                            <select id="tipe_absensi" name="tipe_absensi" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                required>
+                                <option value="">Pilih Tipe Absensi</option>
+                                {% for tipe in tipe_absensi_list %}
+                                <option value="{{ tipe }}">{{ tipe }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
                         <div id="id_izin_container" style="display: none;">
                             <label for="id_izin" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">ID
                                 Izin</label>
@@ -197,16 +230,22 @@
                         document.getElementById('status').addEventListener('change', function() {
                             var idIzinContainer = document.getElementById('id_izin_container');
                             var idSakitContainer = document.getElementById('id_sakit_container');
-
+                            var tipeAbsensiContainer = document.getElementById('tipe_absensi_container');
+                            var tipeAbsensi = document.getElementById('tipe_absensi');
                             if (this.value === 'izin') {
                                 idIzinContainer.style.display = 'block';
                                 idSakitContainer.style.display = 'none';
+                                tipeAbsensiContainer.style.display = 'none';
+                                tipeAbsensi.value = null;
                             } else if (this.value === 'sakit') {
                                 idIzinContainer.style.display = 'none';
                                 idSakitContainer.style.display = 'block';
+                                tipeAbsensiContainer.style.display = 'none';
+                                tipeAbsensi.value = null;
                             } else {
                                 idIzinContainer.style.display = 'none';
                                 idSakitContainer.style.display = 'none';
+                                tipeAbsensiContainer.style.display = 'block';
                             }
                         });
                     </script>

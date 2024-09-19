@@ -2,7 +2,7 @@
 <c-dashboard title="Dashboard Absensi" logo="{{ logoimage }}">
     {% if edit_data_dashboard_absensi %} {% for data in edit_data_dashboard_absensi %}
     <div class="flex flex-col mt-14 gap-4 dark:bg-gray-700">
-    {% include 'notification.html' %}
+        {% include 'notification.html' %}
         <c-heading title="Edit Data Absensi" subtitle="Perbarui informasi absensi">
             <img src="{{ logoimage }}" alt="logo" class="w-10 h-10">
         </c-heading>
@@ -26,11 +26,22 @@
                     <div>
                         <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Status</label>
                         <select id="status" name="status" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                            required onchange="toggleIdInput(this.value)">
-                            <option value="{{ data.status }}" selected>{{ data.status }}</option>
+                            required onchange="toggleInputs(this.value)">
+                            <option value="{{ data.status }}" selescted>{{ data.status }}</option>
                             {% for status in status_list %}
                             {% if status != data.status %}
                             <option value="{{ status }}">{{ status }}</option>
+                            {% endif %}
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div id="tipe_absensi_container"ss>
+                        <label for="tipe_absensi" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Tipe Absensi</label>
+                        <select id="tipe_absensi" name="tipe_absensi" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                            <option value="{{ data.tipe_absensi }}" selected>{{ data.tipe_absensi }}</option>
+                            {% for tipe in tipe_absensi_list %}
+                            {% if tipe != data.tipe_absensi %}
+                            <option value="{{ tipe }}">{{ tipe }}</option>
                             {% endif %}
                             {% endfor %}
                         </select>
@@ -75,25 +86,37 @@
                 </div>
             </form>
             <script>
-                function toggleIdInput(status) {
+                function toggleInputs(status) {
                     const idIzinContainer = document.getElementById('id_izin_container');
                     const idSakitContainer = document.getElementById('id_sakit_container');
+                    const tipeAbsensiContainer = document.getElementById('tipe_absensi_container');
+                    const tipeAbsensi = document.getElementById('tipe_absensi');
 
                     if (status.toLowerCase() === 'izin') {
                         idIzinContainer.style.display = 'block';
                         idSakitContainer.style.display = 'none';
+                        tipeAbsensiContainer.style.display = 'none';
+                        tipeAbsensi.value = null;
                     } else if (status.toLowerCase() === 'sakit') {
                         idIzinContainer.style.display = 'none';
                         idSakitContainer.style.display = 'block';
+                        tipeAbsensiContainer.style.display = 'none';
+                        tipeAbsensi.value = null;
+                    } else if (status.toLowerCase() === 'hadir') {
+                        idIzinContainer.style.display = 'none';
+                        idSakitContainer.style.display = 'none';
+                        tipeAbsensiContainer.style.display = 'block';
                     } else {
                         idIzinContainer.style.display = 'none';
                         idSakitContainer.style.display = 'none';
+                        tipeAbsensiContainer.style.display = 'none';
+                        tipeAbsensi.value = null;
                     }
                 }
 
                 // Panggil fungsi saat halaman dimuat untuk mengatur tampilan awal
                 document.addEventListener('DOMContentLoaded', function() {
-                    toggleIdInput(document.getElementById('status').value);
+                    toggleInputs(document.getElementById('status').value);
                 });
             </script>
 
@@ -109,7 +132,7 @@
     </div>
     {% endfor %} {% else %}
     <div class="flex flex-col mt-14 gap-4 dark:bg-gray-700">
-    {% include 'notification.html' %}
+        {% include 'notification.html' %}
         <c-heading title="Selamat Datang Admin" subtitle="Website Absensi  {{ nama_sekolah }}">
             <img src="{{ logoimage }}" alt="logo" class="w-10 h-10">
         </c-heading>
@@ -165,6 +188,13 @@
                                 <option value="izin">Izin</option>
                             </select>
                         </div>
+                        <div id="tipe_absensi_container" style="display: block;">
+                            <label for="tipe_absensi" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Tipe Absensi</label>
+                            <select id="tipe_absensi" name="tipe_absensi" class="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                                <option value="masuk">Masuk</option>
+                                <option value="pulang">Pulang</option>
+                            </select>
+                        </div>
                         <div id="id_izin_container" style="display: none;">
                             <label for="id_izin" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">ID
                                 Izin</label>
@@ -193,16 +223,23 @@
                         document.getElementById('status').addEventListener('change', function() {
                             var idIzinContainer = document.getElementById('id_izin_container');
                             var idSakitContainer = document.getElementById('id_sakit_container');
-
+                            var tipeAbsensiContainer = document.getElementById('tipe_absensi_container');
+                            var tipeAbsensi = document.getElementById('tipe_absensi');
                             if (this.value === 'izin') {
                                 idIzinContainer.style.display = 'block';
                                 idSakitContainer.style.display = 'none';
+                                tipeAbsensiContainer.style.display = 'none';
+                                tipeAbsensi.value = null;
                             } else if (this.value === 'sakit') {
                                 idIzinContainer.style.display = 'none';
                                 idSakitContainer.style.display = 'block';
+                                tipeAbsensiContainer.style.display = 'none';
+                                tipeAbsensi.value = null;
                             } else {
                                 idIzinContainer.style.display = 'none';
                                 idSakitContainer.style.display = 'none';
+                                tipeAbsensiContainer.style.display = 'block';
+                                
                             }
                         });
                     </script>
