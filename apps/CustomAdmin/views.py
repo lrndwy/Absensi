@@ -90,7 +90,7 @@ def get_bulan_from_date(date):
 @superuser_required
 def admin_dashboard_absensi_siswa(request): 
     absensi_records = record_absensi.objects.filter(user__siswa__isnull=False, status_verifikasi='diterima').order_by('-checktime')
-    absensi_records_charts = record_absensi.objects.filter(user__siswa__isnull=False, status_verifikasi='diterima', tipe_absensi='masuk').order_by('-checktime')
+    absensi_records_charts = record_absensi.objects.filter(user__siswa__isnull=False, status_verifikasi='diterima', tipe_absensi__in=['masuk', 'sakit', 'izin']).order_by('-checktime')
 
     start_date = request.GET.get('start')
     end_date = request.GET.get('end')
@@ -423,7 +423,7 @@ def admin_dashboard_absensi_siswa(request):
 @superuser_required
 def admin_dashboard_absensi_guru(request):
     absensi_records = record_absensi.objects.filter(user__guru__isnull=False, status_verifikasi='diterima').order_by('-checktime')
-    absensi_records_charts = record_absensi.objects.filter(user__guru__isnull=False, status_verifikasi='diterima', tipe_absensi='masuk').order_by('-checktime')
+    absensi_records_charts = record_absensi.objects.filter(user__guru__isnull=False, status_verifikasi='diterima', tipe_absensi__in=['masuk', 'sakit', 'izin']).order_by('-checktime')
 
     start_date = request.GET.get('start')
     end_date = request.GET.get('end')
@@ -760,7 +760,7 @@ def admin_dashboard_absensi_guru(request):
 @superuser_required
 def admin_dashboard_absensi_karyawan(request):
     absensi_records = record_absensi.objects.filter(user__karyawan__isnull=False, status_verifikasi='diterima').order_by('-checktime')
-    absensi_records_charts = record_absensi.objects.filter(user__karyawan__isnull=False, status_verifikasi='diterima', tipe_absensi='masuk').order_by('-checktime')
+    absensi_records_charts = record_absensi.objects.filter(user__karyawan__isnull=False, status_verifikasi='diterima', tipe_absensi__in=['masuk', 'sakit', 'izin']).order_by('-checktime')
     
     # untuk filter data
     start_date = request.GET.get('start')
@@ -1083,7 +1083,7 @@ def admin_dashboard_absensi_karyawan(request):
 @superuser_required
 def admin_dashboard(request):
     absensi_records = record_absensi.objects.filter(status_verifikasi='diterima').order_by('-checktime')
-    absensi_record_charts = record_absensi.objects.filter(status_verifikasi='diterima', tipe_absensi='masuk').order_by('-checktime')
+    absensi_record_charts = record_absensi.objects.filter(status_verifikasi='diterima', tipe_absensi__in=['masuk', 'sakit', 'izin']).order_by('-checktime')
 
     start_date = request.GET.get('start')
     end_date = request.GET.get('end')
@@ -1502,6 +1502,8 @@ def admin_siswa(request):
                 user.set_password(password)
             user.save()
             
+            siswa = Siswa.objects.get(id=id_siswa)
+            
             if jenjang_selected not in ('None', '', 'Pilih Jenjang', None, 0, '0'):
                 siswa.jenjang = jenjang.objects.get(nama=jenjang_selected)
             else:
@@ -1513,7 +1515,7 @@ def admin_siswa(request):
                 pass
             
             # Update siswa details
-            siswa = Siswa.objects.get(id=id_siswa)
+            
             siswa.nisn = nisn
             siswa.nama = nama
             siswa.tanggal_lahir = tanggal_lahir

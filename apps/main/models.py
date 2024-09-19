@@ -102,8 +102,14 @@ class record_absensi(models.Model):
     checktime = models.DateTimeField(null=True, blank=True)
     status = models.CharField(max_length=20, choices=[('hadir', 'Hadir'), ('sakit', 'Sakit'), ('izin', 'Izin')], default='hadir')
     status_verifikasi = models.CharField(max_length=20, choices=[('menunggu', 'Menunggu'), ('diterima', 'Diterima'), ('ditolak', 'Ditolak')], default='menunggu')
-    tipe_absensi = models.CharField(max_length=20, choices=[('masuk', 'Masuk'), ('pulang', 'Pulang')], null=True, blank=True)
+    tipe_absensi = models.CharField(max_length=20, choices=[('masuk', 'Masuk'), ('pulang', 'Pulang'), ('sakit', 'Sakit'), ('izin', 'Izin')], null=True, blank=True)
     
+    def save(self, *args, **kwargs):
+        if self.status == 'sakit':
+            self.tipe_absensi = 'sakit'
+        elif self.status == 'izin':
+            self.tipe_absensi = 'izin'
+        super().save(*args, **kwargs)
     def __str__(self):
         return str(self.id)
     
