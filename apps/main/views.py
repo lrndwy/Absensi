@@ -149,17 +149,14 @@ def webhook_kehadiran(request):
     try:
         data = json.loads(request.body)
         
-        # Pastikan data adalah list
         if not isinstance(data, list):
-            data = [data]  # Jika bukan list, ubah menjadi list dengan satu item
+            data = [data]
         
-        # Mengambil data instalasi
         instalasi = Instalasi.objects.first()
         jam_masuk = instalasi.jam_masuk
         jam_pulang = instalasi.jam_pulang
         jam_kerja = instalasi.jam_kerja
         
-        # Menggunakan bulk_create untuk efisiensi
         new_records = []
         messages_to_send = []
         
@@ -173,10 +170,27 @@ def webhook_kehadiran(request):
             if not user:
                 continue
             
+            # Cek apakah user adalah siswa, guru atau karyawan
             siswa = Siswa.objects.filter(user=user).first()
-            chat_id = siswa.telegram_chat_id if siswa else None
+            guru = Guru.objects.filter(user=user).first()
+            karyawan = Karyawan.objects.filter(user=user).first()
             
-            # Cek apakah sudah absen masuk dan keluar pada tanggal tersebut
+            # Ambil chat_id dan nama berdasarkan tipe user
+            if siswa:
+                chat_id = siswa.telegram_chat_id
+                nama = siswa.nama
+                tipe_user = "siswa"
+            elif guru:
+                chat_id = guru.telegram_chat_id
+                nama = guru.nama
+                tipe_user = "guru"
+            elif karyawan:
+                chat_id = karyawan.telegram_chat_id
+                nama = karyawan.nama
+                tipe_user = "karyawan"
+            else:
+                continue
+            
             absensi_tanggal_ini = record_absensi.objects.filter(
                 user=user,
                 checktime__date=today
@@ -185,13 +199,11 @@ def webhook_kehadiran(request):
             absen_masuk = absensi_tanggal_ini.filter(tipe_absensi='masuk').first()
             absen_pulang = absensi_tanggal_ini.filter(tipe_absensi='pulang').first()
             
-            # Menentukan tipe absensi
             if jam_masuk <= waktu < jam_pulang:
                 tipe_absensi = 'masuk'
             else:
                 tipe_absensi = 'pulang'
             
-            # Catat absensi masuk jika belum ada
             if tipe_absensi == 'masuk' and not absen_masuk:
                 new_records.append(record_absensi(
                     user=user,
@@ -202,10 +214,12 @@ def webhook_kehadiran(request):
                 ))
                 
                 if chat_id:
-                    message = f"Selamat {cek_waktu()} Bapak/Ibu Orang Tua/Wali Murid. Informasi bahwa {siswa.nama} {tipe_absensi} pada {today} jam {tanggal.time().strftime('%H.%M.%S')}"
+                    if tipe_user == "siswa":
+                        message = f"Selamat {cek_waktu()} Bapak/Ibu Orang Tua/Wali Murid. Informasi bahwa {nama} {tipe_absensi} pada {today} jam {tanggal.time().strftime('%H.%M.%S')}"
+                    else:
+                        message = f"Selamat {cek_waktu()}. Informasi bahwa {nama} telah {tipe_absensi} pada {today} jam {tanggal.time().strftime('%H.%M.%S')}"
                     messages_to_send.append((chat_id, message))
             
-            # Catat absensi pulang jika belum ada dan sudah ada absen masuk
             elif tipe_absensi == 'pulang' and absen_masuk and not absen_pulang:
                 new_records.append(record_absensi(
                     user=user,
@@ -216,13 +230,14 @@ def webhook_kehadiran(request):
                 ))
                 
                 if chat_id:
-                    message = f"Selamat {cek_waktu()} Bapak/Ibu Orang Tua/Wali Murid. Informasi bahwa {siswa.nama} {tipe_absensi} pada {today} jam {tanggal.time().strftime('%H.%M.%S')}"
+                    if tipe_user == "siswa":
+                        message = f"Selamat {cek_waktu()} Bapak/Ibu Orang Tua/Wali Murid. Informasi bahwa {nama} {tipe_absensi} pada {today} jam {tanggal.time().strftime('%H.%M.%S')}"
+                    else:
+                        message = f"Selamat {cek_waktu()}. Informasi bahwa {nama} telah {tipe_absensi} pada {today} jam {tanggal.time().strftime('%H.%M.%S')}"
                     messages_to_send.append((chat_id, message))
         
-        # Bulk create untuk record absensi
         record_absensi.objects.bulk_create(new_records)
         
-        # Kirim pesan Telegram secara asinkron
         telegram_token = instalasi.telegram_token
         for chat_id, message in messages_to_send:
             telegram_url = f"https://api.telegram.org/bot{telegram_token}/sendMessage?chat_id={chat_id}&text={message}"

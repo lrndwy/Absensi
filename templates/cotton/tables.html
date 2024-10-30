@@ -208,8 +208,13 @@
         }
         data.push(headers);
 
-        // Get data
+        // Get data dari baris yang ditampilkan saja
         for (let i = 1; i < rows.length; i++) {
+            // Skip baris yang disembunyikan
+            if (rows[i].style.display === 'none') {
+                continue;
+            }
+            
             const cells = rows[i].getElementsByTagName('td');
             const rowData = [];
             for (let j = 1; j < cells.length - 1; j++) { // Skip checkbox and action columns

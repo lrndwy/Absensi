@@ -13,6 +13,7 @@ class Karyawan(models.Model):
     alamat = models.TextField(null=True, blank=True)
     jabatan = models.ForeignKey(jabatan, on_delete=models.CASCADE, null=True, blank=True)
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, blank=True)
+    telegram_chat_id = models.CharField(max_length=20, null=True, blank=True)
 
     
     def __str__(self):
