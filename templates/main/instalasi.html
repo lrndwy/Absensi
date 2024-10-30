@@ -93,32 +93,11 @@
                         <p class="text-sm text-gray-500 dark:text-gray-400">Pilih minimal satu fitur yang akan diinstal</p>
                     </div>
                 </div>
-                <div id="telegram_token_container" class="mb-6 relative" style="display: none;">
+                <div class="mb-6 relative">
                     <input type="text" id="telegram_token" name="telegram_token" class="block rounded-t-lg px-2.5 pb-2.5 pt-5 w-full text-sm text-gray-900 bg-gray-50 dark:bg-gray-700 border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
                         placeholder=" " />
                     <label for="telegram_token" class="absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-4 z-10 origin-[0] start-2.5 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto">Telegram Token</label>
                 </div>
-                <script>
-                    document.querySelector('form').addEventListener('submit', function(e) {
-                        var checkboxes = document.querySelectorAll('input[type="checkbox"]');
-                        var checked = Array.from(checkboxes).some(checkbox => checkbox.checked);
-                        if (!checked) {
-                            e.preventDefault();
-                            alert('Pilih minimal satu fitur untuk diinstal.');
-                        }
-                    });
-
-                    document.getElementById('fitur_siswa_checkbox').addEventListener('change', function() {
-                        var telegramTokenContainer = document.getElementById('telegram_token_container');
-                        if (this.checked) {
-                            telegramTokenContainer.style.display = 'block';
-                            document.getElementById('telegram_token').required = true;
-                        } else {
-                            telegramTokenContainer.style.display = 'none';
-                            document.getElementById('telegram_token').required = false;
-                        }
-                    });
-                </script>
             </div>
             <div class="flex items-center justify-center">
                 <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-full w-full focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:scale-105">
