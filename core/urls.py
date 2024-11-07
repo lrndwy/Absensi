@@ -20,14 +20,14 @@ from django.contrib import admin
 from django.urls import include, path
 from django.views.static import serve
 from django.urls import re_path
-from djangoLrnd.views import validate_view
+# from djangoLrnd.views import validate_view
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('apps.urls')),
     re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
     re_path(r'^static/(?P<path>.*)$', serve, {'document_root': settings.STATIC_ROOT}),
-    path('validate/', validate_view, name='lrnd_validate'),
+    # path('validate/', validate_view, name='lrnd_validate'),
 ]
 
 if settings.DEBUG:
