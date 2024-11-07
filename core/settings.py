@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-fw!zps2lo9f5yxw3sn8--ke_lc0z*^5ot$u-62dixk^z=eusj2'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     
     # Third Party
     'django_cotton',
+    'djangoLrnd',
 ]
 
 MIDDLEWARE = [
@@ -61,6 +62,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'djangoLrnd.middleware.LRNDMiddleware',
 ]
 
 ROOT_URLCONF = 'core.urls'
@@ -160,4 +162,9 @@ STORAGES = {
 }
 
 # Pastikan MEDIA_URL dan MEDIA_ROOT sudah terkonfigurasi dengan benar
+LRND_VALIDATION_ENDPOINT = 'http://127.0.0.1:3333/activate/'
+LRND_ENCRYPTION_PASSWORD = 'Testing'
+LRND_EXEMPT_PATHS = ['/validate/']
+LRND_KEY_MODEL = 'djangoLrnd.LRNDKey'
+LRND_SUCCESS_REDIRECT_URL = 'login_view'
 

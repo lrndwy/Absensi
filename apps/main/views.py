@@ -238,10 +238,17 @@ def webhook_kehadiran(request):
         
         record_absensi.objects.bulk_create(new_records)
         
+        # Memisahkan pengiriman Telegram ke dalam blok try-except tersendiri
         telegram_token = instalasi.telegram_token
         for chat_id, message in messages_to_send:
-            telegram_url = f"https://api.telegram.org/bot{telegram_token}/sendMessage?chat_id={chat_id}&text={message}"
-            Thread(target=lambda: requests.get(telegram_url)).start()
+            try:
+                telegram_url = f"https://api.telegram.org/bot{telegram_token}/sendMessage?chat_id={chat_id}&text={message}"
+                Thread(target=lambda: requests.get(telegram_url)).start()
+                print('Berhasil Mengirim Chat Telegram')
+            except Exception as e:
+                # Log error tapi tetap lanjutkan ke pesan berikutnya
+                print(f"Gagal mengirim pesan Telegram ke {chat_id}: {str(e)}")
+                continue
         
         return HttpResponse(f"Berhasil mencatat {len(new_records)} kehadiran", status=200)
     except Exception as e:
