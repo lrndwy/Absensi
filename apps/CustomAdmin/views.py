@@ -17,6 +17,7 @@ from django.templatetags.static import static
 from django.urls import reverse
 from django.utils import timezone
 
+
 from apps.Guru.models import *
 from apps.Karyawan.models import *
 from apps.main.instalasi import cek_instalasi, get_context
@@ -1567,7 +1568,91 @@ def admin_siswa(request):
             siswa_filter = siswa_filter.filter(jenjang__nama=jenjang_filter)
         if kelas_filter:
             siswa_filter = siswa_filter.filter(kelas__nama=kelas_filter)
+            
+        # IF PRINT
+        print_id = request.GET.get('print')
+        bulan = request.GET.get('bulan')
+        if print_id and bulan:
+            try:
+                siswa = Siswa.objects.get(id=print_id)
+                tahun = timezone.now().year
+                bulan_int = int(bulan)
+                
+                # Dapatkan tanggal awal dan akhir bulan
+                tanggal_awal = timezone.datetime(tahun, bulan_int, 1)
+                if bulan_int == 12:
+                    tanggal_akhir = timezone.datetime(tahun + 1, 1, 1) - timezone.timedelta(days=1)
+                else:
+                    tanggal_akhir = timezone.datetime(tahun, bulan_int + 1, 1) - timezone.timedelta(days=1)
 
+                # Buat list semua hari dalam bulan tersebut
+                jumlah_hari = (tanggal_akhir - tanggal_awal).days + 1
+                semua_hari = []
+                
+                for i in range(jumlah_hari):
+                    tanggal = tanggal_awal + timezone.timedelta(days=i)
+                    
+                    # Ambil record absensi untuk tanggal tersebut
+                    absensi_masuk = record_absensi.objects.filter(
+                        user=siswa.user,
+                        checktime__date=tanggal.date(),
+                        tipe_absensi='masuk',
+                        status_verifikasi='diterima'
+                    ).first()
+                    
+                    absensi_pulang = record_absensi.objects.filter(
+                        user=siswa.user,
+                        checktime__date=tanggal.date(),
+                        tipe_absensi='pulang',
+                        status_verifikasi='diterima'
+                    ).first()
+                    
+                    # Cek status ketidakhadiran
+                    ketidakhadiran = record_absensi.objects.filter(
+                        user=siswa.user,
+                        checktime__date=tanggal.date(),
+                        status__in=['sakit', 'izin'],
+                        status_verifikasi='diterima'
+                    ).first()
+                    
+                    hari_data = {
+                        'tanggal': tanggal,
+                        'hari': tanggal.strftime('%A'),
+                        'jam_masuk': timezone.localtime(absensi_masuk.checktime).strftime('%H:%M') if absensi_masuk else '-',
+                        'jam_pulang': timezone.localtime(absensi_pulang.checktime).strftime('%H:%M') if absensi_pulang else '-',
+                        'status': ketidakhadiran.status if ketidakhadiran else ('Hadir' if absensi_masuk else 'Tidak Hadir'),
+                        'keterangan': ketidakhadiran.id_sakit.keterangan if ketidakhadiran and ketidakhadiran.status == 'sakit' and ketidakhadiran.id_sakit
+                                    else ketidakhadiran.id_izin.keterangan if ketidakhadiran and ketidakhadiran.status == 'izin' and ketidakhadiran.id_izin
+                                    else '-'
+                    }
+                    semua_hari.append(hari_data)
+                
+                # Hitung total
+                total_hadir = sum(1 for hari in semua_hari if hari['status'] == 'Hadir')
+                total_sakit = sum(1 for hari in semua_hari if hari['status'] == 'sakit')
+                total_izin = sum(1 for hari in semua_hari if hari['status'] == 'izin')
+                total_tidak_hadir = sum(1 for hari in semua_hari if hari['status'] == 'Tidak Hadir')
+                
+                context = {
+                    'siswa': siswa,
+                    'bulan': tanggal_awal.strftime('%B %Y'),
+                    'hari_records': semua_hari,
+                    'total_hadir': total_hadir,
+                    'total_sakit': total_sakit,
+                    'total_izin': total_izin,
+                    'total_tidak_hadir': total_tidak_hadir,
+                    'tanggal_cetak': timezone.now().strftime('%d-%m-%Y %H:%M:%S')
+                }
+                
+                return render(request, 'CustomAdmin/print_absensi_siswa.html', context)
+                
+            except Siswa.DoesNotExist:
+                messages.error(request, 'Siswa tidak ditemukan')
+                return redirect('admin_siswa')
+            except Exception as e:
+                messages.error(request, f'Gagal mencetak record: {str(e)}')
+                return redirect('admin_siswa')
+      
         if request.method == 'POST':
             action = request.POST.get('action')
             if action == 'tambah':
@@ -1824,6 +1909,7 @@ def admin_siswa(request):
             'edit_data_siswa': edit_data_siswa,
             
             'total_data_table': siswa_filter.count(),
+            'print': True,
         })
         return render(request, 'CustomAdmin/admin_siswa.html', context)
     except Exception as e:
@@ -1867,6 +1953,90 @@ def admin_guru(request):
             guru_filter = guru_filter.filter(kelas__nama=kelas_filter)
         if mata_pelajaran_filter:
             guru_filter = guru_filter.filter(mata_pelajaran__nama=mata_pelajaran_filter)
+            
+        # IF PRINT
+        print_id = request.GET.get('print')
+        bulan = request.GET.get('bulan')
+        if print_id and bulan:
+            try:
+                guru = Guru.objects.get(id=print_id)
+                tahun = timezone.now().year
+                bulan_int = int(bulan)
+                
+                # Dapatkan tanggal awal dan akhir bulan
+                tanggal_awal = timezone.datetime(tahun, bulan_int, 1)
+                if bulan_int == 12:
+                    tanggal_akhir = timezone.datetime(tahun + 1, 1, 1) - timezone.timedelta(days=1)
+                else:
+                    tanggal_akhir = timezone.datetime(tahun, bulan_int + 1, 1) - timezone.timedelta(days=1)
+
+                # Buat list semua hari dalam bulan tersebut
+                jumlah_hari = (tanggal_akhir - tanggal_awal).days + 1
+                semua_hari = []
+                
+                for i in range(jumlah_hari):
+                    tanggal = tanggal_awal + timezone.timedelta(days=i)
+                    
+                    # Ambil record absensi untuk tanggal tersebut
+                    absensi_masuk = record_absensi.objects.filter(
+                        user=guru.user,
+                        checktime__date=tanggal.date(),
+                        tipe_absensi='masuk',
+                        status_verifikasi='diterima'
+                    ).first()
+                    
+                    absensi_pulang = record_absensi.objects.filter(
+                        user=guru.user,
+                        checktime__date=tanggal.date(),
+                        tipe_absensi='pulang',
+                        status_verifikasi='diterima'
+                    ).first()
+                    
+                    # Cek status ketidakhadiran
+                    ketidakhadiran = record_absensi.objects.filter(
+                        user=guru.user,
+                        checktime__date=tanggal.date(),
+                        status__in=['sakit', 'izin'],
+                        status_verifikasi='diterima'
+                    ).first()
+                    
+                    hari_data = {
+                        'tanggal': tanggal,
+                        'hari': tanggal.strftime('%A'),
+                        'jam_masuk': timezone.localtime(absensi_masuk.checktime).strftime('%H:%M') if absensi_masuk else '-',
+                        'jam_pulang': timezone.localtime(absensi_pulang.checktime).strftime('%H:%M') if absensi_pulang else '-',
+                        'status': ketidakhadiran.status if ketidakhadiran else ('Hadir' if absensi_masuk else 'Tidak Hadir'),
+                        'keterangan': ketidakhadiran.id_sakit.keterangan if ketidakhadiran and ketidakhadiran.status == 'sakit' and ketidakhadiran.id_sakit
+                                    else ketidakhadiran.id_izin.keterangan if ketidakhadiran and ketidakhadiran.status == 'izin' and ketidakhadiran.id_izin
+                                    else '-'
+                    }
+                    semua_hari.append(hari_data)
+                
+                # Hitung total
+                total_hadir = sum(1 for hari in semua_hari if hari['status'] == 'Hadir')
+                total_sakit = sum(1 for hari in semua_hari if hari['status'] == 'sakit')
+                total_izin = sum(1 for hari in semua_hari if hari['status'] == 'izin')
+                total_tidak_hadir = sum(1 for hari in semua_hari if hari['status'] == 'Tidak Hadir')
+                
+                context = {
+                    'guru': guru,
+                    'bulan': tanggal_awal.strftime('%B %Y'),
+                    'hari_records': semua_hari,
+                    'total_hadir': total_hadir,
+                    'total_sakit': total_sakit,
+                    'total_izin': total_izin,
+                    'total_tidak_hadir': total_tidak_hadir,
+                    'tanggal_cetak': timezone.now().strftime('%d-%m-%Y %H:%M:%S')
+                }
+                
+                return render(request, 'CustomAdmin/print_absensi_guru.html', context)
+                
+            except Guru.DoesNotExist:
+                messages.error(request, 'Guru tidak ditemukan')
+                return redirect('admin_guru')
+            except Exception as e:
+                messages.error(request, f'Gagal mencetak record: {str(e)}')
+                return redirect('admin_guru')
             
         if request.method == 'POST':
             action =  request.POST.get('action')
@@ -2114,6 +2284,7 @@ def admin_guru(request):
             'guru': True,
             
             'total_data_table': guru_filter.count(),
+            'print': True,
         })
         return render(request, 'CustomAdmin/admin_guru.html', context)
     except Exception as e:
@@ -2150,6 +2321,91 @@ def admin_karyawan(request):
         karyawan_filter = Karyawan.objects.all()
         if jabatan_filter:
             karyawan_filter = karyawan_filter.filter(jabatan__nama=jabatan_filter)
+            
+            
+        # IF PRINT
+        print_id = request.GET.get('print')
+        bulan = request.GET.get('bulan')
+        if print_id and bulan:
+            try:
+                karyawan = Karyawan.objects.get(id=print_id)
+                tahun = timezone.now().year
+                bulan_int = int(bulan)
+                
+                # Dapatkan tanggal awal dan akhir bulan
+                tanggal_awal = timezone.datetime(tahun, bulan_int, 1)
+                if bulan_int == 12:
+                    tanggal_akhir = timezone.datetime(tahun + 1, 1, 1) - timezone.timedelta(days=1)
+                else:
+                    tanggal_akhir = timezone.datetime(tahun, bulan_int + 1, 1) - timezone.timedelta(days=1)
+
+                # Buat list semua hari dalam bulan tersebut
+                jumlah_hari = (tanggal_akhir - tanggal_awal).days + 1
+                semua_hari = []
+                
+                for i in range(jumlah_hari):
+                    tanggal = tanggal_awal + timezone.timedelta(days=i)
+                    
+                    # Ambil record absensi untuk tanggal tersebut
+                    absensi_masuk = record_absensi.objects.filter(
+                        user=karyawan.user,
+                        checktime__date=tanggal.date(),
+                        tipe_absensi='masuk',
+                        status_verifikasi='diterima'
+                    ).first()
+                    
+                    absensi_pulang = record_absensi.objects.filter(
+                        user=karyawan.user,
+                        checktime__date=tanggal.date(),
+                        tipe_absensi='pulang',
+                        status_verifikasi='diterima'
+                    ).first()
+                    
+                    # Cek status ketidakhadiran
+                    ketidakhadiran = record_absensi.objects.filter(
+                        user=karyawan.user,
+                        checktime__date=tanggal.date(),
+                        status__in=['sakit', 'izin'],
+                        status_verifikasi='diterima'
+                    ).first()
+                    
+                    hari_data = {
+                        'tanggal': tanggal,
+                        'hari': tanggal.strftime('%A'),
+                        'jam_masuk': timezone.localtime(absensi_masuk.checktime).strftime('%H:%M') if absensi_masuk else '-',
+                        'jam_pulang': timezone.localtime(absensi_pulang.checktime).strftime('%H:%M') if absensi_pulang else '-',
+                        'status': ketidakhadiran.status if ketidakhadiran else ('Hadir' if absensi_masuk else 'Tidak Hadir'),
+                        'keterangan': ketidakhadiran.id_sakit.keterangan if ketidakhadiran and ketidakhadiran.status == 'sakit' and ketidakhadiran.id_sakit
+                                    else ketidakhadiran.id_izin.keterangan if ketidakhadiran and ketidakhadiran.status == 'izin' and ketidakhadiran.id_izin
+                                    else '-'
+                    }
+                    semua_hari.append(hari_data)
+                
+                # Hitung total
+                total_hadir = sum(1 for hari in semua_hari if hari['status'] == 'Hadir')
+                total_sakit = sum(1 for hari in semua_hari if hari['status'] == 'sakit')
+                total_izin = sum(1 for hari in semua_hari if hari['status'] == 'izin')
+                total_tidak_hadir = sum(1 for hari in semua_hari if hari['status'] == 'Tidak Hadir')
+                
+                context = {
+                    'karyawan': karyawan,
+                    'bulan': tanggal_awal.strftime('%B %Y'),
+                    'hari_records': semua_hari,
+                    'total_hadir': total_hadir,
+                    'total_sakit': total_sakit,
+                    'total_izin': total_izin,
+                    'total_tidak_hadir': total_tidak_hadir,
+                    'tanggal_cetak': timezone.now().strftime('%d-%m-%Y %H:%M:%S')
+                }
+                
+                return render(request, 'CustomAdmin/print_absensi_karyawan.html', context)
+                
+            except Karyawan.DoesNotExist:
+                messages.error(request, 'Karyawan tidak ditemukan')
+                return redirect('admin_karyawan')
+            except Exception as e:
+                messages.error(request, f'Gagal mencetak record: {str(e)}')
+                return redirect('admin_karyawan')
             
         if request.method == 'POST':
             action = request.POST.get('action')
@@ -2370,6 +2626,7 @@ def admin_karyawan(request):
             'karyawan': True,
             
             'total_data_table': karyawan_filter.count(),
+            'print': True,
         })
         return render(request, 'CustomAdmin/admin_karyawan.html', context)
     except Exception as e:

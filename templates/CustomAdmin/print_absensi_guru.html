@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Record Absensi {{ guru.nama }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 30px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .info {
+            margin-bottom: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .summary {
+            margin-top: 20px;
+        }
+        .footer {
+            margin-top: 30px;
+            text-align: right;
+            font-size: 0.9em;
+        }
+        .weekend {
+            background-color: #fff3e0;
+        }
+        .tidak-hadir {
+            color: #f44336;
+        }
+        .hadir {
+            color: #4CAF50;
+        }
+        .izin {
+            color: #ff9800;
+        }
+        .sakit {
+            color: #2196f3;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h2>Record Absensi Guru</h2>
+        <h3>{{ bulan }}</h3>
+    </div>
+
+    <div class="info">
+        <p><strong>Nama:</strong> {{ guru.nama }}</p>
+        <p><strong>NUPTK:</strong> {{ guru.nuptk }}</p>
+        <p><strong>Mata Pelajaran:</strong> {{ guru.mata_pelajaran.nama }}</p>
+        <p><strong>Kelas:</strong> {{ guru.kelas.nama }}</p>
+        <p><strong>Jenjang:</strong> {{ guru.jenjang.nama }}</p>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>No</th>
+                <th>Hari</th>
+                <th>Tanggal</th>
+                <th>Jam Masuk</th>
+                <th>Jam Pulang</th>
+                <th>Status</th>
+                <th>Keterangan</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for record in hari_records %}
+            <tr class="{% if record.hari == 'Saturday' or record.hari == 'Sunday' %}weekend{% endif %}
+                     {% if record.status == 'Tidak Hadir' %}tidak-hadir{% endif %}
+                     {% if record.status == 'hadir' %} {% endif %}
+                     {% if record.status == 'izin' %}izin{% endif %}
+                     {% if record.status == 'sakit' %}sakit{% endif %}">
+                <td>{{ forloop.counter }}</td>
+                <td>{{ record.hari }}</td>
+                <td>{{ record.tanggal|date:"d/m/Y" }}</td>
+                <td>{{ record.jam_masuk }}</td>
+                <td>{{ record.jam_pulang }}</td>
+                <td>{{ record.status }}</td>
+                <td>{{ record.keterangan }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="summary">
+        <h3>Ringkasan Absensi</h3>
+        <p>Total Hadir: {{ total_hadir }} hari</p>
+        <p>Total Sakit: {{ total_sakit }} hari</p>
+        <p>Total Izin: {{ total_izin }} hari</p>
+        <p>Total Tidak Hadir: {{ total_tidak_hadir }} hari</p>
+    </div>
+
+    <div class="footer">
+        <div class="flex justify-between items-center">
+            <div>
+                <p>Dicetak pada: {{ tanggal_cetak }}</p>
+            </div>
+            <div>
+                <button onclick="window.print()" class="px-4 py-2 bg-blue-500 text-white text-base font-medium rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300">
+                    Cetak
+                </button>
+                <button onclick="window.history.back()" class="px-4 py-2 bg-gray-500 text-white text-base font-medium rounded-md shadow-sm hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-300 ml-2">
+                    Kembali
+                </button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
