@@ -172,3 +172,37 @@ def siswa_statistik(request):
     
     messages.info(request, f'Menampilkan statistik absensi dari {start_date.strftime("%d %B %Y")} sampai {end_date.strftime("%d %B %Y")}.')
     return render(request, 'Siswa/siswa_statistik.html', context)
+
+@login_required
+@siswa_required
+def siswa_pengaturan(request):
+    siswa = Siswa.objects.get(user=request.user)
+    
+    if request.method == 'POST':
+        telegram_chat_id = request.POST.get('telegram_chat_id')
+        notifikasi_telegram = request.POST.get('notifikasi_telegram') == 'on'
+        
+        # Update pengaturan
+        siswa.telegram_chat_id = telegram_chat_id
+        siswa.notifikasi_telegram = notifikasi_telegram
+        siswa.save()
+        
+        # Kirim pesan test jika notifikasi diaktifkan
+        if notifikasi_telegram and telegram_chat_id:
+            try:
+                send_telegram_message(telegram_chat_id, f"Selamat {cek_waktu()} {siswa.nama}, ini adalah pesan test notifikasi Telegram.")
+                messages.success(request, 'Pengaturan berhasil disimpan dan pesan test telah dikirim.')
+            except:
+                messages.warning(request, 'Pengaturan berhasil disimpan tetapi gagal mengirim pesan test. Pastikan Chat ID valid.')
+        else:
+            messages.success(request, 'Pengaturan berhasil disimpan.')
+        
+        return redirect('siswa_pengaturan')
+    
+    context = get_context()
+    context.update({
+        'siswa': siswa,
+        'user_is_siswa': True,
+    })
+    
+    return render(request, 'Siswa/siswa_pengaturan.html', context)

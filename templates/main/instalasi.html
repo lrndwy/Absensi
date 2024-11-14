@@ -1,6 +1,6 @@
 {% extends 'base.html' %} {% block content %}
 <div class="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-800">
-    <div id="slotDashboard" class="w-full max-w-md mx-auto h-screen flex flex-col justify-center">
+    <div id="slotDashboard" class="w-full max-w-lg mx-auto h-screen flex flex-col justify-center">
     
         {% if create_super_user %}
         <form id="superUserForm" class="bg-white dark:bg-gray-800 shadow border border-gray-300 rounded-lg px-8 pt-6 pb-8 dark:shadow-none dark:border-gray-700 dark:text-white" method="POST">
@@ -49,19 +49,7 @@
                     placeholder=" " required></textarea>
                 <label for="alamat" class="absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-4 z-10 origin-[0] start-2.5 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto">Alamat</label>
             </div>
-            <div class="mb-6 flex">
-                <div class="relative flex-1 mr-2">
-                    <input type="time" id="jam_masuk" name="jam_masuk" class="block rounded-t-lg px-2.5 pb-2.5 pt-5 w-full text-sm text-gray-900 bg-gray-50 dark:bg-gray-700 border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
-                        placeholder=" " required />
-                    <label for="jam_masuk" class="absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-4 z-10 origin-[0] start-2.5 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto">Jam Masuk</label>
-                </div>
-                <div class="relative flex-1 ml-2">
-                    <input type="time" id="jam_pulang" name="jam_pulang" class="block rounded-t-lg px-2.5 pb-2.5 pt-5 w-full text-sm text-gray-900 bg-gray-50 dark:bg-gray-700 border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
-                        placeholder=" " required />
-                    <label for="jam_pulang" class="absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-4 z-10 origin-[0] start-2.5 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto">Jam Pulang</label>
-                </div>
-            </div>
-            <div class="mb-6 relative flex flex-col gap-2">
+            <div class="mb-6 relative">
                 <div class="mb-4">
                     <p class="text-sm text-gray-500 dark:text-gray-400">Pilih fitur yang akan diinstal</p>
                 </div>
@@ -70,34 +58,70 @@
                         <label class="inline-flex items-center cursor-pointer">
                             <input type="checkbox" name="fitur_siswa" value="siswa" class="sr-only peer" id="fitur_siswa_checkbox">
                             <div
-                                class="relative w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600">
-                            </div>
+                                class="relative w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
                             <span class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">Siswa</span>
                         </label>
-                        <label class="inline-flex items-center cursor-pointer">
-                            <input type="checkbox" name="fitur_guru" value="guru" class="sr-only peer">
-                            <div
-                                class="relative w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600">
+                        <div id="jam_siswa" class="hidden flex-1">
+                            <div class="flex gap-2">
+                                <div class="relative flex-1">
+                                    <input type="time" name="jam_masuk_siswa" class="block rounded-t-lg px-2.5 pb-2.5 pt-5 w-full text-sm text-gray-900 bg-gray-50 dark:bg-gray-700 border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " />
+                                    <label class="absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-4 z-10 origin-[0] start-2.5 peer-focus:text-blue-600 peer-focus:dark:text-blue-500">Jam Masuk Siswa</label>
+                                </div>
+                                <div class="relative flex-1">
+                                    <input type="time" name="jam_pulang_siswa" class="block rounded-t-lg px-2.5 pb-2.5 pt-5 w-full text-sm text-gray-900 bg-gray-50 dark:bg-gray-700 border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " />
+                                    <label class="absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-4 z-10 origin-[0] start-2.5 peer-focus:text-blue-600 peer-focus:dark:text-blue-500">Jam Pulang Siswa</label>
+                                </div>
                             </div>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-row gap-4">
+                        <label class="inline-flex items-center cursor-pointer">
+                            <input type="checkbox" name="fitur_guru" value="guru" class="sr-only peer" id="fitur_guru_checkbox">
+                            <div
+                                class="relative w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
                             <span class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">Guru</span>
                         </label>
-                        <label class="inline-flex items-center cursor-pointer">
-                            <input type="checkbox" name="fitur_karyawan" value="karyawan" class="sr-only peer">
-                            <div
-                                class="relative w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600">
+                        <div id="jam_guru" class="hidden flex-1">
+                            <div class="flex gap-2">
+                                <div class="relative flex-1">
+                                    <input type="time" name="jam_masuk_guru" class="block rounded-t-lg px-2.5 pb-2.5 pt-5 w-full text-sm text-gray-900 bg-gray-50 dark:bg-gray-700 border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " />
+                                    <label class="absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-4 z-10 origin-[0] start-2.5 peer-focus:text-blue-600 peer-focus:dark:text-blue-500">Jam Masuk Guru</label>
+                                </div>
+                                <div class="relative flex-1">
+                                    <input type="time" name="jam_pulang_guru" class="block rounded-t-lg px-2.5 pb-2.5 pt-5 w-full text-sm text-gray-900 bg-gray-50 dark:bg-gray-700 border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " />
+                                    <label class="absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-4 z-10 origin-[0] start-2.5 peer-focus:text-blue-600 peer-focus:dark:text-blue-500">Jam Pulang Guru</label>
+                                </div>
                             </div>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-row gap-4">
+                        <label class="inline-flex items-center cursor-pointer">
+                            <input type="checkbox" name="fitur_karyawan" value="karyawan" class="sr-only peer" id="fitur_karyawan_checkbox">
+                            <div
+                                class="relative w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
                             <span class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">Karyawan</span>
                         </label>
-                    </div>
-                    <div class="mb-4">
-                        <p class="text-sm text-gray-500 dark:text-gray-400">Pilih minimal satu fitur yang akan diinstal</p>
+                        <div id="jam_karyawan" class="hidden flex-1">
+                            <div class="flex gap-2">
+                                <div class="relative flex-1">
+                                    <input type="time" name="jam_masuk_karyawan" class="block rounded-t-lg px-2.5 pb-2.5 pt-5 w-full text-sm text-gray-900 bg-gray-50 dark:bg-gray-700 border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " />
+                                    <label class="absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-4 z-10 origin-[0] start-2.5 peer-focus:text-blue-600 peer-focus:dark:text-blue-500">Jam Masuk Karyawan</label>
+                                </div>
+                                <div class="relative flex-1">
+                                    <input type="time" name="jam_pulang_karyawan" class="block rounded-t-lg px-2.5 pb-2.5 pt-5 w-full text-sm text-gray-900 bg-gray-50 dark:bg-gray-700 border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " />
+                                    <label class="absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-4 z-10 origin-[0] start-2.5 peer-focus:text-blue-600 peer-focus:dark:text-blue-500">Jam Pulang Karyawan</label>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="mb-6 relative">
-                    <input type="text" id="telegram_token" name="telegram_token" class="block rounded-t-lg px-2.5 pb-2.5 pt-5 w-full text-sm text-gray-900 bg-gray-50 dark:bg-gray-700 border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
-                        placeholder=" " />
-                    <label for="telegram_token" class="absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-4 z-10 origin-[0] start-2.5 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto">Telegram Token</label>
-                </div>
+            </div>
+            <div class="mb-6 relative">
+                <input type="text" id="telegram_token" name="telegram_token" class="block rounded-t-lg px-2.5 pb-2.5 pt-5 w-full text-sm text-gray-900 bg-gray-50 dark:bg-gray-700 border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
+                    placeholder=" " />
+                <label for="telegram_token" class="absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-4 z-10 origin-[0] start-2.5 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto">Telegram Token</label>
             </div>
             <div class="flex items-center justify-center">
                 <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-full w-full focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:scale-105">
@@ -115,5 +139,19 @@
         {% endif %}
     </div>
 </div>
+
+<script>
+document.getElementById('fitur_siswa_checkbox').addEventListener('change', function() {
+    document.getElementById('jam_siswa').classList.toggle('hidden', !this.checked);
+});
+
+document.getElementById('fitur_guru_checkbox').addEventListener('change', function() {
+    document.getElementById('jam_guru').classList.toggle('hidden', !this.checked);
+});
+
+document.getElementById('fitur_karyawan_checkbox').addEventListener('change', function() {
+    document.getElementById('jam_karyawan').classList.toggle('hidden', !this.checked);
+});
+</script>
 
 {% endblock %}

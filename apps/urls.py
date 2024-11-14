@@ -24,6 +24,7 @@ urlpatterns = [
     path('dashboard/atribut/', admin.admin_atribut, name='admin_atribut'),
     path('dashboard/sakit/', admin.admin_sakit, name='admin_sakit'),
     path('dashboard/izin/', admin.admin_izin, name='admin_izin'),
+    path('dashboard/tanggal-merah/', admin.admin_tanggal_merah, name='admin_tanggal_merah'),
     
     path('dashboard/atribut/kelas/', admin.admin_atribut_kelas, name='admin_atribut_kelas'),
     path('dashboard/atribut/mapel/', admin.admin_atribut_mapel, name='admin_atribut_mapel'),
@@ -43,15 +44,16 @@ urlpatterns = [
     # Siswa
     path('siswa/', siswa.siswa_dashboard, name='siswa_dashboard'),
     path('siswa/statistik/', siswa.siswa_statistik, name='siswa_statistik'),
+    path('siswa/pengaturan/', siswa.siswa_pengaturan, name='siswa_pengaturan'),
     
     # Guru
     path('guru/', guru.guru_dashboard, name='guru_dashboard'),
     path('guru/statistik/', guru.guru_statistik, name='guru_statistik'),
-
+    path('guru/pengaturan/', guru.guru_pengaturan, name='guru_pengaturan'),
     # Karyawan
     path('karyawan/', karyawan.karyawan_dashboard, name='karyawan_dashboard'),
     path('karyawan/statistik/', karyawan.karyawan_statistik, name='karyawan_statistik'),
-
+    path('karyawan/pengaturan/', karyawan.karyawan_pengaturan, name='karyawan_pengaturan'),
     # Export Data
     path('export/', main.export_data, name='export_data'),
 ]

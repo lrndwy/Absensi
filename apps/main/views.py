@@ -72,36 +72,50 @@ def instalasi(request):
         form = request.POST.get('form')
         
         if form == 'instalasi':
-            # Proses instalasi awal
+            # Ambil data dasar
             nama_sekolah = request.POST.get('nama_sekolah')
             deskripsi = request.POST.get('deskripsi')
             alamat = request.POST.get('alamat')
             logo = request.FILES.get('logo')
-            fitur_siswa = request.POST.get('fitur_siswa')
-            fitur_guru = request.POST.get('fitur_guru')
-            fitur_karyawan = request.POST.get('fitur_karyawan')
-            jam_masuk = request.POST.get('jam_masuk')
-            jam_pulang = request.POST.get('jam_pulang')
             telegram_token = request.POST.get('telegram_token')
-            siswa_fitur = True if fitur_siswa else False
-            guru_fitur = True if fitur_guru else False
-            karyawan_fitur = True if fitur_karyawan else False
             
-            if jam_masuk and jam_pulang:
-                jam_masuk = datetime.strptime(jam_masuk, '%H:%M').time()
-                jam_pulang = datetime.strptime(jam_pulang, '%H:%M').time()
+            # Ambil status fitur
+            fitur_siswa = 'fitur_siswa' in request.POST
+            fitur_guru = 'fitur_guru' in request.POST
+            fitur_karyawan = 'fitur_karyawan' in request.POST
+            
+            # Proses jam masuk dan pulang untuk setiap fitur
+            jam_masuk_siswa = jam_pulang_siswa = None
+            jam_masuk_guru = jam_pulang_guru = None
+            jam_masuk_karyawan = jam_pulang_karyawan = None
+            
+            if fitur_siswa:
+                jam_masuk_siswa = datetime.strptime(request.POST.get('jam_masuk_siswa'), '%H:%M').time()
+                jam_pulang_siswa = datetime.strptime(request.POST.get('jam_pulang_siswa'), '%H:%M').time()
+                
+            if fitur_guru:
+                jam_masuk_guru = datetime.strptime(request.POST.get('jam_masuk_guru'), '%H:%M').time()
+                jam_pulang_guru = datetime.strptime(request.POST.get('jam_pulang_guru'), '%H:%M').time()
+                
+            if fitur_karyawan:
+                jam_masuk_karyawan = datetime.strptime(request.POST.get('jam_masuk_karyawan'), '%H:%M').time()
+                jam_pulang_karyawan = datetime.strptime(request.POST.get('jam_pulang_karyawan'), '%H:%M').time()
             
             instalasi = Instalasi.objects.create(
                 nama_sekolah=nama_sekolah,
                 deskripsi=deskripsi,
                 alamat=alamat,
                 logo=logo,
-                fitur_siswa=siswa_fitur,
-                fitur_guru=guru_fitur,
-                fitur_karyawan=karyawan_fitur,
+                fitur_siswa=fitur_siswa,
+                fitur_guru=fitur_guru,
+                fitur_karyawan=fitur_karyawan,
                 telegram_token=telegram_token,
-                jam_masuk=jam_masuk,
-                jam_pulang=jam_pulang
+                jam_masuk_siswa=jam_masuk_siswa,
+                jam_pulang_siswa=jam_pulang_siswa,
+                jam_masuk_guru=jam_masuk_guru,
+                jam_pulang_guru=jam_pulang_guru,
+                jam_masuk_karyawan=jam_masuk_karyawan,
+                jam_pulang_karyawan=jam_pulang_karyawan
             )
             
             messages.success(request, 'Instalasi berhasil dilakukan.')
@@ -148,15 +162,10 @@ def instalasi(request):
 def webhook_kehadiran(request):
     try:
         data = json.loads(request.body)
-        
         if not isinstance(data, list):
             data = [data]
         
         instalasi = Instalasi.objects.first()
-        jam_masuk = instalasi.jam_masuk
-        jam_pulang = instalasi.jam_pulang
-        jam_kerja = instalasi.jam_kerja
-        
         new_records = []
         messages_to_send = []
         
@@ -170,64 +179,88 @@ def webhook_kehadiran(request):
             if not user:
                 continue
             
-            # Cek apakah user adalah siswa, guru atau karyawan
-            siswa = Siswa.objects.filter(user=user).first()
-            guru = Guru.objects.filter(user=user).first()
-            karyawan = Karyawan.objects.filter(user=user).first()
-            
-            # Ambil chat_id dan nama berdasarkan tipe user
-            if siswa:
-                chat_id = siswa.telegram_chat_id
-                nama = siswa.nama
+            # Tentukan tipe user dan ambil data yang sesuai
+            if Siswa.objects.filter(user=user).exists():
+                person = Siswa.objects.get(user=user)
+                jam_masuk = instalasi.jam_masuk_siswa
+                jam_pulang = instalasi.jam_pulang_siswa
                 tipe_user = "siswa"
-            elif guru:
-                chat_id = guru.telegram_chat_id
-                nama = guru.nama
+            elif Guru.objects.filter(user=user).exists():
+                person = Guru.objects.get(user=user)
+                jam_masuk = instalasi.jam_masuk_guru
+                jam_pulang = instalasi.jam_pulang_guru
                 tipe_user = "guru"
-            elif karyawan:
-                chat_id = karyawan.telegram_chat_id
-                nama = karyawan.nama
+            elif Karyawan.objects.filter(user=user).exists():
+                person = Karyawan.objects.get(user=user)
+                jam_masuk = instalasi.jam_masuk_karyawan
+                jam_pulang = instalasi.jam_pulang_karyawan
                 tipe_user = "karyawan"
             else:
                 continue
+
+            chat_id = person.telegram_chat_id
+            nama = person.nama
             
+            # Cek absensi yang sudah ada
             absensi_tanggal_ini = record_absensi.objects.filter(
                 user=user,
                 checktime__date=today
             )
-            
             absen_masuk = absensi_tanggal_ini.filter(tipe_absensi='masuk').first()
             absen_pulang = absensi_tanggal_ini.filter(tipe_absensi='pulang').first()
             
-            if jam_masuk <= waktu < jam_pulang:
+            # Modifikasi logika penentuan tipe absensi
+            if waktu < jam_pulang:
+                # Izinkan absen masuk sebelum jam masuk
                 tipe_absensi = 'masuk'
+                jam_absen = waktu.hour
+                menit_absen = waktu.minute
+                jam_seharusnya = jam_masuk.hour
+                menit_seharusnya = jam_masuk.minute
+                
+                total_menit_absen = (jam_absen * 60) + menit_absen
+                total_menit_seharusnya = (jam_seharusnya * 60) + menit_seharusnya
+                
+                # Jika absen lebih awal, terlambat = 0
+                if total_menit_absen <= total_menit_seharusnya:
+                    terlambat = 0
+                else:
+                    terlambat = total_menit_absen - total_menit_seharusnya
             else:
                 tipe_absensi = 'pulang'
+                terlambat = 0
             
+            # Proses absensi masuk
             if tipe_absensi == 'masuk' and not absen_masuk:
-                new_records.append(record_absensi(
+                new_record = record_absensi(
                     user=user,
                     checktime=tanggal,
                     status='hadir',
                     status_verifikasi='diterima',
-                    tipe_absensi=tipe_absensi
-                ))
+                    tipe_absensi=tipe_absensi,
+                    terlambat=terlambat
+                )
+                new_records.append(new_record)
                 
                 if chat_id:
+                    keterlambatan_text = f" (terlambat {terlambat} menit)" if terlambat > 0 else ""
                     if tipe_user == "siswa":
-                        message = f"Selamat {cek_waktu()} Bapak/Ibu Orang Tua/Wali Murid. Informasi bahwa {nama} {tipe_absensi} pada {today} jam {tanggal.time().strftime('%H.%M.%S')}"
+                        message = f"Selamat {cek_waktu()} Bapak/Ibu Orang Tua/Wali Murid. Informasi bahwa {nama} {tipe_absensi} pada {today} jam {tanggal.time().strftime('%H.%M.%S')}{keterlambatan_text}"
                     else:
-                        message = f"Selamat {cek_waktu()}. Informasi bahwa {nama} telah {tipe_absensi} pada {today} jam {tanggal.time().strftime('%H.%M.%S')}"
+                        message = f"Selamat {cek_waktu()}. Informasi bahwa {nama} telah {tipe_absensi} pada {today} jam {tanggal.time().strftime('%H.%M.%S')}{keterlambatan_text}"
                     messages_to_send.append((chat_id, message))
             
+            # Proses absensi pulang
             elif tipe_absensi == 'pulang' and absen_masuk and not absen_pulang:
-                new_records.append(record_absensi(
+                new_record = record_absensi(
                     user=user,
                     checktime=tanggal,
                     status='hadir',
                     status_verifikasi='diterima',
-                    tipe_absensi=tipe_absensi
-                ))
+                    tipe_absensi=tipe_absensi,
+                    terlambat=0
+                )
+                new_records.append(new_record)
                 
                 if chat_id:
                     if tipe_user == "siswa":
@@ -236,9 +269,9 @@ def webhook_kehadiran(request):
                         message = f"Selamat {cek_waktu()}. Informasi bahwa {nama} telah {tipe_absensi} pada {today} jam {tanggal.time().strftime('%H.%M.%S')}"
                     messages_to_send.append((chat_id, message))
         
+        # Simpan records dan kirim notifikasi
         record_absensi.objects.bulk_create(new_records)
         
-        # Memisahkan pengiriman Telegram ke dalam blok try-except tersendiri
         telegram_token = instalasi.telegram_token
         for chat_id, message in messages_to_send:
             try:
@@ -246,7 +279,6 @@ def webhook_kehadiran(request):
                 Thread(target=lambda: requests.get(telegram_url)).start()
                 print('Berhasil Mengirim Chat Telegram')
             except Exception as e:
-                # Log error tapi tetap lanjutkan ke pesan berikutnya
                 print(f"Gagal mengirim pesan Telegram ke {chat_id}: {str(e)}")
                 continue
         

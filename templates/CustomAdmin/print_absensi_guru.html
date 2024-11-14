@@ -1,126 +1,180 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
+{% load static %}
+{% load custom_filters %}
 <head>
-    <meta charset="utf-8">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Record Absensi {{ guru.nama }}</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            margin: 30px;
-        }
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        .info {
-            margin-bottom: 20px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
-        }
-        th {
-            background-color: #f2f2f2;
-        }
-        .summary {
-            margin-top: 20px;
-        }
-        .footer {
-            margin-top: 30px;
-            text-align: right;
-            font-size: 0.9em;
-        }
-        .weekend {
-            background-color: #fff3e0;
-        }
-        .tidak-hadir {
-            color: #f44336;
-        }
-        .hadir {
-            color: #4CAF50;
-        }
-        .izin {
-            color: #ff9800;
-        }
-        .sakit {
-            color: #2196f3;
-        }
-    </style>
+    <link href="{% static 'src/output.css' %}" rel="stylesheet" />
+    <link href="{% static 'dist/flowbite.min.css' %}" rel="stylesheet" />
 </head>
-<body>
-    <div class="header">
-        <h2>Record Absensi Guru</h2>
-        <h3>{{ bulan }}</h3>
-    </div>
-
-    <div class="info">
-        <p><strong>Nama:</strong> {{ guru.nama }}</p>
-        <p><strong>NUPTK:</strong> {{ guru.nuptk }}</p>
-        <p><strong>Mata Pelajaran:</strong> {{ guru.mata_pelajaran.nama }}</p>
-        <p><strong>Kelas:</strong> {{ guru.kelas.nama }}</p>
-        <p><strong>Jenjang:</strong> {{ guru.jenjang.nama }}</p>
-    </div>
-
-    <table>
-        <thead>
-            <tr>
-                <th>No</th>
-                <th>Hari</th>
-                <th>Tanggal</th>
-                <th>Jam Masuk</th>
-                <th>Jam Pulang</th>
-                <th>Status</th>
-                <th>Keterangan</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for record in hari_records %}
-            <tr class="{% if record.hari == 'Saturday' or record.hari == 'Sunday' %}weekend{% endif %}
-                     {% if record.status == 'Tidak Hadir' %}tidak-hadir{% endif %}
-                     {% if record.status == 'hadir' %} {% endif %}
-                     {% if record.status == 'izin' %}izin{% endif %}
-                     {% if record.status == 'sakit' %}sakit{% endif %}">
-                <td>{{ forloop.counter }}</td>
-                <td>{{ record.hari }}</td>
-                <td>{{ record.tanggal|date:"d/m/Y" }}</td>
-                <td>{{ record.jam_masuk }}</td>
-                <td>{{ record.jam_pulang }}</td>
-                <td>{{ record.status }}</td>
-                <td>{{ record.keterangan }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-
-    <div class="summary">
-        <h3>Ringkasan Absensi</h3>
-        <p>Total Hadir: {{ total_hadir }} hari</p>
-        <p>Total Sakit: {{ total_sakit }} hari</p>
-        <p>Total Izin: {{ total_izin }} hari</p>
-        <p>Total Tidak Hadir: {{ total_tidak_hadir }} hari</p>
-    </div>
-
-    <div class="footer">
-        <div class="flex justify-between items-center">
+<body class="bg-white dark:bg-gray-800 p-8">
+    <div class="">
+      {% if logo_sekolah %}
+        <img src="{{ logo_sekolah.url }}" alt="Logo Sekolah" class="h-20 mb-4">
+      {% endif %}
+        <div class="flex flex-row justify-between mb-8">
             <div>
-                <p>Dicetak pada: {{ tanggal_cetak }}</p>
+              
+              <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">{{ nama_sekolah }}</h1>
+              <p class="text-gray-600 dark:text-gray-400 mb-2">{{ deskripsi_sekolah }}</p>
+              <p class="text-gray-600 dark:text-gray-400 mb-6">{{ alamat_sekolah }}</p>
             </div>
+            
             <div>
-                <button onclick="window.print()" class="px-4 py-2 bg-blue-500 text-white text-base font-medium rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300">
-                    Cetak
-                </button>
-                <button onclick="window.history.back()" class="px-4 py-2 bg-gray-500 text-white text-base font-medium rounded-md shadow-sm hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-300 ml-2">
-                    Kembali
-                </button>
+              <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Record Absensi Guru</h2>
+              <h3 class="text-xl text-gray-700 dark:text-gray-300">{{ periode }}</h3>
             </div>
+            
         </div>
     </div>
+        <div class="mb-6 text-gray-800 dark:text-gray-200">
+        <p class="mb-2"><span class="font-semibold">Nama:</span> {{ guru.nama }}</p>
+        <p class="mb-2"><span class="font-semibold">NUPTK:</span> {{ guru.nuptk }}</p>
+        <p class="mb-2"><span class="font-semibold">Mata Pelajaran:</span> {{ guru.mata_pelajaran.nama }}</p>
+        <p class="mb-2"><span class="font-semibold">Kelas:</span> {{ guru.kelas.nama }}</p>
+        <p class="mb-2"><span class="font-semibold">Jenjang:</span> {{ guru.jenjang.nama }}</p>
+    </div>
+
+    <div class="overflow-x-auto relative shadow-md sm:rounded-lg mb-6">
+        <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+            <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                <tr>
+                    <th scope="col" class="py-3 px-6">No</th>
+                    <th scope="col" class="py-3 px-6">Hari</th>
+                    <th scope="col" class="py-3 px-6">Tanggal</th>
+                    <th scope="col" class="py-3 px-6">Jam Masuk</th>
+                    <th scope="col" class="py-3 px-6">Jam Pulang</th>
+                    <th scope="col" class="py-3 px-6">Status</th>
+                    <th scope="col" class="py-3 px-6">Keterangan</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in hari_records %}
+                <tr class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600
+                    {% if record.hari == 'Saturday' or record.hari == 'Sunday' %}
+                        bg-yellow-50 dark:bg-yellow-900/20
+                        hover:bg-yellow-100 dark:hover:bg-yellow-900/30
+                    {% elif 'Tanggal Merah' in record.status %}
+                        bg-red-50 dark:bg-red-900/20
+                        hover:bg-red-100 dark:hover:bg-red-900/30
+                    {% else %}
+                        bg-white dark:bg-gray-800
+                    {% endif %}">
+                    <td class="py-4 px-6">{{ forloop.counter }}</td>
+                    <td class="py-4 px-6 
+                        {% if record.hari == 'Saturday' or record.hari == 'Sunday' %}
+                            text-yellow-600 dark:text-yellow-400 font-medium
+                        {% endif %}">
+                        {{ record.hari }}
+                    </td>
+                    <td class="py-4 px-6">{{ record.tanggal|date:"d/m/Y" }}</td>
+                    <td class="py-4 px-6">{{ record.jam_masuk }}</td>
+                    <td class="py-4 px-6">{{ record.jam_pulang }}</td>
+                    <td class="py-4 px-6 font-medium
+                        {% if record.status == 'Tidak Hadir' %}text-red-500
+                        {% elif record.status == 'Hadir' %}text-green-500
+                        {% elif record.status == 'izin' %}text-orange-500
+                        {% elif record.status == 'sakit' %}text-blue-500
+                        {% elif 'Tanggal Merah' in record.status %}text-red-600 dark:text-red-400
+                        {% endif %}">
+                        {{ record.status }}
+                    </td>
+                    <td class="py-4 px-6 
+                        {% if 'Tanggal Merah' in record.status %}
+                            text-red-600 dark:text-red-400 italic
+                        {% elif record.is_terlambat %}
+                            text-orange-500 dark:text-orange-400
+                        {% elif record.status == 'Hadir' %}
+                            text-green-500 dark:text-green-400
+                        {% endif %}">
+                        {% if 'Tanggal Merah' in record.status %}
+                            {{ record.keterangan }}
+                        {% elif record.status == 'Hadir' %}
+                            {% if record.is_terlambat %}
+                                {% if record.keterlambatan >= 60 %}
+                                    Terlambat {{ record.keterlambatan|jam }} jam 
+                                    {% if record.keterlambatan|menit != 0 %}
+                                        {{ record.keterlambatan|menit }} menit
+                                    {% endif %}
+                                {% else %}
+                                    Terlambat {{ record.keterlambatan }} menit
+                                {% endif %}
+                            {% elif record.jam_masuk != '-' %}
+                                Tepat Waktu
+                            {% else %}
+                                -
+                            {% endif %}
+                        {% else %}
+                            {{ record.keterangan }}
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="grid grid-cols-2 gap-8 mb-6">
+        <div class="text-gray-800 dark:text-gray-200">
+            <h3 class="text-xl font-bold mb-4">Ringkasan Total</h3>
+            <p class="mb-2">Total Hari: {{ total_hari }} hari</p>
+            <p class="mb-2">Total Hadir: {{ total_hadir }} hari</p>
+            <p class="mb-2 ml-4 text-sm">- Tepat Waktu: {{ total_tepat_waktu }} hari</p>
+            <p class="mb-2 ml-4 text-sm">- Terlambat: {{ total_terlambat }} hari</p>
+            <p class="mb-2 ml-4 text-sm">- Total Keterlambatan: 
+                {% if total_menit_terlambat >= 60 %}
+                    {{ total_menit_terlambat|jam }} jam 
+                    {% if total_menit_terlambat|menit != 0 %}
+                        {{ total_menit_terlambat|menit }} menit
+                    {% endif %}
+                {% else %}
+                    {{ total_menit_terlambat }} menit
+                {% endif %}
+            </p>
+            <p class="mb-2">Total Sakit: {{ total_sakit }} hari</p>
+            <p class="mb-2">Total Izin: {{ total_izin }} hari</p>
+            <p class="mb-2">Total Tidak Hadir: {{ total_tidak_hadir }} hari</p>
+            <p class="mb-2">Total Tanggal Merah: {{ total_tanggal_merah }} hari</p>
+            <p class="mb-2">Total Sabtu & Minggu: {{ total_weekend }} hari</p>
+        </div>
+
+        <div class="text-gray-800 dark:text-gray-200">
+            <h3 class="text-xl font-bold mb-4">Ringkasan Hari Kerja</h3>
+            <p class="mb-2">Total Hari Kerja: {{ total_hari_kerja }} hari</p>
+            <p class="mb-2">Hadir: {{ total_hadir_kerja }} hari</p>
+            <p class="mb-2 ml-4 text-sm">- Tepat Waktu: {{ total_tepat_waktu_kerja }} hari</p>
+            <p class="mb-2 ml-4 text-sm">- Terlambat: {{ total_terlambat_kerja }} hari</p>
+            <p class="mb-2 ml-4 text-sm">- Total Keterlambatan: 
+                {% if total_menit_terlambat_kerja >= 60 %}
+                    {{ total_menit_terlambat_kerja|jam }} jam 
+                    {% if total_menit_terlambat_kerja|menit != 0 %}
+                        {{ total_menit_terlambat_kerja|menit }} menit
+                    {% endif %}
+                {% else %}
+                    {{ total_menit_terlambat_kerja }} menit
+                {% endif %}
+            </p>
+            <p class="mb-2">Sakit: {{ total_sakit_kerja }} hari</p>
+            <p class="mb-2">Izin: {{ total_izin_kerja }} hari</p>
+            <p class="mb-2">Tidak Hadir: {{ total_tidak_hadir_kerja }} hari</p>
+            <p class="mb-2 text-sm italic">*Tidak termasuk Tanggal Merah dan Sabtu-Minggu</p>
+        </div>
+    </div>
+
+    <div class="flex justify-between items-center mt-8">
+        <p class="text-gray-600 dark:text-gray-400">Dicetak pada: {{ tanggal_cetak }}</p>
+        <div>
+            <button onclick="window.print()" class="px-4 py-2 bg-blue-500 text-white text-base font-medium rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300">
+                Cetak
+            </button>
+            <button onclick="window.history.back()" class="px-4 py-2 bg-gray-500 text-white text-base font-medium rounded-md shadow-sm hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-300 ml-2">
+                Kembali
+            </button>
+        </div>
+    </div>
+
+    <script src="{% static 'dist/flowbite.min.js' %}"></script>
 </body>
 </html>

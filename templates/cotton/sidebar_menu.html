@@ -53,6 +53,13 @@
         <span class="ms-3">Verifikasi</span>
     </a>
 </li>
+<li>
+  <a href="{% url 'admin_tanggal_merah' %}" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group {% if 'admin_tanggal_merah' in request.resolver_match.url_name %}bg-gray-100 dark:bg-gray-700{% endif %}">
+      <img src="https://img.icons8.com/?size=100&id=12776&format=png&color=000000" alt="Izin Icon" class="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white">
+      <span class="ms-3">Tanggal Merah</span>
+  </a>
+</li>
+
 {% else %} {% if user_is_siswa == True %}
 <li>
     <a href="{% url 'siswa_dashboard' %}" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group {% if 'siswa_dashboard' in request.resolver_match.url_name %}bg-gray-100 dark:bg-gray-700{% endif %}">
@@ -64,6 +71,12 @@
     <a href="{% url 'siswa_statistik' %}" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group {% if 'siswa_statistik' in request.resolver_match.url_name %}bg-gray-100 dark:bg-gray-700{% endif %}">
         <img src="https://img.icons8.com/?size=100&id=mOCU2P4rcj4p&format=png&color=000000" alt="Dashboard Icon" class="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white">
         <span class="ms-3">Statistik</span>
+    </a>
+</li>
+<li>
+    <a href="{% url 'siswa_pengaturan' %}" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group {% if 'siswa_pengaturan' in request.resolver_match.url_name %}bg-gray-100 dark:bg-gray-700{% endif %}">
+        <img src="https://img.icons8.com/?size=100&id=xsg8DrPwYfql&format=png&color=000000" alt="Pengaturan Icon" class="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white">
+        <span class="ms-3">Pengaturan</span>
     </a>
 </li>
 {% elif user_is_guru == True %}
@@ -79,6 +92,12 @@
         <span class="ms-3">Statistik</span>
     </a>
 </li>
+<li>
+    <a href="{% url 'guru_pengaturan' %}" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group {% if 'guru_pengaturan' in request.resolver_match.url_name %}bg-gray-100 dark:bg-gray-700{% endif %}">
+        <img src="https://img.icons8.com/?size=100&id=xsg8DrPwYfql&format=png&color=000000" alt="Pengaturan Icon" class="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white">
+        <span class="ms-3">Pengaturan</span>
+    </a>
+</li>
 {% elif user_is_karyawan == True %}
 <li>
     <a href="{% url 'karyawan_dashboard' %}" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group {% if 'karyawan_dashboard' in request.resolver_match.url_name %}bg-gray-100 dark:bg-gray-700{% endif %}">
@@ -90,6 +109,12 @@
     <a href="{% url 'karyawan_statistik' %}" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group {% if 'karyawan_statistik' in request.resolver_match.url_name %}bg-gray-100 dark:bg-gray-700{% endif %}">
         <img src="https://img.icons8.com/?size=100&id=mOCU2P4rcj4p&format=png&color=000000" alt="Dashboard Icon" class="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white">
         <span class="ms-3">Statistik</span>
+    </a>
+</li>
+<li>
+    <a href="{% url 'karyawan_pengaturan' %}" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group {% if 'karyawan_pengaturan' in request.resolver_match.url_name %}bg-gray-100 dark:bg-gray-700{% endif %}">
+        <img src="https://img.icons8.com/?size=100&id=xsg8DrPwYfql&format=png&color=000000" alt="Pengaturan Icon" class="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white">
+        <span class="ms-3">Pengaturan</span>
     </a>
 </li>
 {% endif %} {% endif %}

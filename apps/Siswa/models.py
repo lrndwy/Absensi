@@ -15,6 +15,7 @@ class Siswa(models.Model):
     kelas = models.ForeignKey(kelas, on_delete=models.CASCADE, null=True, blank=True)
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, blank=True)
     telegram_chat_id = models.CharField(max_length=20, null=True, blank=True)
+    notifikasi_telegram = models.BooleanField(default=False)
     
     def __str__(self):
         return self.nama

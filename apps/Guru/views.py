@@ -15,6 +15,8 @@ from apps.main.models import *
 
 from .models import Guru
 
+import requests
+
 
 def get_guru_absensi_hari_ini(guru):
     hari_ini = timezone.localtime(timezone.now()).date()
@@ -57,6 +59,8 @@ def guru_dashboard(request):
     if request.method == 'POST':
         status_absensi = request.POST.get('status_absensi')
         keterangan = request.POST.get('keterangan')
+        waktu_absen = timezone.localtime(timezone.now()).strftime('%H.%M.%S')
+        tanggal_absen = timezone.localtime(timezone.now()).date()
         
         if status_absensi in ['sakit', 'izin']:
             if status_absensi == 'sakit':
@@ -64,10 +68,12 @@ def guru_dashboard(request):
                 sakit_obj = sakit.objects.create(user=request.user, keterangan=keterangan, surat_sakit=surat_sakit)
                 record = record_absensi.objects.create(user=request.user, status='sakit', id_sakit=sakit_obj, checktime=timezone.now(), status_verifikasi='menunggu')
                 messages.success(request, 'Absensi sakit berhasil dicatat.')
+                send_telegram_message(guru.telegram_chat_id, f"Selamat {cek_waktu()} Bapak/Ibu. Informasi bahwa {guru.nama} sakit pada {tanggal_absen} jam {waktu_absen}")
             elif status_absensi == 'izin':
                 izin_obj = izin.objects.create(user=request.user, keterangan=keterangan)
                 record = record_absensi.objects.create(user=request.user, status='izin', id_izin=izin_obj, checktime=timezone.now(), status_verifikasi='menunggu')
                 messages.success(request, 'Absensi izin berhasil dicatat.')
+                send_telegram_message(guru.telegram_chat_id, f"Selamat {cek_waktu()} Bapak/Ibu. Informasi bahwa {guru.nama} izin pada {tanggal_absen} jam {waktu_absen}")
             
             return redirect('guru_dashboard')
         else:
@@ -139,3 +145,55 @@ def guru_statistik(request):
     
     messages.info(request, f'Menampilkan statistik absensi dari {start_date.strftime("%d %B %Y")} hingga {end_date.strftime("%d %B %Y")}.')
     return render(request, 'Guru/guru_statistik.html', context)
+
+def send_telegram_message(chat_id, message):
+    telegram_token = Instalasi.objects.first().telegram_token
+    telegram_url = f"https://api.telegram.org/bot{telegram_token}/sendMessage?chat_id={chat_id}&text={message}"
+    requests.get(telegram_url)
+    
+def cek_waktu():
+    sekarang = timezone.localtime(timezone.now())
+    jam = sekarang.hour
+    
+    if 5 <= jam < 12:
+        return "pagi"
+    elif 12 <= jam < 15:
+        return "siang"
+    elif 15 <= jam < 18:
+        return "sore"
+    else:
+        return "malam"
+
+@login_required
+@guru_required
+def guru_pengaturan(request):
+    guru = Guru.objects.get(user=request.user)
+    
+    if request.method == 'POST':
+        telegram_chat_id = request.POST.get('telegram_chat_id')
+        notifikasi_telegram = request.POST.get('notifikasi_telegram') == 'on'
+        
+        # Update pengaturan
+        guru.telegram_chat_id = telegram_chat_id
+        guru.notifikasi_telegram = notifikasi_telegram
+        guru.save()
+        
+        # Kirim pesan test jika notifikasi diaktifkan
+        if notifikasi_telegram and telegram_chat_id:
+            try:
+                send_telegram_message(telegram_chat_id, f"Selamat {cek_waktu()} {guru.nama}, ini adalah pesan test notifikasi Telegram.")
+                messages.success(request, 'Pengaturan berhasil disimpan dan pesan test telah dikirim.')
+            except:
+                messages.warning(request, 'Pengaturan berhasil disimpan tetapi gagal mengirim pesan test. Pastikan Chat ID valid.')
+        else:
+            messages.success(request, 'Pengaturan berhasil disimpan.')
+        
+        return redirect('guru_pengaturan')
+    
+    context = get_context()
+    context.update({
+        'guru': guru,
+        'user_is_guru': True,
+    })
+    
+    return render(request, 'Guru/guru_pengaturan.html', context)

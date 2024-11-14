@@ -23,6 +23,7 @@ def admin_siswa(request):
         today = timezone.localtime(timezone.now()).date()
         jenjang_filter = request.GET.get('jenjang')
         kelas_filter = request.GET.get('kelas')
+        instalasi = Instalasi.objects.first()
 
         edit_data_siswa = []
         edit_id = request.GET.get('id')
@@ -53,83 +54,170 @@ def admin_siswa(request):
             
         # IF PRINT
         print_id = request.GET.get('print')
-        bulan = request.GET.get('bulan')
-        if print_id and bulan:
+        start_date = request.GET.get('start')
+        end_date = request.GET.get('end')
+        
+        if print_id and start_date and end_date:
             try:
                 siswa = Siswa.objects.get(id=print_id)
-                tahun = timezone.now().year
-                bulan_int = int(bulan)
                 
-                # Dapatkan tanggal awal dan akhir bulan
-                tanggal_awal = timezone.datetime(tahun, bulan_int, 1)
-                if bulan_int == 12:
-                    tanggal_akhir = timezone.datetime(tahun + 1, 1, 1) - timezone.timedelta(days=1)
-                else:
-                    tanggal_akhir = timezone.datetime(tahun, bulan_int + 1, 1) - timezone.timedelta(days=1)
-
-                # Buat list semua hari dalam bulan tersebut
+                # Konversi string tanggal ke datetime
+                tanggal_awal = timezone.datetime.strptime(start_date, '%Y-%m-%d')
+                tanggal_akhir = timezone.datetime.strptime(end_date, '%Y-%m-%d')
+                
+                # Buat list semua hari dalam rentang tanggal
                 jumlah_hari = (tanggal_akhir - tanggal_awal).days + 1
                 semua_hari = []
                 
                 for i in range(jumlah_hari):
                     tanggal = tanggal_awal + timezone.timedelta(days=i)
                     
-                    # Ambil record absensi untuk tanggal tersebut
-                    absensi_masuk = record_absensi.objects.filter(
-                        user=siswa.user,
-                        checktime__date=tanggal.date(),
-                        tipe_absensi='masuk',
-                        status_verifikasi='diterima'
+                    # Cek apakah tanggal tersebut adalah tanggal merah
+                    tanggal_merah_obj = tanggal_merah.objects.filter(
+                        tanggal=tanggal.date(),
+                        kategori__in=['siswa', 'semua']
                     ).first()
                     
-                    absensi_pulang = record_absensi.objects.filter(
-                        user=siswa.user,
-                        checktime__date=tanggal.date(),
-                        tipe_absensi='pulang',
-                        status_verifikasi='diterima'
-                    ).first()
+                    if tanggal_merah_obj:
+                        # Jika tanggal merah, set status dan keterangan sesuai tanggal merah
+                        hari_data = {
+                            'tanggal': tanggal,
+                            'hari': tanggal.strftime('%A'),
+                            'jam_masuk': '-',
+                            'jam_pulang': '-',
+                            'status': f"Tanggal Merah: {tanggal_merah_obj.nama_acara}",
+                            'keterangan': tanggal_merah_obj.keterangan,
+                            'keterlambatan': None
+                        }
+                    else:
+                        # Jika bukan tanggal merah, proses seperti biasa
+                        absensi_masuk = record_absensi.objects.filter(
+                            user=siswa.user,
+                            checktime__date=tanggal.date(),
+                            tipe_absensi='masuk',
+                            status_verifikasi='diterima'
+                        ).first()
+                        
+                        absensi_pulang = record_absensi.objects.filter(
+                            user=siswa.user,
+                            checktime__date=tanggal.date(),
+                            tipe_absensi='pulang',
+                            status_verifikasi='diterima'
+                        ).first()
+                        
+                        # Cek ketidakhadiran (sakit/izin)
+                        ketidakhadiran = record_absensi.objects.filter(
+                            user=siswa.user,
+                            checktime__date=tanggal.date(),
+                            status__in=['sakit', 'izin'],
+                            status_verifikasi='diterima'
+                        ).first()
+
+                        # Hitung keterlambatan berdasarkan jam masuk siswa dari instalasi
+                        keterlambatan = None
+                        if absensi_masuk:
+                            keterlambatan = absensi_masuk.terlambat  # Menggunakan field terlambat langsung dari model
+
+                        hari_data = {
+                            'tanggal': tanggal,
+                            'hari': tanggal.strftime('%A'),
+                            'jam_masuk': timezone.localtime(absensi_masuk.checktime).strftime('%H:%M') if absensi_masuk else '-',
+                            'jam_pulang': timezone.localtime(absensi_pulang.checktime).strftime('%H:%M') if absensi_pulang else '-',
+                            'status': ketidakhadiran.status if ketidakhadiran else ('Hadir' if absensi_masuk else 'Tidak Hadir'),
+                            'keterlambatan': keterlambatan,
+                            'is_terlambat': keterlambatan > 0 if keterlambatan is not None else False,
+                            'keterangan': ketidakhadiran.id_sakit.keterangan if ketidakhadiran and ketidakhadiran.status == 'sakit' and ketidakhadiran.id_sakit
+                                        else ketidakhadiran.id_izin.keterangan if ketidakhadiran and ketidakhadiran.status == 'izin' and ketidakhadiran.id_izin
+                                        else f"Terlambat {keterlambatan} menit" if keterlambatan and keterlambatan > 0
+                                        else '-' if not absensi_masuk
+                                        else 'Tepat Waktu'
+                        }
                     
-                    # Cek status ketidakhadiran
-                    ketidakhadiran = record_absensi.objects.filter(
-                        user=siswa.user,
-                        checktime__date=tanggal.date(),
-                        status__in=['sakit', 'izin'],
-                        status_verifikasi='diterima'
-                    ).first()
-                    
-                    hari_data = {
-                        'tanggal': tanggal,
-                        'hari': tanggal.strftime('%A'),
-                        'jam_masuk': timezone.localtime(absensi_masuk.checktime).strftime('%H:%M') if absensi_masuk else '-',
-                        'jam_pulang': timezone.localtime(absensi_pulang.checktime).strftime('%H:%M') if absensi_pulang else '-',
-                        'status': ketidakhadiran.status if ketidakhadiran else ('Hadir' if absensi_masuk else 'Tidak Hadir'),
-                        'keterangan': ketidakhadiran.id_sakit.keterangan if ketidakhadiran and ketidakhadiran.status == 'sakit' and ketidakhadiran.id_sakit
-                                    else ketidakhadiran.id_izin.keterangan if ketidakhadiran and ketidakhadiran.status == 'izin' and ketidakhadiran.id_izin
-                                    else '-'
-                    }
                     semua_hari.append(hari_data)
                 
-                # Hitung total
+                # Hitung total keseluruhan
+                total_hari = len(semua_hari)
                 total_hadir = sum(1 for hari in semua_hari if hari['status'] == 'Hadir')
                 total_sakit = sum(1 for hari in semua_hari if hari['status'] == 'sakit')
                 total_izin = sum(1 for hari in semua_hari if hari['status'] == 'izin')
                 total_tidak_hadir = sum(1 for hari in semua_hari if hari['status'] == 'Tidak Hadir')
+                total_tanggal_merah = sum(1 for hari in semua_hari if 'Tanggal Merah' in hari['status'])
+                total_weekend = sum(1 for hari in semua_hari if hari['hari'] in ['Saturday', 'Sunday'])
+
+                # Hitung total tepat waktu dan terlambat
+                total_tepat_waktu = sum(1 for hari in semua_hari 
+                    if hari['status'] == 'Hadir' and not hari['keterlambatan'])
+                total_terlambat = sum(1 for hari in semua_hari 
+                    if hari['status'] == 'Hadir' and hari['keterlambatan'])
+                total_menit_terlambat = sum(
+                    hari['keterlambatan'] 
+                    for hari in semua_hari 
+                    if hari['status'] == 'Hadir' and hari['is_terlambat']
+                )
+
+                # Hitung untuk hari kerja (tidak termasuk tanggal merah dan weekend)
+                hari_kerja = [hari for hari in semua_hari 
+                            if 'Tanggal Merah' not in hari['status'] 
+                            and hari['hari'] not in ['Saturday', 'Sunday']]
                 
+                total_hari_kerja = len(hari_kerja)
+                total_hadir_kerja = sum(1 for hari in hari_kerja if hari['status'] == 'Hadir')
+                total_sakit_kerja = sum(1 for hari in hari_kerja if hari['status'] == 'sakit')
+                total_izin_kerja = sum(1 for hari in hari_kerja if hari['status'] == 'izin')
+                total_tidak_hadir_kerja = sum(1 for hari in hari_kerja if hari['status'] == 'Tidak Hadir')
+                
+                total_tepat_waktu_kerja = sum(1 for hari in hari_kerja 
+                    if hari['status'] == 'Hadir' and not hari['keterlambatan'])
+                total_terlambat_kerja = sum(1 for hari in hari_kerja 
+                    if hari['status'] == 'Hadir' and hari['keterlambatan'])
+                total_menit_terlambat_kerja = sum(
+                    hari['keterlambatan']
+                    for hari in hari_kerja 
+                    if hari['status'] == 'Hadir' and hari['is_terlambat']
+                )
+
                 context = {
                     'siswa': siswa,
-                    'bulan': tanggal_awal.strftime('%B %Y'),
+                    'periode': f"{tanggal_awal.strftime('%d %B %Y')} - {tanggal_akhir.strftime('%d %B %Y')}",
                     'hari_records': semua_hari,
+                    'jam_masuk_siswa': instalasi.jam_masuk_siswa.strftime('%H:%M') if instalasi.jam_masuk_siswa else '-',
+                    'jam_pulang_siswa': instalasi.jam_pulang_siswa.strftime('%H:%M') if instalasi.jam_pulang_siswa else '-',
+                    
+                    # Data sekolah
+                    'nama_sekolah': instalasi.nama_sekolah if instalasi else '',
+                    'logo_sekolah': instalasi.logo if instalasi else None,
+                    'deskripsi_sekolah': instalasi.deskripsi if instalasi else '',
+                    'alamat_sekolah': instalasi.alamat if instalasi else '',
+                    # Total keseluruhan
+                    'total_hari': total_hari,
                     'total_hadir': total_hadir,
                     'total_sakit': total_sakit,
                     'total_izin': total_izin,
                     'total_tidak_hadir': total_tidak_hadir,
-                    'tanggal_cetak': timezone.now().strftime('%d-%m-%Y %H:%M:%S')
+                    'total_tanggal_merah': total_tanggal_merah,
+                    'total_weekend': total_weekend,
+                    'total_tepat_waktu': total_tepat_waktu,
+                    'total_terlambat': total_terlambat,
+                    'total_menit_terlambat': total_menit_terlambat,
+                    # Total hari kerja
+                    'total_hari_kerja': total_hari_kerja,
+                    'total_hadir_kerja': total_hadir_kerja,
+                    'total_sakit_kerja': total_sakit_kerja,
+                    'total_izin_kerja': total_izin_kerja,
+                    'total_tidak_hadir_kerja': total_tidak_hadir_kerja,
+                    'total_tepat_waktu_kerja': total_tepat_waktu_kerja,
+                    'total_terlambat_kerja': total_terlambat_kerja,
+                    'total_menit_terlambat_kerja': total_menit_terlambat_kerja,
+                    'tanggal_cetak': timezone.localtime(timezone.now()).strftime('%d-%m-%Y %H:%M:%S')
                 }
                 
                 return render(request, 'CustomAdmin/print_absensi_siswa.html', context)
                 
             except Siswa.DoesNotExist:
                 messages.error(request, 'Siswa tidak ditemukan')
+                return redirect('admin_siswa')
+            except ValueError:
+                messages.error(request, 'Format tanggal tidak valid')
                 return redirect('admin_siswa')
             except Exception as e:
                 messages.error(request, f'Gagal mencetak record: {str(e)}')
@@ -266,9 +354,39 @@ def admin_siswa(request):
                     success_count = 0
                     error_count = 0
                     
+                    # Daftar format tanggal yang umum digunakan
+                    date_formats = [
+                        '%Y-%m-%d',           # 2024-03-21
+                        '%d-%m-%Y',           # 21-03-2024
+                        '%d/%m/%Y',           # 21/03/2024
+                        '%Y/%m/%d',           # 2024/03/21
+                        '%d-%B-%Y',           # 21-March-2024
+                        '%d %B %Y',           # 21 March 2024
+                        '%d.%m.%Y',           # 21.03.2024
+                        '%m/%d/%Y',           # 03/21/2024
+                        '%B %d, %Y',          # March 21, 2024
+                        '%d-%b-%Y',           # 21-Mar-2024
+                        '%Y%m%d',             # 20240321
+                    ]
+                    
                     for _, row in df.iterrows():
                         try:
-                            # Cek apakah username sudah ada
+                            # Konversi tanggal lahir
+                            tanggal_lahir = None
+                            tanggal_str = str(row['tanggal_lahir'])
+                            
+                            # Coba setiap format tanggal
+                            for date_format in date_formats:
+                                try:
+                                    tanggal_lahir = datetime.strptime(tanggal_str, date_format).date()
+                                    break
+                                except ValueError:
+                                    continue
+                            
+                            if tanggal_lahir is None:
+                                raise ValueError(f"Format tanggal '{tanggal_str}' tidak valid")
+                            
+                            # Proses data seperti biasa
                             username = row['username']
                             counter = 1
                             while CustomUser.objects.filter(username=username).exists():
@@ -283,17 +401,14 @@ def admin_siswa(request):
                                 is_staff=True
                             )
                             
-                            # Cek dan buat jenjang jika belum ada
                             jenjang_obj, _ = jenjang.objects.get_or_create(nama=row['jenjang'])
-                            
-                            # Cek dan buat kelas jika belum ada
                             kelas_obj, _ = kelas.objects.get_or_create(nama=row['kelas'])
                             
                             Siswa.objects.create(
                                 user=user,
                                 nisn=row['nisn'],
                                 nama=row['nama'],
-                                tanggal_lahir=row['tanggal_lahir'],
+                                tanggal_lahir=tanggal_lahir,  # Gunakan tanggal yang sudah dikonversi
                                 jenjang=jenjang_obj,
                                 kelas=kelas_obj,
                                 alamat=row['alamat'],
@@ -345,9 +460,8 @@ def admin_siswa(request):
         for student in students:
             status = student[-4]  # today_status
             status_verifikasi = student[-3]  # today_status_verifikasi
-            checktime = timezone.localtime(student[-2])  # today_checktime
+            checktime = student[-2]  # today_checktime
             tipe_absensi = student[-1]  # today_tipe_absensi
-            print(status, status_verifikasi, checktime, tipe_absensi)
             
             if status_verifikasi == 'menunggu':
                 display_status = "Belum Diverifikasi"
@@ -356,21 +470,20 @@ def admin_siswa(request):
             elif tipe_absensi == 'pulang':
                 display_status = "Sudah Pulang"
             elif status == 'hadir' and tipe_absensi == 'masuk':
-                instalasi = Instalasi.objects.first()
-                jam_masuk = instalasi.jam_masuk if instalasi.jam_masuk else None
-                jam_pulang = instalasi.jam_pulang if instalasi.jam_pulang else None
-                if checktime and jam_masuk:
-                    selisih = datetime.combine(date.min, datetime.strptime(checktime.strftime('%I:%M %p'), '%I:%M %p').time()) - datetime.combine(date.min, jam_masuk)
-                    if selisih.total_seconds() > 0:
-                        menit_terlambat = selisih.total_seconds() // 60
-                        if menit_terlambat < 60:
-                            display_status = f"Hadir, terlambat {int(menit_terlambat)} menit"
-                        else:
-                            jam_terlambat = int(menit_terlambat // 60)
-                            sisa_menit = int(menit_terlambat % 60)
-                            display_status = f"Hadir, terlambat {jam_terlambat} jam {sisa_menit} menit"
+                # Ambil record absensi untuk mendapatkan keterlambatan
+                absensi = record_absensi.objects.filter(
+                    user__siswa__id=student[0],
+                    checktime__date=today,
+                    tipe_absensi='masuk'
+                ).first()
+                
+                if absensi and absensi.terlambat > 0:
+                    if absensi.terlambat < 60:
+                        display_status = f"Hadir, terlambat {absensi.terlambat} menit"
                     else:
-                        display_status = "Hadir"
+                        jam_terlambat = int(absensi.terlambat // 60)
+                        sisa_menit = int(absensi.terlambat % 60)
+                        display_status = f"Hadir, terlambat {jam_terlambat} jam {sisa_menit} menit"
                 else:
                     display_status = "Hadir"
             else:

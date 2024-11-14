@@ -71,16 +71,18 @@ def admin_pengaturan(request):
                 return redirect('login_view')
             elif request.POST.get('nama_sekolah'):
                 try:
+                    # Ambil data dasar
                     nama_sekolah = request.POST.get('nama_sekolah')
                     deskripsi = request.POST.get('deskripsi')
                     alamat = request.POST.get('alamat')
                     logo = request.FILES.get('logo')
+                    telegram_token = request.POST.get('telegram_token')
+                    
+                    # Ambil status fitur
                     fitur_siswa = request.POST.get('fitur_siswa') == 'on'
                     fitur_guru = request.POST.get('fitur_guru') == 'on'
                     fitur_karyawan = request.POST.get('fitur_karyawan') == 'on'
-                    telegram_token = request.POST.get('telegram_token')
-                    jam_masuk = request.POST.get('jam_masuk')
-                    jam_pulang = request.POST.get('jam_pulang')
+                    
                     if instalasi:
                         instalasi.nama_sekolah = nama_sekolah
                         instalasi.deskripsi = deskripsi
@@ -93,15 +95,38 @@ def admin_pengaturan(request):
                         instalasi.fitur_karyawan = fitur_karyawan
                         instalasi.telegram_token = telegram_token
                         
-                        if jam_masuk and jam_pulang:
+                        # Update jam untuk siswa
+                        if fitur_siswa:
                             try:
-                                jam_masuk_time = datetime.strptime(jam_masuk, '%H:%M').time()
-                                jam_pulang_time = datetime.strptime(jam_pulang, '%H:%M').time()
-                                
-                                instalasi.jam_masuk = jam_masuk_time
-                                instalasi.jam_pulang = jam_pulang_time
+                                jam_masuk_siswa = request.POST.get('jam_masuk_siswa')
+                                jam_pulang_siswa = request.POST.get('jam_pulang_siswa')
+                                if jam_masuk_siswa and jam_pulang_siswa:
+                                    instalasi.jam_masuk_siswa = datetime.strptime(jam_masuk_siswa, '%H:%M').time()
+                                    instalasi.jam_pulang_siswa = datetime.strptime(jam_pulang_siswa, '%H:%M').time()
                             except ValueError:
-                                messages.error(request, 'Format jam tidak valid. Gunakan format HH:MM.')
+                                messages.error(request, 'Format jam siswa tidak valid. Gunakan format HH:MM.')
+                        
+                        # Update jam untuk guru
+                        if fitur_guru:
+                            try:
+                                jam_masuk_guru = request.POST.get('jam_masuk_guru')
+                                jam_pulang_guru = request.POST.get('jam_pulang_guru')
+                                if jam_masuk_guru and jam_pulang_guru:
+                                    instalasi.jam_masuk_guru = datetime.strptime(jam_masuk_guru, '%H:%M').time()
+                                    instalasi.jam_pulang_guru = datetime.strptime(jam_pulang_guru, '%H:%M').time()
+                            except ValueError:
+                                messages.error(request, 'Format jam guru tidak valid. Gunakan format HH:MM.')
+                        
+                        # Update jam untuk karyawan
+                        if fitur_karyawan:
+                            try:
+                                jam_masuk_karyawan = request.POST.get('jam_masuk_karyawan')
+                                jam_pulang_karyawan = request.POST.get('jam_pulang_karyawan')
+                                if jam_masuk_karyawan and jam_pulang_karyawan:
+                                    instalasi.jam_masuk_karyawan = datetime.strptime(jam_masuk_karyawan, '%H:%M').time()
+                                    instalasi.jam_pulang_karyawan = datetime.strptime(jam_pulang_karyawan, '%H:%M').time()
+                            except ValueError:
+                                messages.error(request, 'Format jam karyawan tidak valid. Gunakan format HH:MM.')
                         
                         instalasi.save()
                         messages.success(request, 'Pengaturan berhasil diperbarui.')
@@ -138,8 +163,12 @@ def admin_pengaturan(request):
             'fitur_guru': instalasi.fitur_guru,
             'fitur_karyawan': instalasi.fitur_karyawan,
             'telegram_token': instalasi.telegram_token,
-            'jam_masuk': instalasi.jam_masuk.strftime('%H:%M') if instalasi.jam_masuk else '',
-            'jam_pulang': instalasi.jam_pulang.strftime('%H:%M') if instalasi.jam_pulang else '',
+            'jam_masuk_siswa': instalasi.jam_masuk_siswa.strftime('%H:%M') if instalasi.jam_masuk_siswa else '',
+            'jam_pulang_siswa': instalasi.jam_pulang_siswa.strftime('%H:%M') if instalasi.jam_pulang_siswa else '',
+            'jam_masuk_guru': instalasi.jam_masuk_guru.strftime('%H:%M') if instalasi.jam_masuk_guru else '',
+            'jam_pulang_guru': instalasi.jam_pulang_guru.strftime('%H:%M') if instalasi.jam_pulang_guru else '',
+            'jam_masuk_karyawan': instalasi.jam_masuk_karyawan.strftime('%H:%M') if instalasi.jam_masuk_karyawan else '',
+            'jam_pulang_karyawan': instalasi.jam_pulang_karyawan.strftime('%H:%M') if instalasi.jam_pulang_karyawan else '',
         })
         return render(request, 'CustomAdmin/admin_pengaturan.html', context)
     except Exception as e:

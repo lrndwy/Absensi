@@ -37,47 +37,84 @@
                         <div class="mb-4">
                             <p class="text-sm text-gray-500 dark:text-gray-400">Pilih fitur yang akan diaktifkan</p>
                         </div>
-                        <div class="flex flex-row gap-4">
-                            <label class="inline-flex items-center cursor-pointer">
-                                <input type="checkbox" name="fitur_siswa" id="fitur_siswa" {% if instalasi.fitur_siswa %}checked{% endif
-                                    %} class="sr-only peer">
-                                <div
-                                    class="relative w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600">
+                        <div class="flex flex-col gap-4">
+                            <!-- Fitur Siswa -->
+                            <div class="flex flex-row gap-4">
+                                <label class="inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" name="fitur_siswa" id="fitur_siswa_checkbox" 
+                                           {% if instalasi.fitur_siswa %}checked{% endif %} class="sr-only peer">
+                                    <div class="relative w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                                    <span class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">Siswa</span>
+                                </label>
+                                <div id="jam_siswa" class="flex-1 {% if not instalasi.fitur_siswa %}hidden{% endif %}">
+                                    <div class="flex gap-2">
+                                        <div class="relative flex-1">
+                                            <input type="time" name="jam_masuk_siswa" value="{{ jam_masuk_siswa }}" 
+                                                   class="block rounded-t-lg px-2.5 pb-2.5 pt-5 w-full text-sm text-gray-900 bg-gray-50 dark:bg-gray-700 border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer" />
+                                            <label class="absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-4 z-10 origin-[0] start-2.5">Jam Masuk Siswa</label>
+                                        </div>
+                                        <div class="relative flex-1">
+                                            <input type="time" name="jam_pulang_siswa" value="{{ jam_pulang_siswa }}" 
+                                                   class="block rounded-t-lg px-2.5 pb-2.5 pt-5 w-full text-sm text-gray-900 bg-gray-50 dark:bg-gray-700 border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer" />
+                                            <label class="absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-4 z-10 origin-[0] start-2.5">Jam Pulang Siswa</label>
+                                        </div>
+                                    </div>
                                 </div>
-                                <span class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">Siswa</span>
-                            </label>
-                            <label class="inline-flex items-center cursor-pointer">
-                                <input type="checkbox" name="fitur_guru" {% if instalasi.fitur_guru %}checked{% endif %}
-                                    class="sr-only peer">
-                                <div
-                                    class="relative w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600">
+                            </div>
+
+                            <!-- Fitur Guru -->
+                            <div class="flex flex-row gap-4">
+                                <label class="inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" name="fitur_guru" id="fitur_guru_checkbox"
+                                           {% if instalasi.fitur_guru %}checked{% endif %} class="sr-only peer">
+                                    <div class="relative w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                                    <span class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">Guru</span>
+                                </label>
+                                <div id="jam_guru" class="flex-1 {% if not instalasi.fitur_guru %}hidden{% endif %}">
+                                    <div class="flex gap-2">
+                                        <div class="relative flex-1">
+                                            <input type="time" name="jam_masuk_guru" value="{{ jam_masuk_guru }}"
+                                                   class="block rounded-t-lg px-2.5 pb-2.5 pt-5 w-full text-sm text-gray-900 bg-gray-50 dark:bg-gray-700 border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer" />
+                                            <label class="absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-4 z-10 origin-[0] start-2.5">Jam Masuk Guru</label>
+                                        </div>
+                                        <div class="relative flex-1">
+                                            <input type="time" name="jam_pulang_guru" value="{{ jam_pulang_guru }}"
+                                                   class="block rounded-t-lg px-2.5 pb-2.5 pt-5 w-full text-sm text-gray-900 bg-gray-50 dark:bg-gray-700 border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer" />
+                                            <label class="absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-4 z-10 origin-[0] start-2.5">Jam Pulang Guru</label>
+                                        </div>
+                                    </div>
                                 </div>
-                                <span class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">Guru</span>
-                            </label>
-                            <label class="inline-flex items-center cursor-pointer">
-                                <input type="checkbox" name="fitur_karyawan" {% if instalasi.fitur_karyawan %}checked{%
-                                    endif %} class="sr-only peer">
-                                <div
-                                    class="relative w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600">
+                            </div>
+
+                            <!-- Fitur Karyawan -->
+                            <div class="flex flex-row gap-4">
+                                <label class="inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" name="fitur_karyawan" id="fitur_karyawan_checkbox"
+                                           {% if instalasi.fitur_karyawan %}checked{% endif %} class="sr-only peer">
+                                    <div class="relative w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                                    <span class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">Karyawan</span>
+                                </label>
+                                <div id="jam_karyawan" class="flex-1 {% if not instalasi.fitur_karyawan %}hidden{% endif %}">
+                                    <div class="flex gap-2">
+                                        <div class="relative flex-1">
+                                            <input type="time" name="jam_masuk_karyawan" value="{{ jam_masuk_karyawan }}"
+                                                   class="block rounded-t-lg px-2.5 pb-2.5 pt-5 w-full text-sm text-gray-900 bg-gray-50 dark:bg-gray-700 border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer" />
+                                            <label class="absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-4 z-10 origin-[0] start-2.5">Jam Masuk Karyawan</label>
+                                        </div>
+                                        <div class="relative flex-1">
+                                            <input type="time" name="jam_pulang_karyawan" value="{{ jam_pulang_karyawan }}"
+                                                   class="block rounded-t-lg px-2.5 pb-2.5 pt-5 w-full text-sm text-gray-900 bg-gray-50 dark:bg-gray-700 border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer" />
+                                            <label class="absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-4 z-10 origin-[0] start-2.5">Jam Pulang Karyawan</label>
+                                        </div>
+                                    </div>
                                 </div>
-                                <span class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">Karyawan</span>
-                            </label>
+                            </div>
                         </div>
                     </div>
                     <div class="mb-6 relative">
                         <input type="text" id="telegram_token" name="telegram_token" value="{{ instalasi.telegram_token }}" class="block rounded-t-lg px-2.5 pb-2.5 pt-5 w-full text-sm text-gray-900 bg-gray-50 dark:bg-gray-700 border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
                             placeholder=" " />
                         <label for="telegram_token" class="absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-4 z-10 origin-[0] start-2.5 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto">Telegram Token</label>
-                    </div>
-                    <div class="flex mb-6 space-x-4">
-                        <div class="w-1/2 relative">
-                            <input type="time" id="jam_masuk" name="jam_masuk" value="{{ instalasi.jam_masuk|time:'H:i' }}" class="block rounded-t-lg px-2.5 pb-2.5 pt-5 w-full text-sm text-gray-900 bg-gray-50 dark:bg-gray-700 border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " />
-                            <label for="jam_masuk" class="absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-4 z-10 origin-[0] start-2.5 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto">Jam Masuk</label>
-                        </div>
-                        <div class="w-1/2 relative">
-                            <input type="time" id="jam_pulang" name="jam_pulang" value="{{ instalasi.jam_pulang|time:'H:i' }}" class="block rounded-t-lg px-2.5 pb-2.5 pt-5 w-full text-sm text-gray-900 bg-gray-50 dark:bg-gray-700 border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " />
-                            <label for="jam_pulang" class="absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-4 z-10 origin-[0] start-2.5 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto">Jam Pulang</label>
-                        </div>
                     </div>
                     <div class="flex items-center justify-center">
                         <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-full w-full focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform">
@@ -96,6 +133,21 @@
         </div>
     </div>
 </c-dashboard>
+
+<!-- Tambahkan script untuk toggle input jam -->
+<script>
+document.getElementById('fitur_siswa_checkbox').addEventListener('change', function() {
+    document.getElementById('jam_siswa').classList.toggle('hidden', !this.checked);
+});
+
+document.getElementById('fitur_guru_checkbox').addEventListener('change', function() {
+    document.getElementById('jam_guru').classList.toggle('hidden', !this.checked);
+});
+
+document.getElementById('fitur_karyawan_checkbox').addEventListener('change', function() {
+    document.getElementById('jam_karyawan').classList.toggle('hidden', !this.checked);
+});
+</script>
 
 
 
