@@ -72,13 +72,14 @@ def karyawan_dashboard(request):
             return redirect('karyawan_dashboard')
         else:
             messages.error(request, 'Status absensi tidak valid.')
-
+    history_absensi = record_absensi.objects.filter(user=request.user).order_by('-checktime')
     status_absensi = get_karyawan_absensi_hari_ini(karyawan)
     context = get_context()
     context.update({
         'status_absensi': status_absensi['status'],
         'status_verifikasi': status_absensi['status_verifikasi'],
         'user_is_karyawan': True,
+        'history_absensi': history_absensi,
     })
     
     return render(request, 'Karyawan/karyawan_dashboard.html', context)

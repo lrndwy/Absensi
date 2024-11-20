@@ -22,7 +22,9 @@ class Karyawan(models.Model):
     
     @property
     def get_userid(self):
-        return self.userid
+        if self.user:
+            return self.user.id
+        return None
     
     @property
     def get_user(self):

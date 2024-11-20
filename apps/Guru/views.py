@@ -81,11 +81,15 @@ def guru_dashboard(request):
             
     status_absensi = get_guru_absensi_hari_ini(guru)
 
+    # Tambahkan query untuk mengambil history absensi
+    history_absensi = record_absensi.objects.filter(user=request.user).order_by('-checktime')
+
     context = get_context()
     context.update({
         'status_absensi': status_absensi['status'],
         'status_verifikasi': status_absensi['status_verifikasi'],
         'user_is_guru': True,
+        'history_absensi': history_absensi,
     })
     
     return render(request, 'Guru/guru_dashboard.html', context)

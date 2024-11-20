@@ -101,12 +101,13 @@ def siswa_dashboard(request):
             messages.error(request, 'Status absensi tidak valid.')
     
     status_absensi = get_siswa_absensi_hari_ini(siswa)
-    
+    history_absensi = record_absensi.objects.filter(user=request.user).order_by('-checktime')
     context = get_context()
     context.update({
         'status_absensi': status_absensi['status'],
         'status_verifikasi': status_absensi['status_verifikasi'],
         'user_is_siswa': True,
+        'history_absensi': history_absensi,
     })
     
     return render(request, 'Siswa/siswa_dashboard.html', context)
