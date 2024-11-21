@@ -11,7 +11,7 @@ from django.contrib import messages
 
 from apps.Karyawan.models import Karyawan
 from apps.main.instalasi import get_context
-from apps.main.models import CustomUser, Instalasi, izin, record_absensi, sakit
+from apps.main.models import CustomUser, Instalasi, izin, record_absensi, sakit, tanggal_merah
 
 import requests
 
@@ -51,6 +51,7 @@ def karyawan_required(view_func):
 @karyawan_required
 def karyawan_dashboard(request):
     karyawan = Karyawan.objects.get(user=request.user)
+    
     if request.method == 'POST':
         status_absensi = request.POST.get('status_absensi')
         keterangan = request.POST.get('keterangan')
@@ -61,25 +62,131 @@ def karyawan_dashboard(request):
             if status_absensi == 'sakit':
                 surat_sakit = request.FILES.get('surat_sakit')
                 sakit_obj = sakit.objects.create(user=request.user, keterangan=keterangan, surat_sakit=surat_sakit)
-                record_absensi.objects.create(user=request.user, status='sakit', id_sakit=sakit_obj, checktime=timezone.now(), status_verifikasi='menunggu')
-                messages.success(request, 'Absensi sakit berhasil disubmit.')
+                record = record_absensi.objects.create(user=request.user, status='sakit', id_sakit=sakit_obj, checktime=timezone.now(), status_verifikasi='menunggu')
+                messages.success(request, 'Absensi sakit berhasil dicatat.')
                 send_telegram_message(karyawan.telegram_chat_id, f"Selamat {cek_waktu()} Bapak/Ibu. Informasi bahwa {karyawan.nama} sakit pada {tanggal_absen} jam {waktu_absen}")
-            else:  # izin
+            elif status_absensi == 'izin':
                 izin_obj = izin.objects.create(user=request.user, keterangan=keterangan)
-                record_absensi.objects.create(user=request.user, status='izin', id_izin=izin_obj, checktime=timezone.now(), status_verifikasi='menunggu')
-                messages.success(request, 'Absensi izin berhasil disubmit.')
+                record = record_absensi.objects.create(user=request.user, status='izin', id_izin=izin_obj, checktime=timezone.now(), status_verifikasi='menunggu')
+                messages.success(request, 'Absensi izin berhasil dicatat.')
                 send_telegram_message(karyawan.telegram_chat_id, f"Selamat {cek_waktu()} Bapak/Ibu. Informasi bahwa {karyawan.nama} izin pada {tanggal_absen} jam {waktu_absen}")
+            
             return redirect('karyawan_dashboard')
         else:
             messages.error(request, 'Status absensi tidak valid.')
-    history_absensi = record_absensi.objects.filter(user=request.user).order_by('-checktime')
+            
     status_absensi = get_karyawan_absensi_hari_ini(karyawan)
+    
+    today = timezone.localtime(timezone.now()).date()
+    
+    # Get start and end dates from request
+    start_date = request.GET.get('start')
+    end_date = request.GET.get('end')
+
+    # If no dates provided, default to today and last 7 days
+    if not end_date:
+        end_date = today
+    else:
+        try:
+            end_date = datetime.strptime(end_date, '%m/%d/%Y').date()
+        except ValueError:
+            messages.error(request, 'Format tanggal akhir tidak valid')
+            end_date = today
+
+    if not start_date:
+        start_date = end_date - timedelta(days=6)
+    else:
+        try:
+            start_date = datetime.strptime(start_date, '%m/%d/%Y').date()
+        except ValueError:
+            messages.error(request, 'Format tanggal mulai tidak valid')
+            start_date = end_date - timedelta(days=6)
+
+    # Ensure start_date is not after end_date
+    if start_date > end_date:
+        start_date, end_date = end_date, start_date
+        messages.warning(request, 'Tanggal mulai setelah tanggal akhir, urutan dibalik otomatis')
+
+    # Limit date range to 31 days
+    max_range = 31
+    if (end_date - start_date).days > max_range:
+        messages.warning(request, f'Rentang waktu dibatasi maksimal {max_range} hari.')
+        start_date = end_date - timedelta(days=max_range)
+    
+    days_difference = (end_date - start_date).days + 1
+    
+    history_records = []
+    
+    instalasi = Instalasi.objects.first()
+    jam_masuk = instalasi.jam_masuk_karyawan if instalasi else None
+    
+    for i in range(days_difference):
+        tanggal = start_date + timedelta(days=i)
+        
+        tanggal_merah_obj = tanggal_merah.objects.filter(
+            tanggal=tanggal,
+            kategori__in=['karyawan', 'semua']
+        ).first()
+        
+        if tanggal_merah_obj:
+            hari_data = {
+                'tanggal': tanggal,
+                'hari': tanggal.strftime('%A'),
+                'jam_masuk': '-',
+                'jam_pulang': '-',
+                'status': f"Tanggal Merah: {tanggal_merah_obj.nama_acara}",
+                'keterangan': tanggal_merah_obj.keterangan,
+                'keterlambatan': None
+            }
+        else:
+            absensi_masuk = record_absensi.objects.filter(
+                user=request.user,
+                checktime__date=tanggal,
+                tipe_absensi='masuk',
+                status_verifikasi='diterima'
+            ).first()
+            
+            absensi_pulang = record_absensi.objects.filter(
+                user=request.user,
+                checktime__date=tanggal,
+                tipe_absensi='pulang',
+                status_verifikasi='diterima'
+            ).first()
+            
+            ketidakhadiran = record_absensi.objects.filter(
+                user=request.user,
+                checktime__date=tanggal,
+                status__in=['sakit', 'izin'],
+                status_verifikasi='diterima'
+            ).first()
+
+            keterlambatan = absensi_masuk.terlambat if absensi_masuk else None
+
+            hari_data = {
+                'tanggal': tanggal,
+                'hari': tanggal.strftime('%A'),
+                'jam_masuk': timezone.localtime(absensi_masuk.checktime).strftime('%H:%M') if absensi_masuk else '-',
+                'jam_pulang': timezone.localtime(absensi_pulang.checktime).strftime('%H:%M') if absensi_pulang else '-',
+                'status': ketidakhadiran.status if ketidakhadiran else ('Hadir' if absensi_masuk else 'Tidak Hadir'),
+                'keterlambatan': keterlambatan,
+                'is_terlambat': keterlambatan > 0 if keterlambatan is not None else False,
+                'keterangan': ketidakhadiran.id_sakit.keterangan if ketidakhadiran and ketidakhadiran.status == 'sakit' and ketidakhadiran.id_sakit
+                            else ketidakhadiran.id_izin.keterangan if ketidakhadiran and ketidakhadiran.status == 'izin' and ketidakhadiran.id_izin
+                            else f"Terlambat {keterlambatan} menit" if keterlambatan and keterlambatan > 0
+                            else '-' if not absensi_masuk
+                            else 'Tepat Waktu'
+            }
+        
+        history_records.append(hari_data)
+
     context = get_context()
     context.update({
         'status_absensi': status_absensi['status'],
         'status_verifikasi': status_absensi['status_verifikasi'],
         'user_is_karyawan': True,
-        'history_absensi': history_absensi,
+        'history_records': history_records,
+        'start_date': start_date.strftime('%m/%d/%Y'),
+        'end_date': end_date.strftime('%m/%d/%Y'),
     })
     
     return render(request, 'Karyawan/karyawan_dashboard.html', context)

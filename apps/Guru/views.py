@@ -56,6 +56,7 @@ def guru_required(view_func):
 @guru_required
 def guru_dashboard(request):
     guru = Guru.objects.get(user=request.user)
+    
     if request.method == 'POST':
         status_absensi = request.POST.get('status_absensi')
         keterangan = request.POST.get('keterangan')
@@ -80,16 +81,117 @@ def guru_dashboard(request):
             messages.error(request, 'Status absensi tidak valid.')
             
     status_absensi = get_guru_absensi_hari_ini(guru)
+    
+    today = timezone.localtime(timezone.now()).date()
+    
+    # Get start and end dates from request
+    start_date = request.GET.get('start')
+    end_date = request.GET.get('end')
 
-    # Tambahkan query untuk mengambil history absensi
-    history_absensi = record_absensi.objects.filter(user=request.user).order_by('-checktime')
+    # If no dates provided, default to today and last 7 days
+    if not end_date:
+        end_date = today
+    else:
+        try:
+            end_date = datetime.strptime(end_date, '%m/%d/%Y').date()
+        except ValueError:
+            messages.error(request, 'Format tanggal akhir tidak valid')
+            end_date = today
+
+    if not start_date:
+        start_date = end_date - timedelta(days=6)
+    else:
+        try:
+            start_date = datetime.strptime(start_date, '%m/%d/%Y').date()
+        except ValueError:
+            messages.error(request, 'Format tanggal mulai tidak valid')
+            start_date = end_date - timedelta(days=6)
+
+    # Ensure start_date is not after end_date
+    if start_date > end_date:
+        start_date, end_date = end_date, start_date
+        messages.warning(request, 'Tanggal mulai setelah tanggal akhir, urutan dibalik otomatis')
+
+    # Limit date range to 31 days
+    max_range = 31
+    if (end_date - start_date).days > max_range:
+        messages.warning(request, f'Rentang waktu dibatasi maksimal {max_range} hari.')
+        start_date = end_date - timedelta(days=max_range)
+    
+    days_difference = (end_date - start_date).days + 1
+    
+    history_records = []
+    
+    instalasi = Instalasi.objects.first()
+    jam_masuk = instalasi.jam_masuk_guru if instalasi else None
+    
+    for i in range(days_difference):
+        tanggal = start_date + timedelta(days=i)
+        
+        tanggal_merah_obj = tanggal_merah.objects.filter(
+            tanggal=tanggal,
+            kategori__in=['guru', 'semua']
+        ).first()
+        
+        if tanggal_merah_obj:
+            hari_data = {
+                'tanggal': tanggal,
+                'hari': tanggal.strftime('%A'),
+                'jam_masuk': '-',
+                'jam_pulang': '-',
+                'status': f"Tanggal Merah: {tanggal_merah_obj.nama_acara}",
+                'keterangan': tanggal_merah_obj.keterangan,
+                'keterlambatan': None
+            }
+        else:
+            absensi_masuk = record_absensi.objects.filter(
+                user=request.user,
+                checktime__date=tanggal,
+                tipe_absensi='masuk',
+                status_verifikasi='diterima'
+            ).first()
+            
+            absensi_pulang = record_absensi.objects.filter(
+                user=request.user,
+                checktime__date=tanggal,
+                tipe_absensi='pulang',
+                status_verifikasi='diterima'
+            ).first()
+            
+            ketidakhadiran = record_absensi.objects.filter(
+                user=request.user,
+                checktime__date=tanggal,
+                status__in=['sakit', 'izin'],
+                status_verifikasi='diterima'
+            ).first()
+
+            keterlambatan = absensi_masuk.terlambat if absensi_masuk else None
+
+            hari_data = {
+                'tanggal': tanggal,
+                'hari': tanggal.strftime('%A'),
+                'jam_masuk': timezone.localtime(absensi_masuk.checktime).strftime('%H:%M') if absensi_masuk else '-',
+                'jam_pulang': timezone.localtime(absensi_pulang.checktime).strftime('%H:%M') if absensi_pulang else '-',
+                'status': ketidakhadiran.status if ketidakhadiran else ('Hadir' if absensi_masuk else 'Tidak Hadir'),
+                'keterlambatan': keterlambatan,
+                'is_terlambat': keterlambatan > 0 if keterlambatan is not None else False,
+                'keterangan': ketidakhadiran.id_sakit.keterangan if ketidakhadiran and ketidakhadiran.status == 'sakit' and ketidakhadiran.id_sakit
+                            else ketidakhadiran.id_izin.keterangan if ketidakhadiran and ketidakhadiran.status == 'izin' and ketidakhadiran.id_izin
+                            else f"Terlambat {keterlambatan} menit" if keterlambatan and keterlambatan > 0
+                            else '-' if not absensi_masuk
+                            else 'Tepat Waktu'
+            }
+        
+        history_records.append(hari_data)
 
     context = get_context()
     context.update({
         'status_absensi': status_absensi['status'],
         'status_verifikasi': status_absensi['status_verifikasi'],
         'user_is_guru': True,
-        'history_absensi': history_absensi,
+        'history_records': history_records,
+        'start_date': start_date.strftime('%m/%d/%Y'),
+        'end_date': end_date.strftime('%m/%d/%Y'),
     })
     
     return render(request, 'Guru/guru_dashboard.html', context)
