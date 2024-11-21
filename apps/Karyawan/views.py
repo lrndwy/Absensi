@@ -109,10 +109,10 @@ def karyawan_statistik(request):
     
     total_all = total_hari
     
-    hadir_percentage = round((total_hadir / total_all) * 100, 2) if total_all > 0 else 0
-    sakit_percentage = round((total_sakit / total_all) * 100, 2) if total_all > 0 else 0
-    izin_percentage = round((total_izin / total_all) * 100, 2) if total_all > 0 else 0
-    tanpa_keterangan_percentage = round((total_tanpa_keterangan / total_all) * 100, 2) if total_all > 0 else 0
+    hadir_percentage = total_hadir if total_all > 0 else 0
+    sakit_percentage = total_sakit if total_all > 0 else 0
+    izin_percentage = total_izin if total_all > 0 else 0
+    tanpa_keterangan_percentage = total_tanpa_keterangan if total_all > 0 else 0
     
     context = get_context()
     context.update({
@@ -135,6 +135,7 @@ def karyawan_statistik(request):
         'start_date': start_date,
         'end_date': end_date,
         'user_is_karyawan': True,
+        'statistik_user': True
     })
     
     messages.info(request, f'Menampilkan statistik absensi dari {start_date.strftime("%d %B %Y")} sampai {end_date.strftime("%d %B %Y")}.')

@@ -36,6 +36,13 @@
     </div>
 </div>
 
+{% if statistik_user %}
+  <input type="hidden" id="statistik_user" value=" Kali">
+{% else %}
+  <input type="hidden" id="statistik_user" value=" Orang">
+{% endif %}
+  
+
 <script src="{% static 'dist/apexcharts.js' %}"></script>
 
 <script>
@@ -77,14 +84,14 @@
             yaxis: {
                 labels: {
                     formatter: function(value) {
-                        return value + " Orang"
+                        return value + " " + document.getElementById("statistik_user").value
                     },
                 },
             },
             xaxis: {
                 labels: {
                     formatter: function(value) {
-                        return value + " Orang"
+                        return value + " " + document.getElementById("statistik_user").value
                     },
                 },
                 axisTicks: {
