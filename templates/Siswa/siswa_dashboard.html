@@ -90,9 +90,9 @@
                                 </div>
                                 <input id="datepicker-range-start" name="start" type="text" 
                                     class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" 
-                                    placeholder="Pilih tanggal mulai">
+                                    placeholder="Tanggal mulai">
                             </div>
-                            <span class="mx-4 text-gray-500 dark:text-gray-400">sampai</span>
+                            <span class="mx-4 text-gray-500 dark:text-gray-400">-</span>
                             <div class="relative">
                                 <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
                                     <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
@@ -101,71 +101,64 @@
                                 </div>
                                 <input id="datepicker-range-end" name="end" type="text"
                                     class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" 
-                                    placeholder="Pilih tanggal akhir">
+                                    placeholder="Tanggal akhir">
                             </div>
                         </div>
                         <button class="px-4 py-2 bg-blue-500 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-800" type="submit">
                             Filter
                         </button>
-                        </form>
+                      </form>
                     </div>
                 </div>
-                {% if start_date and end_date %}
-                <h3 class="text-md font-medium text-gray-500 dark:text-gray-300 mb-2">Riwayat absensi dari {{ start_date }} sampai {{ end_date }}</h3>
-                {% else %}
-                <h3 class="text-md font-medium text-gray-500 dark:text-gray-300 mb-2">Riwayat absensi 7 hari terakhir</h3>
-                {% endif %}
-                <!-- Existing table code -->
                 <div class="overflow-x-auto rounded-lg border">
-                  
                     <table class="w-full divide-y divide-gray-200 dark:divide-gray-700">
                         <thead class="bg-gray-50 dark:bg-gray-700">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Hari</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Tanggal</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Jam Masuk</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Jam Pulang</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Keterangan</th>
+                                <th class="px-2 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Hari</th>
+                                <th class="px-2 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Tanggal</th>
+                                <th class="px-2 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Jam Masuk</th>
+                                <th class="px-2 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Jam Pulang</th>
+                                <th class="px-2 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
+                                <th class="px-2 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Keterangan</th>
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
                             {% for record in history_records %}
                             <tr class="{% if record.hari == 'Saturday' or record.hari == 'Sunday' %}
-                                    bg-yellow-50 dark:bg-yellow-900/20
-                                    hover:bg-yellow-100 dark:hover:bg-yellow-900/30
+                                    bg-yellow-50 dark:bg-yellow-900
+                                    hover:bg-yellow-100 dark:hover:bg-yellow-900
                                 {% elif 'Tanggal Merah' in record.status %}
-                                    bg-red-50 dark:bg-red-900/20
-                                    hover:bg-red-100 dark:hover:bg-red-900/30
+                                    bg-red-50 dark:bg-red-900
+                                    hover:bg-red-100 dark:hover:bg-red-900
                                 {% else %}
                                     hover:bg-gray-50 dark:hover:bg-gray-600
                                 {% endif %}">
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300
+                                <td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300
                                     {% if record.hari == 'Saturday' or record.hari == 'Sunday' %}
                                         text-yellow-600 dark:text-yellow-400 font-medium
                                     {% endif %}">
                                     {{ record.hari }}
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
+                                <td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
                                     {{ record.tanggal|date:"d/m/Y" }}
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
+                                <td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
                                     {{ record.jam_masuk }}
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
+                                <td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
                                     {{ record.jam_pulang }}
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
+                                <td class="px-2 py-4 whitespace-nowrap">
                                     <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                        {% if record.status == 'Hadir' %}bg-green-100 text-green-800
-                                        {% elif record.status == 'sakit' %}bg-yellow-100 text-yellow-800
-                                        {% elif record.status == 'izin' %}bg-blue-100 text-blue-800
+                                        {% if record.status == 'Hadir' %}bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-400
+                                        {% elif record.status == 'sakit' %}bg-yellow-100 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-400
+                                        {% elif record.status == 'izin' %}bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-400
                                         {% elif 'Tanggal Merah' in record.status %}text-red-600 dark:text-red-400
-                                        {% else %}bg-red-100 text-red-800{% endif %}">
+                                        {% else %}bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-400{% endif %}">
                                         {{ record.status }}
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm
+                                <td class="px-2 py-4 whitespace-nowrap text-sm
                                     {% if 'Tanggal Merah' in record.status %}
                                         text-red-600 dark:text-red-400 italic
                                     {% elif record.is_terlambat %}
@@ -178,7 +171,7 @@
                             </tr>
                             {% empty %}
                             <tr>
-                                <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-300">
+                                <td colspan="6" class="px-2 py-4 text-center text-sm text-gray-500 dark:text-gray-300">
                                     Belum ada riwayat absensi
                                 </td>
                             </tr>
