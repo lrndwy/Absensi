@@ -161,7 +161,8 @@ def siswa_dashboard(request):
                 'jam_pulang': '-',
                 'status': f"Tanggal Merah: {tanggal_merah_obj.nama_acara}",
                 'keterangan': tanggal_merah_obj.keterangan,
-                'keterlambatan': None
+                'keterlambatan': None,
+                'username': request.user.username
             }
         else:
             absensi_masuk = record_absensi.objects.filter(
@@ -195,6 +196,7 @@ def siswa_dashboard(request):
                 'status': ketidakhadiran.status if ketidakhadiran else ('Hadir' if absensi_masuk else 'Tidak Hadir'),
                 'keterlambatan': keterlambatan,
                 'is_terlambat': keterlambatan > 0 if keterlambatan is not None else False,
+                'username': request.user.username,
                 'keterangan': ketidakhadiran.id_sakit.keterangan if ketidakhadiran and ketidakhadiran.status == 'sakit' and ketidakhadiran.id_sakit
                             else ketidakhadiran.id_izin.keterangan if ketidakhadiran and ketidakhadiran.status == 'izin' and ketidakhadiran.id_izin
                             else f"Terlambat {keterlambatan} menit" if keterlambatan and keterlambatan > 0

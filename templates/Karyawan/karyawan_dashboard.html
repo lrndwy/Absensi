@@ -74,113 +74,118 @@
                     }
                 </script>
             </div>
-            <div class="flex flex-col gap-4 p-4 bg-white rounded-md shadow dark:bg-gray-800">
-                <div class="flex flex-wrap items-center justify-between pb-4 gap-2">
-                    <h2 class="text-xl font-bold text-gray-700 dark:text-gray-300">Riwayat Absensi</h2>
-                    
-                    <!-- Filter Tanggal -->
-                    <div class="flex items-center gap-4">
-                      <form action="" class="flex items-center gap-2">
-                        <div id="date-range-picker" date-rangepicker class="flex items-center">
-                            <div class="relative">
-                                <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
-                                    <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                                        <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"/>
-                                    </svg>
-                                </div>
-                                <input id="datepicker-range-start" name="start" type="text" 
-                                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" 
-                                    placeholder="Tanggal mulai">
-                            </div>
-                            <span class="mx-4 text-gray-500 dark:text-gray-400">-</span>
-                            <div class="relative">
-                                <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
-                                    <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                                        <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"/>
-                                    </svg>
-                                </div>
-                                <input id="datepicker-range-end" name="end" type="text"
-                                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" 
-                                    placeholder="Tanggal akhir">
-                            </div>
-                        </div>
-                        <button class="px-4 py-2 bg-blue-500 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-800" type="submit">
-                            Filter
-                        </button>
-                        </form>
-                    </div>
-                </div>
-                <div class="overflow-x-auto rounded-lg border">
-                    <table class="w-full divide-y divide-gray-200 dark:divide-gray-700">
-                        <thead class="bg-gray-50 dark:bg-gray-700">
-                            <tr>
-                                <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Hari</th>
-                                <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Tanggal</th>
-                                <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Jam Masuk</th>
-                                <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Jam Pulang</th>
-                                <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
-                                <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Keterangan</th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
-                            {% for record in history_records %}
-                            <tr class="{% if record.hari == 'Saturday' or record.hari == 'Sunday' %}
-                                    bg-yellow-50 dark:bg-yellow-900
-                                    hover:bg-yellow-100 dark:hover:bg-yellow-900
-                                {% elif 'Tanggal Merah' in record.status %}
-                                    bg-red-50 dark:bg-red-900
-                                    hover:bg-red-100 dark:hover:bg-red-900
-                                {% else %}
-                                    hover:bg-gray-50 dark:hover:bg-gray-600
-                                {% endif %}">
-                                <td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300
-                                    {% if record.hari == 'Saturday' or record.hari == 'Sunday' %}
-                                        text-yellow-600 dark:text-yellow-400 font-medium
-                                    {% endif %}">
-                                    {{ record.hari }}
-                                </td>
-                                <td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-                                    {{ record.tanggal|date:"d/m/Y" }}
-                                </td>
-                                <td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-                                    {{ record.jam_masuk }}
-                                </td>
-                                <td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-                                    {{ record.jam_pulang }}
-                                </td>
-                                <td class="px-2 py-4 whitespace-nowrap">
-                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                        {% if record.status == 'Hadir' %}bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-400
-                                        {% elif record.status == 'sakit' %}bg-yellow-100 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-400
-                                        {% elif record.status == 'izin' %}bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-400
-                                        {% elif 'Tanggal Merah' in record.status %}text-red-600 dark:text-red-400
-                                        {% else %}bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-400{% endif %}">
-                                        {{ record.status }}
-                                    </span>
-                                </td>
-                                <td class="px-2 py-4 whitespace-nowrap text-sm
-                                    {% if 'Tanggal Merah' in record.status %}
-                                        text-red-600 dark:text-red-400 italic
-                                    {% elif record.is_terlambat %}
-                                        text-orange-500 dark:text-orange-400
-                                    {% else %}
-                                        text-gray-500 dark:text-gray-300
-                                    {% endif %}">
-                                    {{ record.keterangan }}
-                                </td>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="6" class="px-2 py-4 text-center text-sm text-gray-500 dark:text-gray-300">
-                                    Belum ada riwayat absensi
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+            
         {% endif %}
+        <div class="flex flex-col gap-4 p-4 bg-white rounded-md shadow dark:bg-gray-800">
+          <div class="flex flex-wrap items-center justify-between pb-4 gap-2">
+              <h2 class="text-xl font-bold text-gray-700 dark:text-gray-300">Riwayat Absensi</h2>
+              
+              <!-- Filter Tanggal -->
+              <div class="flex items-center gap-4">
+                <form action="" class="flex items-center gap-2">
+                  <div id="date-range-picker" date-rangepicker class="flex items-center">
+                      <div class="relative">
+                          <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                              <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                                  <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"/>
+                              </svg>
+                          </div>
+                          <input id="datepicker-range-start" name="start" type="text" 
+                              class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" 
+                              placeholder="Tanggal mulai">
+                      </div>
+                      <span class="mx-4 text-gray-500 dark:text-gray-400">-</span>
+                      <div class="relative">
+                          <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                              <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                                  <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"/>
+                              </svg>
+                          </div>
+                          <input id="datepicker-range-end" name="end" type="text"
+                              class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" 
+                              placeholder="Tanggal akhir">
+                      </div>
+                  </div>
+                  <button class="px-4 py-2 bg-blue-500 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-800" type="submit">
+                      Filter
+                  </button>
+                  </form>
+              </div>
+          </div>
+          <div class="overflow-x-auto rounded-lg border">
+              <table class="w-full divide-y divide-gray-200 dark:divide-gray-700">
+                  <thead class="bg-gray-50 dark:bg-gray-700">
+                      <tr>
+                          <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Hari</th>
+                          <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Tanggal</th>
+                          <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Username</th>
+                          <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Jam Masuk</th>
+                          <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Jam Pulang</th>
+                          <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
+                          <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Keterangan</th>
+                      </tr>
+                  </thead>
+                  <tbody class="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
+                      {% for record in history_records %}
+                      <tr class="{% if record.hari == 'Saturday' or record.hari == 'Sunday' %}
+                              bg-yellow-50 dark:bg-yellow-900
+                              hover:bg-yellow-100 dark:hover:bg-yellow-900
+                          {% elif 'Tanggal Merah' in record.status %}
+                              bg-red-50 dark:bg-red-900
+                              hover:bg-red-100 dark:hover:bg-red-900
+                          {% else %}
+                              hover:bg-gray-50 dark:hover:bg-gray-600
+                          {% endif %}">
+                          <td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300
+                              {% if record.hari == 'Saturday' or record.hari == 'Sunday' %}
+                                  text-yellow-600 dark:text-yellow-400 font-medium
+                              {% endif %}">
+                              {{ record.hari }}
+                          </td>
+                          <td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
+                              {{ record.tanggal|date:"d/m/Y" }}
+                          </td>
+                          <td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
+                              {{ record.username }}
+                          </td>
+                          <td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
+                              {{ record.jam_masuk }}
+                          </td>
+                          <td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
+                              {{ record.jam_pulang }}
+                          </td>
+                          <td class="px-2 py-4 whitespace-nowrap">
+                              <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                  {% if record.status == 'Hadir' %}bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-400
+                                  {% elif record.status == 'sakit' %}bg-yellow-100 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-400
+                                  {% elif record.status == 'izin' %}bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-400
+                                  {% elif 'Tanggal Merah' in record.status %}text-red-600 dark:text-red-400
+                                  {% else %}bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-400{% endif %}">
+                                  {{ record.status }}
+                              </span>
+                          </td>
+                          <td class="px-2 py-4 whitespace-nowrap text-sm
+                              {% if 'Tanggal Merah' in record.status %}
+                                  text-red-600 dark:text-red-400 italic
+                              {% elif record.is_terlambat %}
+                                  text-orange-500 dark:text-orange-400
+                              {% else %}
+                                  text-gray-500 dark:text-gray-300
+                              {% endif %}">
+                              {{ record.keterangan }}
+                          </td>
+                      </tr>
+                      {% empty %}
+                      <tr>
+                          <td colspan="6" class="px-2 py-4 text-center text-sm text-gray-500 dark:text-gray-300">
+                              Belum ada riwayat absensi
+                          </td>
+                      </tr>
+                      {% endfor %}
+                  </tbody>
+              </table>
+          </div>
+      </div>
     </div>
 </c-dashboard>
 {% endblock %}
