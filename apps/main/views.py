@@ -54,6 +54,18 @@ def login_view(request):
                 return redirect('karyawan_dashboard')
         else:
             messages.error(request, 'Username atau password salah.')
+            
+    cek_user = request.user
+    if cek_user.is_authenticated:
+        if cek_user.is_superuser:
+            return redirect('admin_dashboard')
+        elif Siswa.objects.filter(user=cek_user).exists():
+            return redirect('siswa_dashboard')
+        elif Guru.objects.filter(user=cek_user).exists():
+            return redirect('guru_dashboard')
+        elif Karyawan.objects.filter(user=cek_user).exists():
+            return redirect('karyawan_dashboard')
+          
     context = get_context()
     return render(request, 'main/auth/login.html', context)
 
@@ -206,6 +218,11 @@ def webhook_kehadiran(request):
                 user=user,
                 checktime__date=today
             )
+            
+            # Tambahkan pengecekan status sakit atau izin
+            if absensi_tanggal_ini.filter(status__in=['sakit', 'izin']).exists():
+                continue
+                
             absen_masuk = absensi_tanggal_ini.filter(tipe_absensi='masuk').first()
             absen_pulang = absensi_tanggal_ini.filter(tipe_absensi='pulang').first()
             
