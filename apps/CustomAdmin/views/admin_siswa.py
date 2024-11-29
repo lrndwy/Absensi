@@ -81,8 +81,7 @@ def admin_siswa(request):
                     if tanggal_merah_obj:
                         # Jika tanggal merah, set status dan keterangan sesuai tanggal merah
                         hari_data = {
-                            'tanggal': tanggal,
-                            'hari': tanggal.strftime('%A'),
+                            'tanggal': f"{tanggal.strftime('%A')}, {tanggal.strftime('%d %B %Y')}",
                             'jam_masuk': '-',
                             'jam_pulang': '-',
                             'status': f"Tanggal Merah: {tanggal_merah_obj.nama_acara}",
@@ -119,8 +118,7 @@ def admin_siswa(request):
                             keterlambatan = absensi_masuk.terlambat  # Menggunakan field terlambat langsung dari model
 
                         hari_data = {
-                            'tanggal': tanggal,
-                            'hari': tanggal.strftime('%A'),
+                            'tanggal': f"{tanggal.strftime('%A')}, {tanggal.strftime('%d %B %Y')}",
                             'jam_masuk': timezone.localtime(absensi_masuk.checktime).strftime('%H:%M') if absensi_masuk else '-',
                             'jam_pulang': timezone.localtime(absensi_pulang.checktime).strftime('%H:%M') if absensi_pulang else '-',
                             'status': ketidakhadiran.status if ketidakhadiran else ('Hadir' if absensi_masuk else 'Tidak Hadir'),
@@ -142,7 +140,7 @@ def admin_siswa(request):
                 total_izin = sum(1 for hari in semua_hari if hari['status'] == 'izin')
                 total_tidak_hadir = sum(1 for hari in semua_hari if hari['status'] == 'Tidak Hadir')
                 total_tanggal_merah = sum(1 for hari in semua_hari if 'Tanggal Merah' in hari['status'])
-                total_weekend = sum(1 for hari in semua_hari if hari['hari'] in ['Saturday', 'Sunday'])
+                total_weekend = sum(1 for hari in semua_hari if 'Saturday' in hari['tanggal'] or 'Sunday' in hari['tanggal'])
 
                 # Hitung total tepat waktu dan terlambat
                 total_tepat_waktu = sum(1 for hari in semua_hari 
@@ -158,7 +156,7 @@ def admin_siswa(request):
                 # Hitung untuk hari kerja (tidak termasuk tanggal merah dan weekend)
                 hari_kerja = [hari for hari in semua_hari 
                             if 'Tanggal Merah' not in hari['status'] 
-                            and hari['hari'] not in ['Saturday', 'Sunday']]
+                            and not ('Saturday' in hari['tanggal'] or 'Sunday' in hari['tanggal'])]
                 
                 total_hari_kerja = len(hari_kerja)
                 total_hadir_kerja = sum(1 for hari in hari_kerja if hari['status'] == 'Hadir')
@@ -222,7 +220,6 @@ def admin_siswa(request):
             except Exception as e:
                 messages.error(request, f'Gagal mencetak record: {str(e)}')
                 return redirect('admin_siswa')
-      
         if request.method == 'POST':
             action = request.POST.get('action')
             if action == 'tambah':

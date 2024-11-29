@@ -42,7 +42,6 @@
             <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                 <tr>
                     <th scope="col" class="py-3 px-6">No</th>
-                    <th scope="col" class="py-3 px-6">Hari</th>
                     <th scope="col" class="py-3 px-6">Tanggal</th>
                     <th scope="col" class="py-3 px-6">Jam Masuk</th>
                     <th scope="col" class="py-3 px-6">Jam Pulang</th>
@@ -53,7 +52,7 @@
             <tbody>
                 {% for record in hari_records %}
                 <tr class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600
-                    {% if record.hari == 'Saturday' or record.hari == 'Sunday' %}
+                    {% if 'Saturday' in record.tanggal or 'Sunday' in record.tanggal %}
                         bg-yellow-50 dark:bg-yellow-900/20
                         hover:bg-yellow-100 dark:hover:bg-yellow-900/30
                     {% elif 'Tanggal Merah' in record.status %}
@@ -64,12 +63,11 @@
                     {% endif %}">
                     <td class="py-4 px-6">{{ forloop.counter }}</td>
                     <td class="py-4 px-6 
-                        {% if record.hari == 'Saturday' or record.hari == 'Sunday' %}
+                        {% if 'Saturday' in record.tanggal or 'Sunday' in record.tanggal %}
                             text-yellow-600 dark:text-yellow-400 font-medium
                         {% endif %}">
-                        {{ record.hari }}
+                        {{ record.tanggal }}
                     </td>
-                    <td class="py-4 px-6">{{ record.tanggal|date:"d/m/Y" }}</td>
                     <td class="py-4 px-6">{{ record.jam_masuk }}</td>
                     <td class="py-4 px-6">{{ record.jam_pulang }}</td>
                     <td class="py-4 px-6 font-medium
