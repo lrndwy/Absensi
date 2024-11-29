@@ -8,6 +8,44 @@
     <title>Record Absensi {{ karyawan.nama }}</title>
     <link href="{% static 'src/output.css' %}" rel="stylesheet" />
     <link href="{% static 'dist/flowbite.min.css' %}" rel="stylesheet" />
+    <style>
+        @media print {
+            table td, table th {
+                padding-top: 0.3rem !important;
+                padding-bottom: 0.3rem !important;
+                padding-left: 0.5rem !important;
+                padding-right: 0.5rem !important;
+                font-size: 0.65rem !important;
+            }
+            .text-3xl {
+                font-size: 1.25rem !important;
+            }
+            .text-2xl {
+                font-size: 1rem !important;
+            }
+            .text-xl {
+                font-size: 0.875rem !important;
+            }
+            .text-sm {
+                font-size: 0.6rem !important;
+            }
+            p {
+                font-size: 0.7rem !important;
+            }
+            .overflow-x-auto {
+                margin: 0 -2rem;
+            }
+            table {
+                width: 100vw !important;
+            }
+            body {
+                padding: 2rem !important;
+            }
+            .no-print {
+                display: none !important;
+            }
+        }
+    </style>
 </head>
 <body class="bg-white dark:bg-gray-800 p-8">
     <div class="">
@@ -162,11 +200,11 @@
 
     <div class="flex justify-between items-center mt-8">
         <p class="text-gray-600 dark:text-gray-400">Dicetak pada: {{ tanggal_cetak }}</p>
-        <div>
-            <button onclick="window.print()" class="px-4 py-2 bg-blue-500 text-white text-base font-medium rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300">
+        <div class="no-print">
+            <button onclick="window.print()" class="px-4 py-2 bg-blue-500 text-white text-base font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300">
                 Cetak
             </button>
-            <button onclick="window.history.back()" class="px-4 py-2 bg-gray-500 text-white text-base font-medium rounded-md shadow-sm hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-300 ml-2">
+            <button onclick="window.history.back()" class="px-4 py-2 bg-gray-500 text-white text-base font-medium rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-300 ml-2">
                 Kembali
             </button>
         </div>
