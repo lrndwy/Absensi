@@ -120,6 +120,7 @@ class record_absensi(models.Model):
     status_verifikasi = models.CharField(max_length=20, choices=[('menunggu', 'Menunggu'), ('diterima', 'Diterima'), ('ditolak', 'Ditolak')], default='menunggu')
     tipe_absensi = models.CharField(max_length=20, choices=[('masuk', 'Masuk'), ('pulang', 'Pulang'), ('sakit', 'Sakit'), ('izin', 'Izin')], null=True, blank=True)
     terlambat = models.PositiveIntegerField(default=0)
+    mesin = models.CharField(max_length=255, null=True, blank=True)
     
     def save(self, *args, **kwargs):
         from django.utils import timezone

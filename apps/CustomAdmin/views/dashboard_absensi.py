@@ -345,7 +345,7 @@ def admin_dashboard(request):
             'day_ago': (end_date - start_date).days + 1,
             
             # Table data (updated)
-            'table_columns': ['id records', 'userid', 'Username', 'Nama', 'Checktime', 'Status', 'Tipe Absensi', 'Terlambat (menit)'],
+            'table_columns': ['id records', 'userid', 'Username', 'Nama', 'Checktime', 'Status', 'Tipe Absensi', 'Terlambat (menit)', 'Mesin'],
             'table_data': absensi_records.annotate(
                 nama=Coalesce(
                     'user__siswa__nama',
@@ -353,7 +353,7 @@ def admin_dashboard(request):
                     'user__karyawan__nama',
                     'user__first_name'
                 ),
-            ).values_list('id', 'user__userid', 'user__username', 'nama', 'checktime', 'status', 'tipe_absensi', 'terlambat'),
+            ).values_list('id', 'user__userid', 'user__username', 'nama', 'checktime', 'status', 'tipe_absensi', 'terlambat', 'mesin'),
             
             'start_date': start_date.strftime('%m/%d/%Y'),
             'end_date': end_date.strftime('%m/%d/%Y'),

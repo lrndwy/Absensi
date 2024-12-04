@@ -343,7 +343,7 @@ def admin_dashboard_absensi_siswa(request):
             'day_ago': (end_date - start_date).days + 1,
             
             # Table data
-            'table_columns': ['ID RECORD', 'NISN', 'Nama Siswa', 'Jenjang', 'Kelas', 'Checktime', 'Status', 'Tipe Absensi', 'Terlambat (menit)'],
+            'table_columns': ['ID RECORD', 'NISN', 'Nama Siswa', 'Jenjang', 'Kelas', 'Checktime', 'Status', 'Tipe Absensi', 'Terlambat (menit)', 'Mesin'],
             'table_data': absensi_records.values_list(
                 'id',
                 'user__siswa__nisn',
@@ -353,7 +353,8 @@ def admin_dashboard_absensi_siswa(request):
                 'checktime',
                 'status',
                 'tipe_absensi',
-                'terlambat'
+                'terlambat',
+                'mesin'
             ),
             
             'start_date': start_date.strftime('%m/%d/%Y'),

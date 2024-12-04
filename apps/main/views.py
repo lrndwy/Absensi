@@ -187,6 +187,9 @@ def webhook_kehadiran(request):
             today = tanggal.date()
             waktu = tanggal.time()
             
+            # Ambil data mesin dari item
+            mesin = item.get('mesin', '')  # Default ke string kosong jika tidak ada
+            
             user = CustomUser.objects.filter(userid=pin).first()
             if not user:
                 continue
@@ -255,7 +258,8 @@ def webhook_kehadiran(request):
                     status='hadir',
                     status_verifikasi='diterima',
                     tipe_absensi=tipe_absensi,
-                    terlambat=terlambat
+                    terlambat=terlambat,
+                    mesin=mesin  # Simpan data mesin
                 )
                 new_records.append(new_record)
                 
@@ -275,7 +279,8 @@ def webhook_kehadiran(request):
                     status='hadir',
                     status_verifikasi='diterima',
                     tipe_absensi=tipe_absensi,
-                    terlambat=0
+                    terlambat=0,
+                    mesin=mesin  # Simpan data mesin
                 )
                 new_records.append(new_record)
                 
