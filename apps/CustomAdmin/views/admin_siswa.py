@@ -83,10 +83,13 @@ def admin_siswa(request):
                         hari_data = {
                             'tanggal': f"{tanggal.strftime('%A')}, {tanggal.strftime('%d %B %Y')}",
                             'jam_masuk': '-',
+                            'mesin_masuk': '-',
                             'jam_pulang': '-',
+                            'mesin_pulang': '-',
                             'status': f"Tanggal Merah: {tanggal_merah_obj.nama_acara}",
                             'keterangan': tanggal_merah_obj.keterangan,
-                            'keterlambatan': None
+                            'keterlambatan': None,
+                            'is_terlambat': False
                         }
                     else:
                         # Jika bukan tanggal merah, proses seperti biasa
@@ -120,7 +123,9 @@ def admin_siswa(request):
                         hari_data = {
                             'tanggal': f"{tanggal.strftime('%A')}, {tanggal.strftime('%d %B %Y')}",
                             'jam_masuk': timezone.localtime(absensi_masuk.checktime).strftime('%H:%M') if absensi_masuk else '-',
+                            'mesin_masuk': absensi_masuk.mesin if absensi_masuk else '-',
                             'jam_pulang': timezone.localtime(absensi_pulang.checktime).strftime('%H:%M') if absensi_pulang else '-',
+                            'mesin_pulang': absensi_pulang.mesin if absensi_pulang else '-',
                             'status': ketidakhadiran.status if ketidakhadiran else ('Hadir' if absensi_masuk else 'Tidak Hadir'),
                             'keterlambatan': keterlambatan,
                             'is_terlambat': keterlambatan > 0 if keterlambatan is not None else False,

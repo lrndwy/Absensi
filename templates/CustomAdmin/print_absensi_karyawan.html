@@ -81,7 +81,9 @@
                     <th scope="col" class="py-3 px-6">No</th>
                     <th scope="col" class="py-3 px-6">Tanggal</th>
                     <th scope="col" class="py-3 px-6">Jam Masuk</th>
+                    <th scope="col" class="py-3 px-6">Mesin Masuk</th>
                     <th scope="col" class="py-3 px-6">Jam Pulang</th>
+                    <th scope="col" class="py-3 px-6">Mesin Pulang</th>
                     <th scope="col" class="py-3 px-6">Status</th>
                     <th scope="col" class="py-3 px-6">Keterangan</th>
                 </tr>
@@ -106,7 +108,9 @@
                         {{ record.tanggal }}
                     </td>
                     <td class="py-4 px-6">{{ record.jam_masuk }}</td>
+                    <td class="py-4 px-6">{{ record.mesin_masuk|default:'-' }}</td>
                     <td class="py-4 px-6">{{ record.jam_pulang }}</td>
+                    <td class="py-4 px-6">{{ record.mesin_pulang|default:'-' }}</td>
                     <td class="py-4 px-6 font-medium
                         {% if record.status == 'Tidak Hadir' %}text-red-500
                         {% elif record.status == 'Hadir' %}text-green-500
