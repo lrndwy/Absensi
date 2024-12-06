@@ -339,7 +339,7 @@ def admin_dashboard_absensi_karyawan(request):
                 record_data = {
                     'id': record.id,
                     'karyawan': karyawan.nama if karyawan else None,
-                    'checktime': timezone.localtime(record.checktime).strftime('%Y-%m-%d %H:%M:%S'),
+                    'checktime': timezone.localtime(record.checktime).strftime('%Y-%m-%d %H:%M'),
                     'status': record.status,
                     'id_izin': record.id_izin.id if record.id_izin else None,
                     'id_sakit': record.id_sakit.id if record.id_sakit else None,

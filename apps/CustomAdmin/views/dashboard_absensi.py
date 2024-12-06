@@ -384,7 +384,7 @@ def admin_dashboard(request):
                 record_data = {
                     'id': record_edit.id,
                     'user': record_edit.user.username if record_edit.user else None,
-                    'checktime': timezone.localtime(record_edit.checktime).strftime('%Y-%m-%d %H:%M:%S'),
+                    'checktime': timezone.localtime(record_edit.checktime).strftime('%Y-%m-%d %H:%M'),
                     'status': record_edit.status,
                     'id_izin': record_edit.id_izin.id if record_edit.id_izin else None,
                     'id_sakit': record_edit.id_sakit.id if record_edit.id_sakit else None,
