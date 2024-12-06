@@ -172,27 +172,27 @@
                         <div>
                             <label for="karyawan" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nama
                                 Karyawan</label>
-                            <select id="karyawan" name="karyawan" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                            <select id="karyawan" name="karyawan" class="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                                 required>
                                 <option value="">Pilih Karyawan</option>
                                 {% for karyawan in karyawan_list %}
-                                <option value="{{ karyawan.id }}">{{ karyawan.nama }}</option>
+                                <option value="{{ karyawan.user.id }}">{{ karyawan.nama }}</option>
                                 {% endfor %}
                             </select>
                         </div>
                         <div>
                             <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Status</label>
-                            <select id="status" name="status" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                                required onchange="toggleIdInput(this.value)">
+                            <select id="status" name="status" class="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                required>
                                 <option value="">Pilih Status</option>
                                 {% for status in status_list %}
                                 <option value="{{ status }}">{{ status }}</option>
                                 {% endfor %}
                             </select>
                         </div>
-                        <div>
+                        <div id="tipe_absensi_container" style="display: none;">
                             <label for="tipe_absensi" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Tipe Absensi</label>
-                            <select id="tipe_absensi" name="tipe_absensi" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                            <select id="tipe_absensi" name="tipe_absensi" class="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                                 required>
                                 <option value="">Pilih Tipe Absensi</option>
                                 {% for tipe in tipe_absensi_list %}
@@ -203,7 +203,7 @@
                         <div id="id_izin_container" style="display: none;">
                             <label for="id_izin" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">ID
                                 Izin</label>
-                            <select id="id_izin" name="id_izin" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                            <select id="id_izin" name="id_izin" class="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
                                 <option value="">Pilih ID Izin</option>
                                 {% for izin in id_izin %}
                                 <option value="{{ izin.id }}">{{ izin.id }}</option>
@@ -212,7 +212,7 @@
                         </div>
                         <div id="id_sakit_container" style="display: none;">
                             <label for="id_sakit" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">ID Sakit</label>
-                            <select id="id_sakit" name="id_sakit" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                            <select id="id_sakit" name="id_sakit" class="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
                                 <option value="">Pilih ID Sakit</option>
                                 {% for sakit in id_sakit %}
                                 <option value="{{ sakit.id }}">{{ sakit.id }}</option>
@@ -222,7 +222,7 @@
                         <div>
                             <label for="checktime" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Tanggal dan
                                 Waktu</label>
-                            <input type="datetime-local" id="checktime" name="checktime" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                            <input type="datetime-local" id="checktime" name="checktime" class="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                                 required>
                         </div>
                     </div>
@@ -237,11 +237,13 @@
                                 idSakitContainer.style.display = 'none';
                                 tipeAbsensiContainer.style.display = 'none';
                                 tipeAbsensi.value = null;
+                                tipeAbsensi.removeAttribute('required');
                             } else if (this.value === 'sakit') {
                                 idIzinContainer.style.display = 'none';
                                 idSakitContainer.style.display = 'block';
                                 tipeAbsensiContainer.style.display = 'none';
                                 tipeAbsensi.value = null;
+                                tipeAbsensi.removeAttribute('required');
                             } else {
                                 idIzinContainer.style.display = 'none';
                                 idSakitContainer.style.display = 'none';

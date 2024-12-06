@@ -86,16 +86,18 @@ def admin_dashboard_absensi_siswa(request):
             action = request.POST.get('action')
             if action == 'tambah':
                 try:
-                    user_id = request.POST.get('user')
+                    user_id = request.POST.get('siswa')
                     status = request.POST.get('status')
                     checktime = request.POST.get('checktime')
                     tipe_absensi = request.POST.get('tipe_absensi')
                     
                     user = CustomUser.objects.get(id=user_id)
+                    
                     siswa = Siswa.objects.get(user=user)
                     instalasi = Instalasi.objects.first()
                     
                     if status == 'hadir':
+                        print(f"user: {user}")
                         # Cek existing record
                         existing_record = record_absensi.objects.filter(
                             user=user,
@@ -138,24 +140,29 @@ def admin_dashboard_absensi_siswa(request):
                                 
                         elif tipe_absensi == 'pulang':
                             try:
-                                # Ambil jam masuk terakhir
-                                jam_masuk_record = record_absensi.objects.filter(
+                                # Ambil jam masuk terakhir siswa
+                                jam_masuk = record_absensi.objects.filter(
                                     user=user,
                                     status='hadir',
                                     tipe_absensi='masuk',
                                     checktime__date=datetime.strptime(checktime, '%Y-%m-%dT%H:%M').date()
                                 ).latest('checktime')
                                 
-                                waktu_pulang = timezone.make_aware(datetime.strptime(checktime, '%Y-%m-%dT%H:%M'))
-                                selisih_waktu = waktu_pulang - jam_masuk_record.checktime
+                                # # Ambil jam kerja dari Instalasi
+                                # instalasi = Instalasi.objects.first()
+                                # jam_kerja = instalasi.jam_sekolah_siswa
                                 
-                                # Gunakan jam_sekolah_siswa dari instalasi
-                                if selisih_waktu < instalasi.jam_sekolah_siswa:
-                                    messages.error(request, f'Waktu pulang tidak boleh lebih cepat dari {instalasi.jam_sekolah_siswa} dari jam masuk.')
-                                    return redirect('admin_dashboard_absensi_siswa')
+                                # if jam_kerja:
+                                #     # Hitung selisih waktu
+                                #     waktu_pulang = checktime_aware
+                                #     selisih_waktu = waktu_pulang - jam_masuk.checktime
+                                    
+                                #     if selisih_waktu < jam_kerja:
+                                #         messages.error(request, f'Waktu pulang tidak boleh lebih cepat dari {jam_kerja} dari jam masuk.')
+                                #         return redirect('admin_dashboard_absensi_siswa')
                                 terlambat = 0
                             except record_absensi.DoesNotExist:
-                                messages.error(request, 'Tidak ada data absensi masuk untuk hari ini.')
+                                messages.error(request, 'Tidak ada data absensi masuk untuk hari ini. Siswa harus absen masuk terlebih dahulu.')
                                 return redirect('admin_dashboard_absensi_siswa')
 
                         # Buat record baru
@@ -171,6 +178,9 @@ def admin_dashboard_absensi_siswa(request):
                     elif status == 'izin':
                         id_izin = request.POST.get('id_izin')
                         izin_obj = izin.objects.get(id=id_izin)
+                        if izin_obj.user is not user:
+                            messages.error(request, f'Data izin user {user.username} dengan id {id_izin} tidak ditemukan.')
+                            return redirect('admin_dashboard_absensi_siswa')
                         record = record_absensi.objects.create(
                             user=user,
                             status=status,
@@ -184,6 +194,9 @@ def admin_dashboard_absensi_siswa(request):
                     elif status == 'sakit':
                         id_sakit = request.POST.get('id_sakit')
                         sakit_obj = sakit.objects.get(id=id_sakit)
+                        if sakit_obj.user is not user:
+                            messages.error(request, f'Data sakit user {user.username} dengan id {id_sakit} tidak ditemukan.')
+                            return redirect('admin_dashboard_absensi_siswa')
                         record = record_absensi.objects.create(
                             user=user,
                             status=status,
@@ -197,7 +210,7 @@ def admin_dashboard_absensi_siswa(request):
                     messages.success(request, 'Data absensi berhasil ditambahkan.')
                     
                 except CustomUser.DoesNotExist:
-                    messages.error(request, 'Pengguna tidak ditemukan.')
+                    messages.error(request, f'Pengguna {user_id} tidak ditemukan.')
                 except Siswa.DoesNotExist:
                     messages.error(request, 'Data siswa tidak ditemukan.')
                 except izin.DoesNotExist:
@@ -208,6 +221,7 @@ def admin_dashboard_absensi_siswa(request):
                     messages.error(request, f'Terjadi kesalahan: {str(e)}')
                 
                 return redirect('admin_dashboard_absensi_siswa')
+              
             elif action == 'edit':
                 absensi_id = request.POST.get('id')
                 checktime = request.POST.get('tanggal_waktu')
@@ -294,19 +308,19 @@ def admin_dashboard_absensi_siswa(request):
                                     checktime__date=datetime.strptime(checktime, '%Y-%m-%dT%H:%M').date()
                                 ).latest('checktime')
                                 
-                                # Ambil jam kerja dari Instalasi
-                                instalasi = Instalasi.objects.first()
-                                jam_kerja = instalasi.jam_sekolah_siswa
+                                # # Ambil jam kerja dari Instalasi
+                                # instalasi = Instalasi.objects.first()
+                                # jam_kerja = instalasi.jam_sekolah_siswa
                                 
-                                if jam_kerja:
-                                    # Hitung selisih waktu
-                                    waktu_pulang = checktime_aware
-                                    selisih_waktu = waktu_pulang - jam_masuk.checktime
+                                # if jam_kerja:
+                                #     # Hitung selisih waktu
+                                #     waktu_pulang = checktime_aware
+                                #     selisih_waktu = waktu_pulang - jam_masuk.checktime
                                     
-                                    if selisih_waktu < jam_kerja:
-                                        messages.error(request, f'Waktu pulang tidak boleh lebih cepat dari {jam_kerja} dari jam masuk.')
-                                        return redirect('admin_dashboard_absensi_siswa')
-                                    terlambat = 0
+                                #     if selisih_waktu < jam_kerja:
+                                #         messages.error(request, f'Waktu pulang tidak boleh lebih cepat dari {jam_kerja} dari jam masuk.')
+                                #         return redirect('admin_dashboard_absensi_siswa')
+                                terlambat = 0
                             except record_absensi.DoesNotExist:
                                 messages.error(request, 'Tidak ada data absensi masuk untuk hari ini. Siswa harus absen masuk terlebih dahulu.')
                                 return redirect('admin_dashboard_absensi_siswa')

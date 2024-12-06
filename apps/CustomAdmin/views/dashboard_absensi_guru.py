@@ -84,7 +84,7 @@ def admin_dashboard_absensi_guru(request):
             action = request.POST.get('action')
             if action == 'tambah':
                 try:
-                    user_id = request.POST.get('user')
+                    user_id = request.POST.get('guru')
                     status = request.POST.get('status')
                     checktime = request.POST.get('checktime')
                     tipe_absensi = request.POST.get('tipe_absensi')
@@ -145,18 +145,17 @@ def admin_dashboard_absensi_guru(request):
                                     checktime__date=datetime.strptime(checktime, '%Y-%m-%dT%H:%M').date()
                                 ).latest('checktime')
                                 
-                                waktu_pulang = timezone.make_aware(datetime.strptime(checktime, '%Y-%m-%dT%H:%M'))
-                                selisih_waktu = waktu_pulang - jam_masuk_record.checktime
+                                # waktu_pulang = timezone.make_aware(datetime.strptime(checktime, '%Y-%m-%dT%H:%M'))
+                                # selisih_waktu = waktu_pulang - jam_masuk_record.checktime
                                 
                                 # Gunakan jam_kerja_guru dari instalasi
-                                if selisih_waktu < instalasi.jam_kerja_guru:
-                                    messages.error(request, f'Waktu pulang tidak boleh lebih cepat dari {instalasi.jam_kerja_guru} dari jam masuk.')
-                                    return redirect('admin_dashboard_absensi_guru')
+                                # if selisih_waktu < instalasi.jam_kerja_guru:
+                                #     messages.error(request, f'Waktu pulang tidak boleh lebih cepat dari {instalasi.jam_kerja_guru} dari jam masuk.')
+                                #     return redirect('admin_dashboard_absensi_guru')
                                 terlambat = 0
                             except record_absensi.DoesNotExist:
                                 messages.error(request, 'Tidak ada data absensi masuk untuk hari ini.')
                                 return redirect('admin_dashboard_absensi_guru')
-
                         # Buat record baru
                         record = record_absensi.objects.create(
                             user=user,
@@ -170,6 +169,9 @@ def admin_dashboard_absensi_guru(request):
                     elif status == 'izin':
                         id_izin = request.POST.get('id_izin')
                         izin_obj = izin.objects.get(id=id_izin)
+                        if izin_obj.user is not user:
+                            messages.error(request, f'Data izin user {user.username} dengan id {id_izin} tidak ditemukan.')
+                            return redirect('admin_dashboard_absensi_guru')
                         record = record_absensi.objects.create(
                             user=user,
                             status=status,
@@ -183,6 +185,9 @@ def admin_dashboard_absensi_guru(request):
                     elif status == 'sakit':
                         id_sakit = request.POST.get('id_sakit')
                         sakit_obj = sakit.objects.get(id=id_sakit)
+                        if sakit_obj.user is not user:
+                            messages.error(request, f'Data sakit user {user.username} dengan id {id_sakit} tidak ditemukan.')
+                            return redirect('admin_dashboard_absensi_guru')
                         record = record_absensi.objects.create(
                             user=user,
                             status=status,
@@ -207,6 +212,7 @@ def admin_dashboard_absensi_guru(request):
                     messages.error(request, f'Terjadi kesalahan: {str(e)}')
                 
                 return redirect('admin_dashboard_absensi_guru')
+              
             elif action == 'edit':
                 absensi_id = request.POST.get('id')
                 checktime = request.POST.get('tanggal_waktu')
@@ -293,18 +299,18 @@ def admin_dashboard_absensi_guru(request):
                                 ).latest('checktime')
                                 
                                 # Ambil jam kerja dari Instalasi
-                                instalasi = Instalasi.objects.first()
-                                jam_kerja = instalasi.jam_kerja_guru
+                                # instalasi = Instalasi.objects.first()
+                                # jam_kerja = instalasi.jam_kerja_guru
                                 
-                                if jam_kerja:
-                                    # Hitung selisih waktu
-                                    waktu_pulang = checktime_aware
-                                    selisih_waktu = waktu_pulang - jam_masuk.checktime
-                                    
-                                    if selisih_waktu < jam_kerja:
-                                        messages.error(request, f'Waktu pulang tidak boleh lebih cepat dari {jam_kerja} dari jam masuk.')
-                                        return redirect('admin_dashboard_absensi_guru')
-                                    terlambat = 0
+                                # if jam_kerja:
+                                #     # Hitung selisih waktu
+                                #     waktu_pulang = checktime_aware
+                                #     selisih_waktu = waktu_pulang - jam_masuk.checktime
+                                
+                                #     if selisih_waktu < jam_kerja:
+                                #         messages.error(request, f'Waktu pulang tidak boleh lebih cepat dari {jam_kerja} dari jam masuk.')
+                                #         return redirect('admin_dashboard_absensi_guru')
+                                terlambat = 0
                             except record_absensi.DoesNotExist:
                                 messages.error(request, 'Tidak ada data absensi masuk untuk hari ini. Guru harus absen masuk terlebih dahulu.')
                                 return redirect('admin_dashboard_absensi_guru')

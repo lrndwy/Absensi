@@ -71,7 +71,7 @@ def admin_dashboard_absensi_karyawan(request):
             action = request.POST.get('action')
             if action == 'tambah':
                 try:
-                    user_id = request.POST.get('user')
+                    user_id = request.POST.get('karyawan')
                     status = request.POST.get('status')
                     checktime = request.POST.get('checktime')
                     tipe_absensi = request.POST.get('tipe_absensi')
@@ -122,28 +122,30 @@ def admin_dashboard_absensi_karyawan(request):
                                 terlambat = 0
                                 
                         elif tipe_absensi == 'pulang':
-                            try:
+                            try: 
                                 # Ambil jam masuk terakhir karyawan
-                                jam_masuk_record = record_absensi.objects.filter(
+                                jam_masuk = record_absensi.objects.filter(
                                     user=user,
                                     status='hadir',
                                     tipe_absensi='masuk',
                                     checktime__date=datetime.strptime(checktime, '%Y-%m-%dT%H:%M').date()
                                 ).latest('checktime')
                                 
-                                # Hitung selisih waktu
-                                waktu_pulang = timezone.make_aware(datetime.strptime(checktime, '%Y-%m-%dT%H:%M'))
-                                selisih_waktu = waktu_pulang - jam_masuk_record.checktime
+                                # # Ambil jam kerja dari Instalasi
+                                # instalasi = Instalasi.objects.first()
+                                # jam_kerja = instalasi.jam_kerja_karyawan
                                 
-                                # Ambil jam kerja dari instalasi
-                                jam_kerja = instalasi.jam_kerja_karyawan
+                                # if jam_kerja:
+                                #     # Hitung selisih waktu
+                                #     waktu_pulang = checktime_aware
+                                #     selisih_waktu = waktu_pulang - jam_masuk.checktime
                                 
-                                if selisih_waktu < jam_kerja:
-                                    messages.error(request, f'Waktu pulang tidak boleh lebih cepat dari {jam_kerja} dari jam masuk.')
-                                    return redirect('admin_dashboard_absensi_karyawan')
+                                #     if selisih_waktu < jam_kerja:
+                                #         messages.error(request, f'Waktu pulang tidak boleh lebih cepat dari {jam_kerja} dari jam masuk.')
+                                #         return redirect('admin_dashboard_absensi_karyawan')
                                 terlambat = 0
                             except record_absensi.DoesNotExist:
-                                messages.error(request, 'Tidak ada data absensi masuk untuk hari ini.')
+                                messages.error(request, 'Tidak ada data absensi masuk untuk hari ini. Karyawan harus absen masuk terlebih dahulu.')
                                 return redirect('admin_dashboard_absensi_karyawan')
                         
                         record = record_absensi.objects.create(
@@ -157,6 +159,9 @@ def admin_dashboard_absensi_karyawan(request):
                     elif status in ['izin', 'sakit']:
                         id_status = request.POST.get(f'id_{status}')
                         status_obj = globals()[status].objects.get(id=id_status)
+                        if status_obj.user is not user:
+                            messages.error(request, f'Data {status} user {user.username} dengan id {id_status} tidak ditemukan.')
+                            return redirect('admin_dashboard_absensi_karyawan')
                         record = record_absensi.objects.create(
                             user=user,
                             status=status,
@@ -259,19 +264,19 @@ def admin_dashboard_absensi_karyawan(request):
                                     checktime__date=datetime.strptime(checktime, '%Y-%m-%dT%H:%M').date()
                                 ).latest('checktime')
                                 
-                                # Ambil jam kerja dari Instalasi
-                                instalasi = Instalasi.objects.first()
-                                jam_kerja = instalasi.jam_kerja_karyawan
+                                # # Ambil jam kerja dari Instalasi
+                                # instalasi = Instalasi.objects.first()
+                                # jam_kerja = instalasi.jam_kerja_karyawan
                                 
-                                if jam_kerja:
-                                    # Hitung selisih waktu
-                                    waktu_pulang = checktime_aware
-                                    selisih_waktu = waktu_pulang - jam_masuk.checktime
-                                    
-                                    if selisih_waktu < jam_kerja:
-                                        messages.error(request, f'Waktu pulang tidak boleh lebih cepat dari {jam_kerja} dari jam masuk.')
-                                        return redirect('admin_dashboard_absensi_karyawan')
-                                    terlambat = 0
+                                # if jam_kerja:
+                                #     # Hitung selisih waktu
+                                #     waktu_pulang = checktime_aware
+                                #     selisih_waktu = waktu_pulang - jam_masuk.checktime
+                                
+                                #     if selisih_waktu < jam_kerja:
+                                #         messages.error(request, f'Waktu pulang tidak boleh lebih cepat dari {jam_kerja} dari jam masuk.')
+                                #         return redirect('admin_dashboard_absensi_karyawan')
+                                terlambat = 0
                             except record_absensi.DoesNotExist:
                                 messages.error(request, 'Tidak ada data absensi masuk untuk hari ini. Karyawan harus absen masuk terlebih dahulu.')
                                 return redirect('admin_dashboard_absensi_karyawan')

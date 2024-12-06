@@ -35,9 +35,9 @@
                             {% endfor %}
                         </select>
                     </div>
-                    <div id="tipe_absensi_container"ss>
-                        <label for="tipe_absensi" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Tipe Absensi</label>
-                        <select id="tipe_absensi" name="tipe_absensi" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required>
+                    <div id="tipe_absensi_container_edit" style="display: none;">
+                        <label for="tipe_absensi_edit" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Tipe Absensi</label>
+                        <select id="tipe_absensi_edit" name="tipe_absensi" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required>
                             <option value="{{ data.tipe_absensi }}" selected>{{ data.tipe_absensi }}</option>
                             {% for tipe in tipe_absensi_list %}
                             {% if tipe != data.tipe_absensi %}
@@ -46,7 +46,7 @@
                             {% endfor %}
                         </select>
                     </div>
-                    <div id="id_izin_container" style="display: none;">
+                    <div id="id_izin_container_edit" style="display: none;">
                         <label for="id_izin" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">ID
                             Izin</label>
                         <select id="id_izin" name="id_izin" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
@@ -58,8 +58,8 @@
                             {% endfor %}
                         </select>
                     </div>
-                    <div id="id_sakit_container" style="display: none;">
-                        <label for="id_sakit" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">ID
+                    <div id="id_sakit_container_edit" style="display: none;">
+                        <label for="id_sakit_edit" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">ID
                             Sakit</label>
                         <select id="id_sakit" name="id_sakit" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
                             <option value="{{ data.id_sakit }}" selected>{{ data.id_sakit }}</option>
@@ -87,34 +87,34 @@
             </form>
             <script>
                 function toggleInputs(status) {
-                    const idIzinContainer = document.getElementById('id_izin_container');
-                    const idSakitContainer = document.getElementById('id_sakit_container');
-                    const tipeAbsensiContainer = document.getElementById('tipe_absensi_container');
-                    const tipeAbsensi = document.getElementById('tipe_absensi');
+                    const idIzinContainer_edit = document.getElementById('id_izin_container_edit');
+                    const idSakitContainer_edit = document.getElementById('id_sakit_container_edit');
+                    const tipeAbsensiContainer_edit = document.getElementById('tipe_absensi_container_edit');
+                    const tipeAbsensi_edit = document.getElementById('tipe_absensi_edit');
 
                     if (status.toLowerCase() === 'izin') {
-                        idIzinContainer.style.display = 'block';
-                        idSakitContainer.style.display = 'none';
-                        tipeAbsensiContainer.style.display = 'none';
-                        tipeAbsensi.required = false;
-                        tipeAbsensi.value = null;
+                        idIzinContainer_edit.style.display = 'block';
+                        idSakitContainer_edit.style.display = 'none';
+                        tipeAbsensiContainer_edit.style.display = 'none';
+                        tipeAbsensi_edit.required = false;
+                        tipeAbsensi_edit.value = null;
                     } else if (status.toLowerCase() === 'sakit') {
-                        idIzinContainer.style.display = 'none';
-                        idSakitContainer.style.display = 'block';
-                        tipeAbsensiContainer.style.display = 'none';
-                        tipeAbsensi.required = false;
-                        tipeAbsensi.value = null;
+                        idIzinContainer_edit.style.display = 'none';
+                        idSakitContainer_edit.style.display = 'block';
+                        tipeAbsensiContainer_edit.style.display = 'none';
+                        tipeAbsensi_edit.required = false;
+                        tipeAbsensi_edit.value = null;
                     } else if (status.toLowerCase() === 'hadir') {
-                        idIzinContainer.style.display = 'none';
-                        idSakitContainer.style.display = 'none';
-                        tipeAbsensiContainer.style.display = 'block';
-                        tipeAbsensi.required = true;
+                        idIzinContainer_edit.style.display = 'none';
+                        idSakitContainer_edit.style.display = 'none';
+                        tipeAbsensiContainer_edit.style.display = 'block';
+                        tipeAbsensi_edit.required = true;
                     } else {
-                        idIzinContainer.style.display = 'none';
-                        idSakitContainer.style.display = 'none';
-                        tipeAbsensiContainer.style.display = 'none';
-                        tipeAbsensi.value = null;
-                        tipeAbsensi.required = true;
+                        idIzinContainer_edit.style.display = 'none';
+                        idSakitContainer_edit.style.display = 'none';
+                        tipeAbsensiContainer_edit.style.display = 'none';
+                        tipeAbsensi_edit.value = null;
+                        tipeAbsensi_edit.required = true;
                     }
                 }
 
@@ -187,14 +187,16 @@
                         <div>
                             <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Status</label>
                             <select id="status" name="status" class="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required>
-                                <option value="hadir" selected>Hadir</option>
+                                <option value="" selected disabled>Pilih Status</option>
+                                <option value="hadir">Hadir</option>
                                 <option value="sakit">Sakit</option>
                                 <option value="izin">Izin</option>
                             </select>
                         </div>
-                        <div id="tipe_absensi_container" style="display: block;">
+                        <div id="tipe_absensi_container" style="display: none;">
                             <label for="tipe_absensi" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Tipe Absensi</label>
                             <select id="tipe_absensi" name="tipe_absensi" class="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required>
+                                <option value="" selected disabled>Pilih Tipe Absensi</option>
                                 <option value="masuk">Masuk</option>
                                 <option value="pulang">Pulang</option>
                             </select>
@@ -241,11 +243,17 @@
                                 tipeAbsensiContainer.style.display = 'none';
                                 tipeAbsensi.value = null;
                                 tipeAbsensi.required = false;
-                            } else {
+                            } else if (this.value === 'hadir') {
                                 idIzinContainer.style.display = 'none';
                                 idSakitContainer.style.display = 'none';
                                 tipeAbsensiContainer.style.display = 'block';
                                 tipeAbsensi.required = true;
+                            } else {
+                                idIzinContainer.style.display = 'none';
+                                idSakitContainer.style.display = 'none';
+                                tipeAbsensiContainer.style.display = 'none';
+                                tipeAbsensi.value = null;
+                                tipeAbsensi.required = false;
                             }
                         });
                     </script>

@@ -36,7 +36,7 @@
                             {% endfor %}
                         </select>
                     </div>
-                    <div id="tipe_absensi_container" style="display: none;">
+                    <div id="tipe_absensi_container_edit" style="display: none;">
                         <label for="tipe_absensi" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Tipe Absensi</label>
                         <select id="tipe_absensi" name="tipe_absensi" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required>
                             <option value="{{ data.tipe_absensi }}" selected>{{ data.tipe_absensi }}</option>
@@ -47,7 +47,7 @@
                             {% endfor %}
                         </select>
                     </div>
-                    <div id="id_izin_container" style="display: none;">
+                    <div id="id_izin_container_edit" style="display: none;">
                         <label for="id_izin" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">ID
                             Izin</label>
                         <select id="id_izin" name="id_izin" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
@@ -59,7 +59,7 @@
                             {% endfor %}
                         </select>
                     </div>
-                    <div id="id_sakit_container" style="display: none;">
+                    <div id="id_sakit_container_edit" style="display: none;">
                         <label for="id_sakit" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">ID
                             Sakit</label>
                         <select id="id_sakit" name="id_sakit" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
@@ -88,30 +88,31 @@
             </form>
             <script>
                 function toggleInputs(status) {
-                    const idIzinContainer = document.getElementById('id_izin_container');
-                    const idSakitContainer = document.getElementById('id_sakit_container');
-                    const tipeAbsensiContainer = document.getElementById('tipe_absensi_container');
-                    const tipeAbsensi = document.getElementById('tipe_absensi');
+                    const idIzinContainerEdit = document.getElementById('id_izin_container_edit');
+                    const idSakitContainerEdit = document.getElementById('id_sakit_container_edit');
+                    const tipeAbsensiContainerEdit = document.getElementById('tipe_absensi_container_edit');
+                    const tipeAbsensiEdit = document.getElementById('tipe_absensi_edit');
 
                     if (status.toLowerCase() === 'izin') {
-                        idIzinContainer.style.display = 'block';
-                        idSakitContainer.style.display = 'none';
-                        tipeAbsensiContainer.style.display = 'none';
-                        tipeAbsensi.value = null;
+                        idIzinContainerEdit.style.display = 'block';
+                        idSakitContainerEdit.style.display = 'none';
+                        tipeAbsensiContainerEdit.style.display = 'none';
+                        tipeAbsensiEdit.value = null;
                     } else if (status.toLowerCase() === 'sakit') {
-                        idIzinContainer.style.display = 'none';
-                        idSakitContainer.style.display = 'block';
-                        tipeAbsensiContainer.style.display = 'none';
-                        tipeAbsensi.value = null;
+                        idIzinContainerEdit.style.display = 'none';
+                        idSakitContainerEdit.style.display = 'block';
+                        tipeAbsensiContainerEdit.style.display = 'none';
+                        tipeAbsensiEdit.value = null;
                     } else if (status.toLowerCase() === 'hadir') {
-                        idIzinContainer.style.display = 'none';
-                        idSakitContainer.style.display = 'none';
-                        tipeAbsensiContainer.style.display = 'block';
+                        idIzinContainerEdit.style.display = 'none';
+                        idSakitContainerEdit.style.display = 'none';
+                        tipeAbsensiContainerEdit.style.display = 'block';
+                        tipeAbsensiEdit.value = null;
                     } else {
-                        idIzinContainer.style.display = 'none';
-                        idSakitContainer.style.display = 'none';
-                        tipeAbsensiContainer.style.display = 'none';
-                        tipeAbsensi.value = null;
+                        idIzinContainerEdit.style.display = 'none';
+                        idSakitContainerEdit.style.display = 'none';
+                        tipeAbsensiContainerEdit.style.display = 'none';
+                        tipeAbsensiEdit.value = null;
                     }
                 }
 
@@ -171,27 +172,28 @@
                         <div>
                             <label for="siswa" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nama
                                 Siswa</label>
-                            <select id="siswa" name="siswa" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                            <select id="siswa" name="siswa" class="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                                 required>
                                 <option value="">Pilih Siswa</option>
                                 {% for siswa in siswa_list %}
-                                <option value="{{ siswa.id }}">{{ siswa.nama }}</option>
+                                <option value="{{ siswa.user.id }}">{{ siswa.nama }}</option>
                                 {% endfor %}
                             </select>
                         </div>
                         <div>
                             <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Status</label>
-                            <select id="status" name="status" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                            <select id="status" name="status" class="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                                 required onchange="toggleInputs(this.value)">
-                                <option value="">Pilih Status</option>
+                                <option value="" selected>Pilih Status</option>
                                 {% for status in status_list %}
                                 <option value="{{ status }}">{{ status }}</option>
                                 {% endfor %}
                             </select>
                         </div>
-                        <div id="tipe_absensi_container" style="display: block;">
+                        <div id="tipe_absensi_container" style="display: none;">
                             <label for="tipe_absensi" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Tipe Absensi</label>
-                            <select id="tipe_absensi" name="tipe_absensi" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required>
+                            <select id="tipe_absensi" name="tipe_absensi" class="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required>
+                                <option value="">Pilih Tipe Absensi</option>
                                 <option value="masuk">Masuk</option>
                                 <option value="pulang">Pulang</option>
                             </select>
@@ -199,7 +201,7 @@
                         <div id="id_izin_container" style="display: none;">
                             <label for="id_izin" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">ID
                                 Izin</label>
-                            <select id="id_izin" name="id_izin" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                            <select id="id_izin" name="id_izin" class="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
                                 <option value="">Pilih ID Izin</option>
                                 {% for izin in id_izin %}
                                 <option value="{{ izin.id }}">{{ izin.id }}</option>
@@ -208,7 +210,7 @@
                         </div>
                         <div id="id_sakit_container" style="display: none;">
                             <label for="id_sakit" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">ID Sakit</label>
-                            <select id="id_sakit" name="id_sakit" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                            <select id="id_sakit" name="id_sakit" class="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
                                 <option value="">Pilih ID Sakit</option>
                                 {% for sakit in id_sakit %}
                                 <option value="{{ sakit.id }}">{{ sakit.id }}</option>
@@ -218,7 +220,7 @@
                         <div>
                             <label for="checktime" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Tanggal dan
                                 Waktu</label>
-                            <input type="datetime-local" id="checktime" name="checktime" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                            <input type="datetime-local" id="checktime" name="checktime" class="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                                 required>
                         </div>
                     </div>
@@ -239,10 +241,16 @@
                                 idSakitContainer.style.display = 'block';
                                 tipeAbsensiContainer.style.display = 'none';
                                 tipeAbsensi.value = null;
-                            } else {
+                            } else if (status.toLowerCase() === 'hadir') {
                                 idIzinContainer.style.display = 'none';
                                 idSakitContainer.style.display = 'none';
                                 tipeAbsensiContainer.style.display = 'block';
+
+                            } else {
+                                idIzinContainer.style.display = 'none';
+                                idSakitContainer.style.display = 'none';
+                                tipeAbsensiContainer.style.display = 'none';
+                                
                             }
                         }
 

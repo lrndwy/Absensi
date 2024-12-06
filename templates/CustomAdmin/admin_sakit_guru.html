@@ -25,8 +25,7 @@
                     </div>
                     <div>
                         <label for="keterangan" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Keterangan</label>
-                        <input type="text" id="keterangan" name="keterangan" value="{{ data.keterangan }}" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                            required>
+                        <textarea id="keterangan" name="keterangan" rows="4" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required>{{ data.keterangan }}</textarea>
                     </div>
                     <div>
                         <label for="surat_sakit_file" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Surat Sakit</label>
@@ -54,7 +53,7 @@
         <c-tables title="Data Guru Sakit" subtitle="Data Guru Sakit" :columns="{{ table_columns|safe }}" :data="{{ table_data|safe }}">
             <c-slot name="actionsbutton">
                 <c-btn-add modal-title="Tambah Data" url="{% url 'admin_sakit_guru' %}" button-title="Tambah Data" button-modal-title="Tambah">
-                    <div class="grid grid-cols-2 gap-4 w-full">
+                    <div class="flex flex-col gap-4 w-full">
                         <div>
                             <label for="nama" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nama
                                 Guru</label>
@@ -68,8 +67,7 @@
                         </div>
                         <div>
                             <label for="keterangan" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Keterangan</label>
-                            <input type="text" id="keterangan" name="keterangan" class="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                                required>
+                            <textarea id="keterangan" name="keterangan" rows="4" class="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required></textarea>
                         </div>
                         <div>
                             <label for="surat_sakit_file" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Surat Sakit</label>
