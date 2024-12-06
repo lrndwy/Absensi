@@ -93,7 +93,35 @@ def admin_dashboard_absensi_karyawan(request):
                             messages.error(request, f'Sudah ada data absensi {tipe_absensi} untuk hari ini.')
                             return redirect('admin_dashboard_absensi_karyawan')
                         
-                        if tipe_absensi == 'pulang':
+                        if tipe_absensi == 'masuk':
+                            try:
+                                instalasi = Instalasi.objects.first()
+                                if not instalasi:
+                                    terlambat = 0
+                                else:
+                                    # Tentukan jam masuk berdasarkan tipe user
+                                    jam_masuk = instalasi.jam_masuk_karyawan
+                                    
+                                    if jam_masuk:
+                                        # Ambil jam dan menit dari waktu absen
+                                        waktu_absen = timezone.make_aware(datetime.strptime(checktime, '%Y-%m-%dT%H:%M')).time()
+                                        
+                                        # Hitung selisih dalam menit
+                                        selisih_menit = (
+                                            waktu_absen.hour * 60 + waktu_absen.minute
+                                        ) - (
+                                            jam_masuk.hour * 60 + jam_masuk.minute
+                                        )
+                                        
+                                        # Set keterlambatan (minimal 0 menit)
+                                        terlambat = max(0, selisih_menit)
+                                    else:
+                                        terlambat = 0
+                            except Exception as e:
+                                messages.error(request, f'Error menghitung keterlambatan: {str(e)}')
+                                terlambat = 0
+                                
+                        elif tipe_absensi == 'pulang':
                             try:
                                 # Ambil jam masuk terakhir karyawan
                                 jam_masuk_record = record_absensi.objects.filter(
@@ -113,6 +141,7 @@ def admin_dashboard_absensi_karyawan(request):
                                 if selisih_waktu < jam_kerja:
                                     messages.error(request, f'Waktu pulang tidak boleh lebih cepat dari {jam_kerja} dari jam masuk.')
                                     return redirect('admin_dashboard_absensi_karyawan')
+                                terlambat = 0
                             except record_absensi.DoesNotExist:
                                 messages.error(request, 'Tidak ada data absensi masuk untuk hari ini.')
                                 return redirect('admin_dashboard_absensi_karyawan')
@@ -122,7 +151,8 @@ def admin_dashboard_absensi_karyawan(request):
                             status=status,
                             checktime=checktime,
                             status_verifikasi='diterima',
-                            tipe_absensi=tipe_absensi
+                            tipe_absensi=tipe_absensi,
+                            terlambat=terlambat
                         )
                     elif status in ['izin', 'sakit']:
                         id_status = request.POST.get(f'id_{status}')
@@ -133,7 +163,8 @@ def admin_dashboard_absensi_karyawan(request):
                             **{f'id_{status}': status_obj},
                             checktime=checktime,
                             status_verifikasi='diterima',
-                            tipe_absensi=status
+                            tipe_absensi=status,
+                            terlambat=0
                         )
                     
                     messages.success(request, 'Data absensi berhasil ditambahkan.')
@@ -144,69 +175,115 @@ def admin_dashboard_absensi_karyawan(request):
                 return redirect('admin_dashboard_absensi_karyawan')
 
             elif action == 'edit':
+                absensi_id = request.POST.get('id')
+                checktime = request.POST.get('tanggal_waktu')
+                status = request.POST.get('status')
+                status_verifikasi = request.POST.get('status_verifikasi')
+                tipe_absensi = request.POST.get('tipe_absensi')
+                
                 try:
-                    record_id = request.POST.get('id')
-                    status = request.POST.get('status')
-                    checktime = request.POST.get('checktime')
-                    tipe_absensi = request.POST.get('tipe_absensi')
+                    absensi = record_absensi.objects.get(id=absensi_id)
+                    user = absensi.user
                     
-                    record = record_absensi.objects.get(id=record_id)
-                    old_status = record.status
-                    instalasi = Instalasi.objects.first()
-                    
-                    record.status = status
-                    record.checktime = checktime
-                    
-                    if status == 'hadir':
-                        record.tipe_absensi = tipe_absensi
-                        if tipe_absensi == 'pulang':
+                    # Ubah format waktu dengan benar
+                    try:
+                        checktime_datetime = datetime.strptime(checktime, '%Y-%m-%dT%H:%M')
+                        checktime_aware = timezone.make_aware(checktime_datetime)
+                        absensi.checktime = checktime_aware
+                    except ValueError:
+                        messages.error(request, 'Format tanggal dan waktu tidak valid')
+                        return redirect('admin_dashboard_absensi_karyawan')
+                        
+                    if status == 'izin':
+                        id_izin = request.POST.get('id_izin')
+                        absensi.id_izin = izin.objects.get(id=id_izin) if id_izin else None
+                        absensi.id_sakit = None
+                        absensi.terlambat = 0
+                    elif status == 'sakit':
+                        id_sakit = request.POST.get('id_sakit')
+                        absensi.id_sakit = sakit.objects.get(id=id_sakit) if id_sakit else None
+                        absensi.id_izin = None
+                        absensi.terlambat = 0
+                    else:
+                        absensi.id_izin = None
+                        absensi.id_sakit = None
+                        
+                        # Cek apakah sudah ada absensi dengan tipe yang sama untuk hari ini
+                        existing_record = record_absensi.objects.filter(
+                            user=user,
+                            status='hadir',
+                            tipe_absensi=tipe_absensi,
+                            checktime__date=datetime.strptime(checktime, '%Y-%m-%dT%H:%M').date()
+                        ).exclude(id=absensi_id).exists()  # Tambahkan .exclude(id=absensi_id)
+                        
+                        if existing_record:
+                            messages.error(request, f'Sudah ada data absensi {tipe_absensi} untuk hari ini.')
+                            return redirect('admin_dashboard_absensi_karyawan')
+                        
+                        if tipe_absensi == 'masuk':
                             try:
+                                instalasi = Instalasi.objects.first()
+                                if not instalasi:
+                                    absensi.terlambat = 0
+                                else:
+                                    # Tentukan jam masuk berdasarkan tipe user
+                                    jam_masuk = instalasi.jam_masuk_karyawan
+                                    
+                                    if jam_masuk:
+                                        # Ambil jam dan menit dari waktu absen
+                                        waktu_absen = checktime_aware.time()
+                                        
+                                        # Hitung selisih dalam menit
+                                        selisih_menit = (
+                                            waktu_absen.hour * 60 + waktu_absen.minute
+                                        ) - (
+                                            jam_masuk.hour * 60 + jam_masuk.minute
+                                        )
+                                        
+                                        # Set keterlambatan (minimal 0 menit)
+                                        terlambat = max(0, selisih_menit)
+                                        
+                                    else:
+                                        absensi.terlambat = 0
+                            except Exception as e:
+                                messages.error(request, f'Error menghitung keterlambatan: {str(e)}')
+                                absensi.terlambat = 0
+                                
+                        elif tipe_absensi == 'pulang':
+                            try: 
                                 # Ambil jam masuk terakhir karyawan
-                                jam_masuk_record = record_absensi.objects.filter(
-                                    user=record.user,
+                                jam_masuk = record_absensi.objects.filter(
+                                    user=user,
                                     status='hadir',
                                     tipe_absensi='masuk',
                                     checktime__date=datetime.strptime(checktime, '%Y-%m-%dT%H:%M').date()
                                 ).latest('checktime')
                                 
-                                # Hitung selisih waktu
-                                waktu_pulang = timezone.make_aware(datetime.strptime(checktime, '%Y-%m-%dT%H:%M'))
-                                
-                                # Ambil jam kerja karyawan dari instalasi
+                                # Ambil jam kerja dari Instalasi
+                                instalasi = Instalasi.objects.first()
                                 jam_kerja = instalasi.jam_kerja_karyawan
                                 
-                                selisih_waktu = waktu_pulang - jam_masuk_record.checktime
-                                
-                                if selisih_waktu < jam_kerja:
-                                    messages.error(request, f'Waktu pulang tidak boleh lebih cepat dari {jam_kerja} dari jam masuk.')
-                                    return redirect('admin_dashboard_absensi_karyawan')
+                                if jam_kerja:
+                                    # Hitung selisih waktu
+                                    waktu_pulang = checktime_aware
+                                    selisih_waktu = waktu_pulang - jam_masuk.checktime
+                                    
+                                    if selisih_waktu < jam_kerja:
+                                        messages.error(request, f'Waktu pulang tidak boleh lebih cepat dari {jam_kerja} dari jam masuk.')
+                                        return redirect('admin_dashboard_absensi_karyawan')
+                                    terlambat = 0
                             except record_absensi.DoesNotExist:
-                                messages.error(request, 'Tidak ada data absensi masuk untuk hari ini.')
+                                messages.error(request, 'Tidak ada data absensi masuk untuk hari ini. Karyawan harus absen masuk terlebih dahulu.')
                                 return redirect('admin_dashboard_absensi_karyawan')
-                    
-                    elif status == 'izin':
-                        id_izin = request.POST.get('id_izin')
-                        izin_obj = izin.objects.get(id=id_izin)
-                        record.id_izin = izin_obj
-                        record.id_sakit = None
-                        record.tipe_absensi = 'izin'
-                        
-                    elif status == 'sakit':
-                        id_sakit = request.POST.get('id_sakit')
-                        sakit_obj = sakit.objects.get(id=id_sakit)
-                        record.id_sakit = sakit_obj
-                        record.id_izin = None
-                        record.tipe_absensi = 'sakit'
-                    
-                    record.save()
-                    messages.success(request, f'Data absensi karyawan berhasil diperbarui dari {old_status} menjadi {status}.')
-                    
-                except ValueError as e:
-                    messages.error(request, str(e))
+                    absensi.status = status
+                    absensi.status_verifikasi = status_verifikasi
+                    absensi.tipe_absensi = tipe_absensi
+                    absensi.terlambat = terlambat
+                    print(f'absensi: {absensi.status}, {absensi.status_verifikasi}, {absensi.tipe_absensi}, {absensi.terlambat}')
+                    absensi.save()
+                    messages.success(request, 'Data absensi berhasil diperbarui.')
                 except record_absensi.DoesNotExist:
-                    messages.error(request, 'Data absensi tidak ditemukan')
-                except (izin.DoesNotExist, sakit.DoesNotExist):
-                    messages.error(request, 'Data izin/sakit tidak ditemukan')
+                    messages.error(request, 'Data absensi tidak ditemukan.')
                 except Exception as e:
                     messages.error(request, f'Terjadi kesalahan: {str(e)}')
                 

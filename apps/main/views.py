@@ -231,21 +231,46 @@ def webhook_kehadiran(request):
             
             # Modifikasi logika penentuan tipe absensi
             if waktu < jam_pulang:
-                # Izinkan absen masuk sebelum jam masuk
                 tipe_absensi = 'masuk'
-                jam_absen = waktu.hour
-                menit_absen = waktu.minute
-                jam_seharusnya = jam_masuk.hour
-                menit_seharusnya = jam_masuk.minute
-                
-                total_menit_absen = (jam_absen * 60) + menit_absen
-                total_menit_seharusnya = (jam_seharusnya * 60) + menit_seharusnya
-                
-                # Jika absen lebih awal, terlambat = 0
-                if total_menit_absen <= total_menit_seharusnya:
+                try:
+                    # Konversi waktu absen ke waktu lokal
+                    local_checktime = timezone.localtime(tanggal)
+                    
+                    # Tentukan jam masuk berdasarkan tipe user
+                    if hasattr(user, 'siswa'):
+                        jam_masuk = instalasi.jam_masuk_siswa
+                    elif hasattr(user, 'guru'):
+                        jam_masuk = instalasi.jam_masuk_guru
+                    elif hasattr(user, 'karyawan'):
+                        jam_masuk = instalasi.jam_masuk_karyawan
+                    else:
+                        print("Debug - Tipe user tidak dikenali")
+                        terlambat = 0
+                        
+                    if not jam_masuk:
+                        print(f"Debug - Jam masuk tidak ditemukan untuk user type: {user}")
+                        terlambat = 0
+                    else:
+                        # Ambil jam dan menit dari waktu absen
+                        waktu_absen = local_checktime.time()
+                        
+                        # Hitung selisih dalam menit
+                        selisih_menit = (
+                            waktu_absen.hour * 60 + waktu_absen.minute
+                        ) - (
+                            jam_masuk.hour * 60 + jam_masuk.minute
+                        )
+                        
+                        # Set keterlambatan (minimal 0 menit)
+                        terlambat = max(0, selisih_menit)
+                        
+                        print(f"Debug - Jam Masuk: {jam_masuk}")
+                        print(f"Debug - Waktu Absen: {waktu_absen}")
+                        print(f"Debug - Terlambat: {terlambat} menit")
+
+                except Exception as e:
+                    print(f"Error dalam perhitungan keterlambatan: {str(e)}")
                     terlambat = 0
-                else:
-                    terlambat = total_menit_absen - total_menit_seharusnya
             else:
                 tipe_absensi = 'pulang'
                 terlambat = 0

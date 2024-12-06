@@ -191,44 +191,58 @@ class record_absensi(models.Model):
             elif self.status == 'izin':
                 self.tipe_absensi = 'izin'
                 self.terlambat = 0
-            elif self.status == 'hadir' and self.tipe_absensi == 'masuk':
-                try:
-                    instalasi = Instalasi.objects.first()
-                    if not instalasi or not instalasi.jam_masuk_siswa or not self.checktime:
-                        print("Debug - Instalasi atau jam masuk tidak ada atau waktu absen tidak ada")
-                        self.terlambat = 0
-                    else:
-                        # Konversi waktu absen ke waktu lokal
-                        local_checktime = timezone.localtime(self.checktime)
-                        
-                        # Ambil jam dan menit dari waktu absen
-                        jam_absen = local_checktime.hour
-                        menit_absen = local_checktime.minute
-                        
-                        # Ambil jam dan menit dari jam masuk yang ditentukan
-                        jam_seharusnya = instalasi.jam_masuk_siswa.hour
-                        menit_seharusnya = instalasi.jam_masuk_siswa.minute
-                        
-                        # Hitung total menit
-                        total_menit_absen = (jam_absen * 60) + menit_absen
-                        total_menit_seharusnya = (jam_seharusnya * 60) + menit_seharusnya
-                        
-                        # Hitung selisih
-                        selisih_menit = total_menit_absen - total_menit_seharusnya
-                        
-                        # Simpan keterlambatan
-                        self.terlambat = max(0, selisih_menit)
-                        
-                        print(f"Debug - Jam Masuk: {instalasi.jam_masuk_siswa}")
-                        print(f"Debug - Waktu Absen: {local_checktime}")
-                        print(f"Debug - Terlambat: {self.terlambat} menit")
-                
-                except Exception as e:
-                    print(f"Error dalam perhitungan keterlambatan: {str(e)}")
-                    self.terlambat = 0
-            else:
-                print(f"Debug - Status: {self.status}, Tipe Absensi: {self.tipe_absensi}")
-                self.terlambat = 0
+            elif self.status == 'hadir':
+              pass
+                # if self.tipe_absensi == 'masuk':
+                    # try:
+                    #     instalasi = Instalasi.objects.first()
+                    #     if not instalasi or not self.checktime:
+                    #         print("Debug - Instalasi atau waktu absen tidak ada")
+                    #         self.terlambat = 0
+                    #     else:
+                    #         # Konversi waktu absen ke waktu lokal
+                    #         local_checktime = timezone.localtime(self.checktime)
+                            
+                    #         # Tentukan jam masuk berdasarkan tipe user
+                    #         if hasattr(self.user, 'siswa'):
+                    #             jam_masuk = instalasi.jam_masuk_siswa
+                    #         elif hasattr(self.user, 'guru'):
+                    #             jam_masuk = instalasi.jam_masuk_guru
+                    #         elif hasattr(self.user, 'karyawan'):
+                    #             jam_masuk = instalasi.jam_masuk_karyawan
+                    #         else:
+                    #             print("Debug - Tipe user tidak dikenali")
+                    #             self.terlambat = 0
+                    #             super().save(*args, **kwargs)
+                    #             return
+
+                    #         if not jam_masuk:
+                    #             print(f"Debug - Jam masuk tidak ditemukan untuk user type: {self.user}")
+                    #             self.terlambat = 0
+                    #         else:
+                    #             # Ambil jam dan menit dari waktu absen
+                    #             waktu_absen = local_checktime.time()
+                                
+                    #             # Hitung selisih dalam menit
+                    #             selisih_menit = (
+                    #                 waktu_absen.hour * 60 + waktu_absen.minute
+                    #             ) - (
+                    #                 jam_masuk.hour * 60 + jam_masuk.minute
+                    #             )
+                                
+                    #             # Set keterlambatan (minimal 0 menit)
+                    #             self.terlambat = max(0, selisih_menit)
+                                
+                    #             print(f"Debug - Jam Masuk: {jam_masuk}")
+                    #             print(f"Debug - Waktu Absen: {waktu_absen}")
+                    #             print(f"Debug - Terlambat: {self.terlambat} menit")
+
+                    # except Exception as e:
+                    #     print(f"Error dalam perhitungan keterlambatan: {str(e)}")
+                    #     self.terlambat = 0
+                    #  
+                # else:
+                #     print(f"Debug - Status: {self.status}, Tipe Absensi: {self.tipe_absensi}")
                 
             super().save(*args, **kwargs)
             
@@ -254,7 +268,6 @@ class record_absensi(models.Model):
     @property
     def get_id_sakit(self):
         return self.id_sakit
-      
 class tanggal_merah(models.Model):
     nama_acara = models.CharField(max_length=200, null=True, blank=True)
     tanggal = models.DateField(null=True, blank=True)
