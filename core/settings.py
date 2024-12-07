@@ -162,9 +162,7 @@ STORAGES = {
 }
 
 # # Pastikan MEDIA_URL dan MEDIA_ROOT sudah terkonfigurasi dengan benar
-# LRND_VALIDATION_ENDPOINT = 'http://127.0.0.1:3333/activate/'
-# LRND_ENCRYPTION_PASSWORD = 'Testing'
-# LRND_EXEMPT_PATHS = ['/validate/']
-# LRND_KEY_MODEL = 'djangoLrnd.LRNDKey'
+# LRND_VALIDATION_ENDPOINT = 'http://153.92.5.186:8001/activate/'
+# LRND_ENCRYPTION_PASSWORD = 'NAMA_SEKOLAH'
 # LRND_SUCCESS_REDIRECT_URL = 'login_view'
 
