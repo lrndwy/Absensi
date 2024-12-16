@@ -353,78 +353,117 @@ def admin_siswa(request):
                         messages.error(request, 'Tipe file tidak didukung.')
                         return redirect('admin_siswa')
                     
+                    # Periksa kolom yang diperlukan
+                    required_columns = ['username', 'email', 'password', 'userid', 'nisn', 'nama', 
+                                      'tanggal_lahir', 'jenjang', 'kelas', 'alamat', 'telegram_chat_id']
+                    
+                    missing_columns = [col for col in required_columns if col not in df.columns]
+                    if missing_columns:
+                        messages.error(request, f'Kolom yang diperlukan tidak ditemukan: {", ".join(missing_columns)}')
+                        return redirect('admin_siswa')
+                    
                     success_count = 0
                     error_count = 0
+                    error_details = []
                     
                     # Daftar format tanggal yang umum digunakan
                     date_formats = [
-                        '%Y-%m-%d',           # 2024-03-21
-                        '%d-%m-%Y',           # 21-03-2024
-                        '%d/%m/%Y',           # 21/03/2024
-                        '%Y/%m/%d',           # 2024/03/21
-                        '%d-%B-%Y',           # 21-March-2024
-                        '%d %B %Y',           # 21 March 2024
-                        '%d.%m.%Y',           # 21.03.2024
-                        '%m/%d/%Y',           # 03/21/2024
-                        '%B %d, %Y',          # March 21, 2024
-                        '%d-%b-%Y',           # 21-Mar-2024
-                        '%Y%m%d',             # 20240321
+                        '%Y-%m-%d %H:%M:%S',    # Format datetime dari Excel: 2024-12-16 00:00:00
+                        '%Y-%m-%d',             # 2024-03-21
+                        '%d-%m-%Y',             # 21-03-2024
+                        '%d/%m/%Y',             # 21/03/2024
+                        '%Y/%m/%d',             # 2024/03/21
+                        '%d-%B-%Y',             # 21-March-2024
+                        '%d %B %Y',             # 21 March 2024
+                        '%d.%m.%Y',             # 21.03.2024
+                        '%m/%d/%Y',             # 03/21/2024
+                        '%B %d, %Y',            # March 21, 2024
+                        '%d-%b-%Y',             # 21-Mar-2024
+                        '%Y%m%d',               # 20240321
                     ]
                     
-                    for _, row in df.iterrows():
+                    for index, row in df.iterrows():
                         try:
                             # Konversi tanggal lahir
+                            tanggal_str = str(row['tanggal_lahir']).strip()
                             tanggal_lahir = None
-                            tanggal_str = str(row['tanggal_lahir'])
                             
-                            # Coba setiap format tanggal
-                            for date_format in date_formats:
-                                try:
-                                    tanggal_lahir = datetime.strptime(tanggal_str, date_format).date()
-                                    break
-                                except ValueError:
-                                    continue
+                            if pd.isna(tanggal_str) or tanggal_str == '' or tanggal_str.lower() == 'nan':
+                                raise ValueError("Tanggal lahir tidak boleh kosong")
+                            
+                            # Jika input adalah timestamp/datetime dari pandas
+                            if isinstance(row['tanggal_lahir'], (pd.Timestamp, datetime)):
+                                tanggal_lahir = row['tanggal_lahir'].date()
+                            else:
+                                # Coba setiap format tanggal
+                                for date_format in date_formats:
+                                    try:
+                                        parsed_date = datetime.strptime(tanggal_str, date_format)
+                                        tanggal_lahir = parsed_date.date()  # Ambil hanya tanggalnya
+                                        break
+                                    except ValueError:
+                                        continue
                             
                             if tanggal_lahir is None:
                                 raise ValueError(f"Format tanggal '{tanggal_str}' tidak valid")
                             
+                            # Validasi data lainnya
+                            if not row['username'] or pd.isna(row['username']):
+                                raise ValueError("Username tidak boleh kosong")
+                            if not row['email'] or pd.isna(row['email']):
+                                raise ValueError("Email tidak boleh kosong")
+                            if not row['password'] or pd.isna(row['password']):
+                                raise ValueError("Password tidak boleh kosong")
+                            
                             # Proses data seperti biasa
-                            username = row['username']
+                            username = str(row['username']).strip()
                             counter = 1
+                            original_username = username
                             while CustomUser.objects.filter(username=username).exists():
-                                username = f"{row['username']}_{counter}"
+                                username = f"{original_username}_{counter}"
                                 counter += 1
                             
                             user = CustomUser.objects.create_user(
                                 username=username,
-                                email=row['email'],
-                                password=row['password'],
-                                userid=row['userid'],
+                                email=str(row['email']).strip(),
+                                password=str(row['password']).strip(),
+                                userid=str(row['userid']).strip(),
                                 is_staff=True
                             )
                             
-                            jenjang_obj, _ = jenjang.objects.get_or_create(nama=row['jenjang'])
-                            kelas_obj, _ = kelas.objects.get_or_create(nama=row['kelas'])
+                            jenjang_obj, _ = jenjang.objects.get_or_create(nama=str(row['jenjang']).strip())
+                            kelas_obj, _ = kelas.objects.get_or_create(nama=str(row['kelas']).strip())
                             
                             Siswa.objects.create(
                                 user=user,
-                                nisn=row['nisn'],
-                                nama=row['nama'],
-                                tanggal_lahir=tanggal_lahir,  # Gunakan tanggal yang sudah dikonversi
+                                nisn=str(row['nisn']).strip(),
+                                nama=str(row['nama']).strip(),
+                                tanggal_lahir=tanggal_lahir,
                                 jenjang=jenjang_obj,
                                 kelas=kelas_obj,
-                                alamat=row['alamat'],
-                                telegram_chat_id=row['telegram_chat_id']
+                                alamat=str(row['alamat']).strip(),
+                                telegram_chat_id=str(row['telegram_chat_id']).strip()
                             )
                             success_count += 1
                         except Exception as e:
                             error_count += 1
-                            print(f'Gagal mengimpor data: {str(e)}')
+                            error_message = f'Baris {index + 2}: {str(e)}'
+                            error_details.append(error_message)
+                            print(error_message)
+                            
+                            # Jika user sudah terlanjur dibuat tapi ada error, hapus user tersebut
+                            if 'user' in locals():
+                                user.delete()
                     
                     if success_count > 0:
                         messages.success(request, f'{success_count} data siswa berhasil diimpor.')
                     if error_count > 0:
-                        messages.warning(request, f'{error_count} data siswa gagal diimpor. Silakan periksa log untuk detailnya.')
+                        messages.warning(request, f'{error_count} data siswa gagal diimpor.')
+                        messages.warning(request, 'Detail error:')
+                        for error in error_details[:5]:  # Tampilkan 5 error pertama
+                            messages.warning(request, error)
+                        if len(error_details) > 5:
+                            messages.warning(request, f'...dan {len(error_details) - 5} error lainnya')
                     
                     return redirect('admin_siswa')
                 except Exception as e:
