@@ -19,7 +19,7 @@ django-cotton==0.9.32
 django-htmx==1.19.0
 django-tailwind==3.8.0
 django-unfold==0.37.0
-djangoLrnd==3.0
+djangoLrnd==3.1
 et-xmlfile==1.1.0
 fonttools==4.54.1
 idna==3.8

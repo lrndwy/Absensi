@@ -161,8 +161,6 @@ STORAGES = {
     },
 }
 
-# # Pastikan MEDIA_URL dan MEDIA_ROOT sudah terkonfigurasi dengan benar
-# LRND_VALIDATION_ENDPOINT = 'http://153.92.5.186:8001/activate/'
+# Pastikan MEDIA_URL dan MEDIA_ROOT sudah terkonfigurasi dengan benar
 # LRND_ENCRYPTION_PASSWORD = 'NAMA_SEKOLAH'
-# LRND_SUCCESS_REDIRECT_URL = 'login_view'
 

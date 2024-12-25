@@ -15,10 +15,10 @@
                             Karyawan</label>
                         <select id="nama" name="nama" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                             required>
-                            <option value="{{ data.user }}" selected>{{ data.user }}</option>
+                            <option value="{{ data.user }}" selected>{{ data.nama }} - {{ data.jabatan }}</option>
                             {% for karyawan in karyawan_list %}
-                            {% if karyawan.username != data.user %}
-                            <option value="{{ karyawan.username }}">{{ karyawan.username }}</option>
+                            {% if karyawan.user.username != data.user %}
+                            <option value="{{ karyawan.user.username }}">{{ karyawan.nama }} - {{ karyawan.jabatan }}</option>
                             {% endif %}
                             {% endfor %}
                         </select>
@@ -61,7 +61,7 @@
                                 required>
                                 <option value="" selected disabled>Pilih Karyawan</option>
                                 {% for karyawan in karyawan_list %}
-                                <option value="{{ karyawan.username }}">{{ karyawan.username }}</option>
+                                <option value="{{ karyawan.user.username }}">{{ karyawan.nama }} - {{ karyawan.jabatan }}</option>
                                 {% endfor %}
                             </select>
                         </div>

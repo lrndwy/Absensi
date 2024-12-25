@@ -49,6 +49,8 @@ def admin_pengaturan(request):
                     mata_pelajaran.objects.all().delete()
                     jabatan.objects.all().delete()
                     Instalasi.objects.all().delete()
+                    tanggal_merah.objects.all().delete()
+                    
                     
                     # Hapus semua file media yang diupload
                     import os

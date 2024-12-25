@@ -98,27 +98,28 @@
                         idIzinContainer.style.display = 'block';
                         idSakitContainer.style.display = 'none';
                         tipeAbsensiContainer.style.display = 'none';
-                        tipeAbsensi.value = null;
+                        tipeAbsensi.removeAttribute('required');
                     } else if (status.toLowerCase() === 'sakit') {
                         idIzinContainer.style.display = 'none';
                         idSakitContainer.style.display = 'block';
                         tipeAbsensiContainer.style.display = 'none';
-                        tipeAbsensi.value = null;
+                        tipeAbsensi.removeAttribute('required');
                     } else if (status.toLowerCase() === 'hadir') {
                         idIzinContainer.style.display = 'none';
                         idSakitContainer.style.display = 'none';
                         tipeAbsensiContainer.style.display = 'block';
+                        tipeAbsensi.setAttribute('required');
                     } else {
                         idIzinContainer.style.display = 'none';
                         idSakitContainer.style.display = 'none';
                         tipeAbsensiContainer.style.display = 'none';
-                        tipeAbsensi.value = null;
+                        tipeAbsensi.removeAttribute('required');
                     }
                 }
 
-                // Call the function when the page loads to set the initial display
                 document.addEventListener('DOMContentLoaded', function() {
-                    toggleInputs(document.getElementById('status').value);
+                    const status = document.getElementById('status').value;
+                    toggleInputs(status);
                 });
             </script>
         </div>
@@ -176,7 +177,7 @@
                                 required>
                                 <option value="">Pilih Karyawan</option>
                                 {% for karyawan in karyawan_list %}
-                                <option value="{{ karyawan.user.id }}">{{ karyawan.nama }}</option>
+                                <option value="{{ karyawan.user.id }}">{{ karyawan.nama }} - {{ karyawan.jabatan }}</option>
                                 {% endfor %}
                             </select>
                         </div>

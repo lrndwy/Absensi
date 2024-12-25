@@ -15,10 +15,10 @@
                             Siswa</label>
                         <select id="nama" name="nama" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                             required>
-                            <option value="{{ data.user }}" selected>{{ data.user }}</option>
+                            <option value="{{ data.user }}" selected>{{ data.nama }} - {{ data.kelas }} - {{ data.jenjang }}</option>
                             {% for siswa in siswa_list %}
-                            {% if siswa.username != data.user %}
-                            <option value="{{ siswa.username }}">{{ siswa.username }}</option>
+                            {% if siswa.user.username != data.user %}
+                            <option value="{{ siswa.user.username }}">{{ siswa.nama }} - {{ siswa.kelas }} - {{ siswa.jenjang }}</option>
                             {% endif %}
                             {% endfor %}
                         </select>
@@ -55,7 +55,7 @@
                                 required>
                                 <option value="" selected disabled>Pilih Siswa</option>
                                 {% for siswa in siswa_list %}
-                                <option value="{{ siswa.username }}">{{ siswa.username }}</option>
+                                <option value="{{ siswa.user.username }}">{{ siswa.nama }} - {{ siswa.kelas }} - {{ siswa.jenjang }}</option>
                                 {% endfor %}
                             </select>
                         </div>

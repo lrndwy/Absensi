@@ -176,7 +176,7 @@
                                 required>
                                 <option value="">Pilih Siswa</option>
                                 {% for siswa in siswa_list %}
-                                <option value="{{ siswa.user.id }}">{{ siswa.nama }}</option>
+                                <option value="{{ siswa.user.id }}">{{ siswa.nama }} - {{ siswa.kelas}} - {{ siswa.jenjang }}</option>
                                 {% endfor %}
                             </select>
                         </div>
@@ -192,7 +192,7 @@
                         </div>
                         <div id="tipe_absensi_container" style="display: none;">
                             <label for="tipe_absensi" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Tipe Absensi</label>
-                            <select id="tipe_absensi" name="tipe_absensi" class="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required>
+                            <select id="tipe_absensi" name="tipe_absensi" class="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
                                 <option value="">Pilih Tipe Absensi</option>
                                 <option value="masuk">Masuk</option>
                                 <option value="pulang">Pulang</option>
@@ -235,22 +235,22 @@
                                 idIzinContainer.style.display = 'block';
                                 idSakitContainer.style.display = 'none';
                                 tipeAbsensiContainer.style.display = 'none';
-                                tipeAbsensi.value = null;
+                                tipeAbsensi.removeAttribute('required');
                             } else if (status.toLowerCase() === 'sakit') {
                                 idIzinContainer.style.display = 'none';
                                 idSakitContainer.style.display = 'block';
                                 tipeAbsensiContainer.style.display = 'none';
-                                tipeAbsensi.value = null;
+                                tipeAbsensi.removeAttribute('required');
                             } else if (status.toLowerCase() === 'hadir') {
                                 idIzinContainer.style.display = 'none';
                                 idSakitContainer.style.display = 'none';
                                 tipeAbsensiContainer.style.display = 'block';
-
+                                tipeAbsensi.setAttribute('required', '');
                             } else {
                                 idIzinContainer.style.display = 'none';
                                 idSakitContainer.style.display = 'none';
                                 tipeAbsensiContainer.style.display = 'none';
-                                
+                                tipeAbsensi.removeAttribute('required');
                             }
                         }
 

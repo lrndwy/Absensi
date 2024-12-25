@@ -97,27 +97,33 @@
                         idIzinContainer.style.display = 'block';
                         idSakitContainer.style.display = 'none';
                         tipeAbsensiContainer.style.display = 'none';
-                        tipeAbsensi.value = null;
+                        tipeAbsensi.removeAttribute('required');
+                        tipeAbsensi.value = 'izin';
                     } else if (status.toLowerCase() === 'sakit') {
                         idIzinContainer.style.display = 'none';
                         idSakitContainer.style.display = 'block';
                         tipeAbsensiContainer.style.display = 'none';
-                        tipeAbsensi.value = null;
+                        tipeAbsensi.removeAttribute('required');
+                        tipeAbsensi.value = 'sakit';
                     } else if (status.toLowerCase() === 'hadir') {
                         idIzinContainer.style.display = 'none';
                         idSakitContainer.style.display = 'none';
                         tipeAbsensiContainer.style.display = 'block';
+                        tipeAbsensi.setAttribute('required');
+                        tipeAbsensi.value = '';
                     } else {
                         idIzinContainer.style.display = 'none';
                         idSakitContainer.style.display = 'none';
                         tipeAbsensiContainer.style.display = 'none';
+                        tipeAbsensi.removeAttribute('required');
                         tipeAbsensi.value = null;
                     }
                 }
 
                 // Call the function when the page loads to set the initial display
                 document.addEventListener('DOMContentLoaded', function() {
-                    toggleInputs(document.getElementById('status').value);
+                    const status = document.getElementById('status').value;
+                    toggleInputs(status);
                 });
             </script>
         </div>
@@ -175,7 +181,7 @@
                                 required>
                                 <option value="">Pilih Guru</option>
                                 {% for guru in guru_list %}
-                                <option value="{{ guru.user.id }}">{{ guru.nama }}</option>
+                                <option value="{{ guru.user.id }}">{{ guru.nama }} - {{ guru.mata_pelajaran }} - {{ guru.jenjang }} - {{ guru.kelas }}</option>
                                 {% endfor %}
                             </select>
                         </div>

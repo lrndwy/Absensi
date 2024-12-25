@@ -30,10 +30,10 @@ from apps.Siswa.models import *
 @superuser_required
 def admin_dashboard_absensi_guru(request):
     try:
-        absensi_records = record_absensi.objects.filter(user__guru__isnull=False).order_by('-checktime')
+        absensi_records = record_absensi.objects.filter(user__guru__isnull=False, status_verifikasi='diterima').order_by('-checktime')
         absensi_records_charts = record_absensi.objects.filter(
             user__guru__isnull=False,
-            status='hadir'
+            status_verifikasi='diterima'
         ).order_by('-checktime')
 
         start_date = request.GET.get('start')
@@ -169,7 +169,7 @@ def admin_dashboard_absensi_guru(request):
                     elif status == 'izin':
                         id_izin = request.POST.get('id_izin')
                         izin_obj = izin.objects.get(id=id_izin)
-                        if izin_obj.user is not user:
+                        if izin_obj.user != user:
                             messages.error(request, f'Data izin user {user.username} dengan id {id_izin} tidak ditemukan.')
                             return redirect('admin_dashboard_absensi_guru')
                         record = record_absensi.objects.create(
@@ -185,7 +185,7 @@ def admin_dashboard_absensi_guru(request):
                     elif status == 'sakit':
                         id_sakit = request.POST.get('id_sakit')
                         sakit_obj = sakit.objects.get(id=id_sakit)
-                        if sakit_obj.user is not user:
+                        if sakit_obj.user != user:
                             messages.error(request, f'Data sakit user {user.username} dengan id {id_sakit} tidak ditemukan.')
                             return redirect('admin_dashboard_absensi_guru')
                         record = record_absensi.objects.create(
@@ -223,7 +223,7 @@ def admin_dashboard_absensi_guru(request):
                 try:
                     absensi = record_absensi.objects.get(id=absensi_id)
                     user = absensi.user
-                    
+                    terlambat = 0
                     # Ubah format waktu dengan benar
                     try:
                         checktime_datetime = datetime.strptime(checktime, '%Y-%m-%dT%H:%M')
@@ -237,12 +237,12 @@ def admin_dashboard_absensi_guru(request):
                         id_izin = request.POST.get('id_izin')
                         absensi.id_izin = izin.objects.get(id=id_izin) if id_izin else None
                         absensi.id_sakit = None
-                        absensi.terlambat = 0
+                        terlambat = 0
                     elif status == 'sakit':
                         id_sakit = request.POST.get('id_sakit')
                         absensi.id_sakit = sakit.objects.get(id=id_sakit) if id_sakit else None
                         absensi.id_izin = None
-                        absensi.terlambat = 0
+                        terlambat = 0
                     else:
                         absensi.id_izin = None
                         absensi.id_sakit = None

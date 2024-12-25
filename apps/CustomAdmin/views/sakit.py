@@ -48,9 +48,13 @@ def admin_sakit_siswa(request):
         if edit_id:
             data_sakit = sakit.objects.filter(id=edit_id).first()
             if data_sakit:
+                siswa = Siswa.objects.get(user=data_sakit.user)
                 edit_data_sakit_siswa.append({
                     'id': data_sakit.id,
                     'user': data_sakit.user,
+                    'nama': siswa.nama,
+                    'kelas': siswa.kelas,
+                    'jenjang': siswa.jenjang,
                     'keterangan': data_sakit.keterangan,
                     'surat_sakit_file': data_sakit.surat_sakit,
                 })
@@ -118,15 +122,21 @@ def admin_sakit_siswa(request):
         sakit_list = sakit.objects.filter(user__siswa__isnull=False)
         
         table_data = [
-            [sakit_obj.id, sakit_obj.user.username, sakit_obj.keterangan, sakit_obj.surat_sakit.name if sakit_obj.surat_sakit else '']
+            [
+                sakit_obj.id, 
+                Siswa.objects.get(user=sakit_obj.user).nama,
+                f"Kelas {Siswa.objects.get(user=sakit_obj.user).kelas} - {Siswa.objects.get(user=sakit_obj.user).jenjang}",
+                sakit_obj.keterangan, 
+                sakit_obj.surat_sakit.name if sakit_obj.surat_sakit else ''
+            ]
             for sakit_obj in sakit_list
         ]
         context = get_context()
         context.update({
-            'table_columns': ['ID', 'Nama Siswa', 'Keterangan', 'Surat Sakit'],
+            'table_columns': ['ID', 'Nama Siswa', 'Kelas - Jenjang', 'Keterangan', 'Surat Sakit'],
             'table_data': table_data,
             'edit_data_sakit_siswa': edit_data_sakit_siswa,
-            'siswa_list': CustomUser.objects.filter(siswa__isnull=False),
+            'siswa_list': Siswa.objects.all(),
             'sakit': True,
             
             'total_data_table': sakit_list.count(),
@@ -145,9 +155,14 @@ def admin_sakit_guru(request):
         if edit_id:
             data_sakit = sakit.objects.filter(id=edit_id).first()
             if data_sakit:
+                guru = Guru.objects.get(user=data_sakit.user)
                 edit_data_sakit_guru.append({
                     'id': data_sakit.id,
                     'user': data_sakit.user,
+                    'nama': guru.nama,
+                    'mapel': guru.mata_pelajaran,
+                    'jenjang': guru.jenjang,
+                    'kelas': guru.kelas,
                     'keterangan': data_sakit.keterangan,
                     'surat_sakit_file': data_sakit.surat_sakit,
                 })
@@ -210,16 +225,23 @@ def admin_sakit_guru(request):
         sakit_list = sakit.objects.filter(user__guru__isnull=False)
         
         table_data = [
-            [sakit_obj.id, sakit_obj.user.username, sakit_obj.keterangan, sakit_obj.surat_sakit.name if sakit_obj.surat_sakit else '']
+            [
+                sakit_obj.id, 
+                Guru.objects.get(user=sakit_obj.user).nama,
+                Guru.objects.get(user=sakit_obj.user).mata_pelajaran,
+                f"Kelas {Guru.objects.get(user=sakit_obj.user).kelas} - {Guru.objects.get(user=sakit_obj.user).jenjang}",
+                sakit_obj.keterangan,
+                sakit_obj.surat_sakit.name if sakit_obj.surat_sakit else ''
+            ]
             for sakit_obj in sakit_list
         ]
            
         context = get_context()     
         context.update({
-            'table_columns': ['ID', 'Nama Guru', 'Keterangan', 'Surat Sakit'],
+            'table_columns': ['ID', 'Nama Guru', 'Mata Pelajaran', 'Kelas - Jenjang', 'Keterangan', 'Surat Sakit'],
             'table_data': table_data,
             'edit_data_sakit_guru': edit_data_sakit_guru,
-            'guru_list': CustomUser.objects.filter(guru__isnull=False),
+            'guru_list': Guru.objects.all(),
             'sakit': True,
             
             'total_data_table': sakit_list.count(),
@@ -238,9 +260,12 @@ def admin_sakit_karyawan(request):
         if edit_id:
             data_sakit = sakit.objects.filter(id=edit_id).first()
             if data_sakit:
+                karyawan = Karyawan.objects.get(user=data_sakit.user)
                 edit_data_sakit_karyawan.append({
                     'id': data_sakit.id,
                     'user': data_sakit.user,
+                    'nama': karyawan.nama,
+                    'jabatan': karyawan.jabatan,
                     'keterangan': data_sakit.keterangan,
                     'surat_sakit_file': data_sakit.surat_sakit,
                 })
@@ -303,15 +328,21 @@ def admin_sakit_karyawan(request):
         sakit_list = sakit.objects.filter(user__karyawan__isnull=False)
         
         table_data = [
-            [sakit_obj.id, sakit_obj.user.username, sakit_obj.keterangan, sakit_obj.surat_sakit.name if sakit_obj.surat_sakit else '']
+            [
+                sakit_obj.id, 
+                Karyawan.objects.get(user=sakit_obj.user).nama,
+                Karyawan.objects.get(user=sakit_obj.user).jabatan,
+                sakit_obj.keterangan,
+                sakit_obj.surat_sakit.name if sakit_obj.surat_sakit else ''
+            ]
             for sakit_obj in sakit_list
         ]
         context = get_context()
         context.update({
-            'table_columns': ['ID', 'Nama Karyawan', 'Keterangan', 'Surat Sakit'],
+            'table_columns': ['ID', 'Nama Karyawan', 'Jabatan', 'Keterangan', 'Surat Sakit'],
             'table_data': table_data,
             'edit_data_sakit_karyawan': edit_data_sakit_karyawan,
-            'karyawan_list': CustomUser.objects.filter(karyawan__isnull=False),
+            'karyawan_list': Karyawan.objects.all(),
             'sakit': True,
             
             'total_data_table': sakit_list.count(),

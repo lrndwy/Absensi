@@ -15,10 +15,10 @@
                             Guru</label>
                         <select id="nama" name="nama" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                             required>
-                            <option value="{{ data.user }}" selected>{{ data.user }}</option>
+                            <option value="{{ data.user }}" selected>{{ data.nama }} - {{ data.mapel }} - {{ data.jenjang }} - {{ data.kelas }}</option>
                             {% for guru in guru_list %}
-                            {% if guru.username != data.user %}
-                            <option value="{{ guru.username }}">{{ guru.username }}</option>
+                            {% if guru.user.username != data.user %}
+                            <option value="{{ guru.user.username }}">{{ guru.nama }} - {{ guru.mata_pelajaran }} - {{ guru.jenjang }} - {{ guru.kelas }}</option>
                             {% endif %}
                             {% endfor %}
                         </select>
@@ -55,7 +55,7 @@
                                 required>
                                 <option value="" selected disabled>Pilih Guru</option>
                                 {% for guru in guru_list %}
-                                <option value="{{ guru.username }}">{{ guru.username }}</option>
+                                <option value="{{ guru.user.username }}">{{ guru.nama }} - {{ guru.mapel }} - {{ guru.jenjang }} - {{ guru.kelas }}</option>
                                 {% endfor %}
                             </select>
                         </div>

@@ -48,9 +48,12 @@ def admin_izin_siswa(request):
         if edit_id:
             data_izin = izin.objects.filter(id=edit_id).first()
             if data_izin:
+                siswa = Siswa.objects.get(user=data_izin.user)
                 edit_data_izin_siswa.append({
                     'id': data_izin.id,
-                    'user': data_izin.user,
+                    'nama': siswa.nama,
+                    'kelas': siswa.kelas,
+                    'jenjang': siswa.jenjang,
                     'keterangan': data_izin.keterangan,
                 })
                 
@@ -99,16 +102,18 @@ def admin_izin_siswa(request):
         izin_list = izin.objects.filter(user__siswa__isnull=False)
         
         table_data = [
-            [izin_obj.id, izin_obj.user.username, izin_obj.keterangan]
+            [izin_obj.id, Siswa.objects.get(user=izin_obj.user).nama,
+             f"Kelas {Siswa.objects.get(user=izin_obj.user).kelas} - {Siswa.objects.get(user=izin_obj.user).jenjang}",
+             izin_obj.keterangan]
             for izin_obj in izin_list
         ]
         
         context = get_context()
         context.update({
-            'table_columns': ['ID', 'Nama Siswa', 'Keterangan'],
+            'table_columns': ['ID', 'Nama Siswa', 'Kelas - Jenjang', 'Keterangan'],
             'table_data': table_data,
             'edit_data_izin_siswa': edit_data_izin_siswa,
-            'siswa_list': CustomUser.objects.filter(siswa__isnull=False),
+            'siswa_list': Siswa.objects.all(),
             'izin': True,
             
             'total_data_table': izin_list.count(),
@@ -127,9 +132,13 @@ def admin_izin_guru(request):
         if edit_id:
             data_izin = izin.objects.filter(id=edit_id).first()
             if data_izin:
+                guru = Guru.objects.get(user=data_izin.user)
                 edit_data_izin_guru.append({
                     'id': data_izin.id,
-                    'user': data_izin.user,
+                    'nama': guru.nama,
+                    'mapel': guru.mata_pelajaran,
+                    'jenjang': guru.jenjang,
+                    'kelas': guru.kelas,
                     'keterangan': data_izin.keterangan,
                 })
                 
@@ -178,16 +187,19 @@ def admin_izin_guru(request):
         izin_list = izin.objects.filter(user__guru__isnull=False)
         
         table_data = [
-            [izin_obj.id, izin_obj.user.username, izin_obj.keterangan]
+            [izin_obj.id, Guru.objects.get(user=izin_obj.user).nama,
+             f"Kelas {Guru.objects.get(user=izin_obj.user).kelas} - {Guru.objects.get(user=izin_obj.user).jenjang}",
+             Guru.objects.get(user=izin_obj.user).mata_pelajaran,
+             izin_obj.keterangan]
             for izin_obj in izin_list
         ]
         
         context = get_context()
         context.update({
-            'table_columns': ['ID', 'Nama Guru', 'Keterangan'],
+            'table_columns': ['ID', 'Nama Guru', 'Mata Pelajaran', 'Kelas - Jenjang', 'Keterangan'],
             'table_data': table_data,
             'edit_data_izin_guru': edit_data_izin_guru,
-            'guru_list': CustomUser.objects.filter(guru__isnull=False),
+            'guru_list': Guru.objects.all(),
             'izin': True,
             
             'total_data_table': izin_list.count(),
@@ -206,9 +218,11 @@ def admin_izin_karyawan(request):
         if edit_id:
             data_izin = izin.objects.filter(id=edit_id).first()
             if data_izin:
+                karyawan = Karyawan.objects.get(user=data_izin.user)
                 edit_data_izin_karyawan.append({
                     'id': data_izin.id,
-                    'user': data_izin.user,
+                    'nama': karyawan.nama,
+                    'jabatan': karyawan.jabatan,
                     'keterangan': data_izin.keterangan,
                 })
                 
@@ -257,16 +271,18 @@ def admin_izin_karyawan(request):
         izin_list = izin.objects.filter(user__karyawan__isnull=False)
         
         table_data = [
-            [izin_obj.id, izin_obj.user.username, izin_obj.keterangan]
+            [izin_obj.id, Karyawan.objects.get(user=izin_obj.user).nama,
+             Karyawan.objects.get(user=izin_obj.user).jabatan,
+             izin_obj.keterangan]
             for izin_obj in izin_list
         ]
         
         context = get_context()
         context.update({
-            'table_columns': ['ID', 'Nama Karyawan', 'Keterangan'],
+            'table_columns': ['ID', 'Nama Karyawan', 'Jabatan', 'Keterangan'],
             'table_data': table_data,
             'edit_data_izin_karyawan': edit_data_izin_karyawan,
-            'karyawan_list': CustomUser.objects.filter(karyawan__isnull=False),
+            'karyawan_list': Karyawan.objects.all(),
             'izin': True,
             
             'total_data_table': izin_list.count(),

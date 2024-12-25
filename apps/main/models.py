@@ -268,6 +268,7 @@ class record_absensi(models.Model):
     @property
     def get_id_sakit(self):
         return self.id_sakit
+      
 class tanggal_merah(models.Model):
     nama_acara = models.CharField(max_length=200, null=True, blank=True)
     tanggal = models.DateField(null=True, blank=True)
