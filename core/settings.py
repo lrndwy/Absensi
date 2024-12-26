@@ -12,6 +12,10 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 import os
 from pathlib import Path
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -21,12 +25,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-fw!zps2lo9f5yxw3sn8--ke_lc0z*^5ot$u-62dixk^z=eusj2'
+SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG') == 'True'
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '*').split(',')
 
 
 # Application definition
@@ -162,4 +166,4 @@ STORAGES = {
 }
 
 # Pastikan MEDIA_URL dan MEDIA_ROOT sudah terkonfigurasi dengan benar
-LRND_ENCRYPTION_PASSWORD = 'NAMA_SEKOLAH'
+LRND_ENCRYPTION_PASSWORD = os.getenv('LRND_ENCRYPTION_PASSWORD')
