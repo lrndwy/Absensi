@@ -50,7 +50,7 @@ INSTALLED_APPS = [
     
     # Third Party
     'django_cotton',
-    # 'djangoLrnd',
+    'djangoLrnd',
 ]
 
 MIDDLEWARE = [
@@ -62,7 +62,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    # 'djangoLrnd.middleware.LRNDMiddleware',
+    'djangoLrnd.middleware.LRNDMiddleware',
 ]
 
 ROOT_URLCONF = 'core.urls'
@@ -162,5 +162,4 @@ STORAGES = {
 }
 
 # Pastikan MEDIA_URL dan MEDIA_ROOT sudah terkonfigurasi dengan benar
-# LRND_ENCRYPTION_PASSWORD = 'NAMA_SEKOLAH'
-
+LRND_ENCRYPTION_PASSWORD = 'NAMA_SEKOLAH'
