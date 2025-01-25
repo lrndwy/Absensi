@@ -16,6 +16,8 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.templatetags.static import static
 from django.urls import reverse
 from django.utils import timezone
+from django.http import JsonResponse
+from django.views.decorators.http import require_http_methods
 
 from apps.CustomAdmin.functions import *
 
@@ -391,6 +393,9 @@ def admin_dashboard_absensi_guru(request):
         context.update({
             'guru': True,
             
+            # Tambahkan API_LINK ke context
+            'API_LINK': reverse('api_dashboard_guru') + f'?start={start_date.strftime("%m/%d/%Y")}&end={end_date.strftime("%m/%d/%Y")}',
+            
             # Data Series
             'ds_title': 'Statistik Absensi Guru',
             'ds_percentage': f'{hadir_percentage}%',
@@ -425,7 +430,7 @@ def admin_dashboard_absensi_guru(request):
             'day_ago': (end_date - start_date).days + 1,
             
             # Table data
-            'table_columns': ['ID RECORD', 'NUPTK', 'Nama Guru', 'Jenjang', 'Kelas', 'Mata Pelajaran', 'Checktime', 'Status', 'Tipe Absensi', 'Terlambat (menit)', 'Mesin'],
+            'table_columns': ['ID', 'NUPTK', 'Nama Guru', 'Jenjang', 'Kelas', 'Mata Pelajaran', 'Checktime', 'Status', 'Tipe Absensi', 'Terlambat', 'Mesin'],
             'table_data': absensi_records.values_list(
                 'id',
                 'user__guru__nuptk', 
@@ -470,3 +475,79 @@ def admin_dashboard_absensi_guru(request):
     except Exception as e:
         messages.error(request, f'Terjadi kesalahan pada sistem: {str(e)}')
         return redirect('admin_dashboard')
+
+@cek_instalasi
+@superuser_required
+@require_http_methods(['GET'])
+def api_dashboard_guru(request):
+    try:
+        start_date = request.GET.get('start')
+        end_date = request.GET.get('amp;end')
+        jenjang_selected = request.GET.get('jenjang')
+        mata_pelajaran_selected = request.GET.get('mata_pelajaran')
+        kelas_selected = request.GET.get('kelas')
+        
+        if not start_date or not end_date:
+            end_date = timezone.localtime(timezone.now()).date()
+            start_date = end_date - timezone.timedelta(days=6)
+        else:
+            try:
+                start_date = datetime.strptime(start_date, '%m/%d/%Y').date()
+                end_date = datetime.strptime(end_date, '%m/%d/%Y').date()
+            except ValueError:
+                end_date = timezone.now().date()
+                start_date = end_date - timezone.timedelta(days=6)
+
+        # Query dasar dengan prefetch_related untuk guru
+        absensi_records = record_absensi.objects.filter(
+            user__guru__isnull=False,
+            status_verifikasi='diterima',
+            checktime__date__gte=start_date,
+            checktime__date__lte=end_date
+        ).select_related('user').prefetch_related('user__guru_set').order_by('-checktime')
+
+        # Filter tambahan
+        filters = {
+            'jenjang': ('user__guru__jenjang__nama', jenjang_selected),
+            'mata_pelajaran': ('user__guru__mata_pelajaran__nama', mata_pelajaran_selected),
+            'kelas': ('user__guru__kelas__nama', kelas_selected)
+        }
+
+        for filter_name, (filter_field, filter_value) in filters.items():
+            if filter_value:
+                absensi_records = absensi_records.filter(**{filter_field: filter_value})
+
+        data = []
+        for record in absensi_records:
+            guru = record.user.guru_set.first()
+            
+            # Format keterlambatan
+            terlambat_display = '-'
+            if record.terlambat is not None and record.terlambat > 0:
+                if record.terlambat < 60:
+                    terlambat_display = f"{record.terlambat} menit"
+                else:
+                    jam = record.terlambat // 60
+                    menit = record.terlambat % 60
+                    if menit > 0:
+                        terlambat_display = f"{jam} jam {menit} menit"
+                    else:
+                        terlambat_display = f"{jam} jam"
+
+            data.append({
+                'id': record.id,
+                'nuptk': guru.nuptk if guru else '-',
+                'nama_guru': guru.nama if guru else '-',
+                'jenjang': guru.jenjang.nama if guru and guru.jenjang else '-',
+                'kelas': guru.kelas.nama if guru and guru.kelas else '-',
+                'mata_pelajaran': guru.mata_pelajaran.nama if guru and guru.mata_pelajaran else '-',
+                'checktime': timezone.localtime(record.checktime).strftime('%Y-%m-%d %H:%M'),
+                'status': record.status,
+                'tipe_absensi': record.tipe_absensi,
+                'terlambat': terlambat_display,
+                'mesin': record.mesin or '-'
+            })
+
+        return JsonResponse({'absensi': data}, safe=False)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)

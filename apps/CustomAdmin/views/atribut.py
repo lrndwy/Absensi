@@ -16,6 +16,8 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.templatetags.static import static
 from django.urls import reverse
 from django.utils import timezone
+from django.http import JsonResponse
+from django.views.decorators.http import require_http_methods
 
 from apps.CustomAdmin.functions import *
 
@@ -94,11 +96,12 @@ def admin_atribut_kelas(request):
             ]
             context = get_context()
             context.update({
-                'table_columns': ['ID Kelas', 'Nama Kelas'],
+                'table_columns': ['ID', 'Nama'],
                 'table_data': table_data,
                 'edit_data_atribut_kelas': edit_data_atribut_kelas,
                 'kelas': True,
                 'total_data_table': kelas_list.count(),
+                'API_LINK': reverse('api_kelas'),
             })
             return render(request, 'CustomAdmin/admin_atribut_kelas.html', context)
         except Exception as e:
@@ -161,11 +164,12 @@ def admin_atribut_mapel(request):
             ]
             context = get_context()
             context.update({
-                'table_columns': ['ID Mata Pelajaran', 'Nama Mata Pelajaran'],
+                'table_columns': ['ID', 'Nama'],
                 'table_data': table_data,
                 'edit_data_atribut_mapel': edit_data_atribut_mapel,
                 'mapel': True,
                 'total_data_table': mapel_list.count(),
+                'API_LINK': reverse('api_mapel'),
             })
             return render(request, 'CustomAdmin/admin_atribut_mapel.html', context)
         except Exception as e:
@@ -230,12 +234,13 @@ def admin_atribut_jabatan(request):
             ]
             context = get_context()
             context.update({
-                'table_columns': ['ID Jabatan', 'Nama Jabatan'],
+                'table_columns': ['ID', 'Nama'],
                 'table_data': table_data,
                 'edit_data_atribut_jabatan': edit_data_atribut_jabatan,
                 'jabatan': True,
                 
                 'total_data_table': jabatan_list.count(),
+                'API_LINK': reverse('api_jabatan'),
             })
             return render(request, 'CustomAdmin/admin_atribut_jabatan.html', context)
         except Exception as e:
@@ -296,12 +301,13 @@ def admin_atribut_jenjang(request):
             ]
             context = get_context()
             context.update({
-                'table_columns': ['ID Jenjang', 'Nama Jenjang'],
+                'table_columns': ['ID', 'Nama'],
                 'table_data': table_data,
                 'edit_data_atribut_jenjang': edit_data_atribut_jenjang,
                 'jenjang': True,
                 
                 'total_data_table': jenjang_list.count(),
+                'API_LINK': reverse('api_jenjang'),
             })
             return render(request, 'CustomAdmin/admin_atribut_jenjang.html', context)
         except Exception as e:
@@ -311,3 +317,72 @@ def admin_atribut_jenjang(request):
     except Exception as e:
         messages.error(request, f'Terjadi kesalahan pada sistem: {str(e)}')
         return redirect('admin_atribut_jenjang')
+
+# Tambahkan API views
+@cek_instalasi
+@superuser_required
+@require_http_methods(['GET'])
+def api_kelas(request):
+    try:
+        kelas_list = kelas.objects.all()
+        data = [
+            {
+                'id': kls.id,
+                'nama': kls.nama
+            }
+            for kls in kelas_list
+        ]
+        return JsonResponse({'kelas': data}, safe=False)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+@cek_instalasi
+@superuser_required
+@require_http_methods(['GET'])
+def api_mapel(request):
+    try:
+        mapel_list = mata_pelajaran.objects.all()
+        data = [
+            {
+                'id': mpl.id,
+                'nama': mpl.nama
+            }
+            for mpl in mapel_list
+        ]
+        return JsonResponse({'mapel': data}, safe=False)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+@cek_instalasi
+@superuser_required
+@require_http_methods(['GET'])
+def api_jabatan(request):
+    try:
+        jabatan_list = jabatan.objects.all()
+        data = [
+            {
+                'id': jbt.id,
+                'nama': jbt.nama
+            }
+            for jbt in jabatan_list
+        ]
+        return JsonResponse({'jabatan': data}, safe=False)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+@cek_instalasi
+@superuser_required
+@require_http_methods(['GET'])
+def api_jenjang(request):
+    try:
+        jenjang_list = jenjang.objects.all()
+        data = [
+            {
+                'id': jjg.id,
+                'nama': jjg.nama
+            }
+            for jjg in jenjang_list
+        ]
+        return JsonResponse({'jenjang': data}, safe=False)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)

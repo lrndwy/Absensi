@@ -56,4 +56,31 @@ urlpatterns = [
     path('karyawan/pengaturan/', karyawan.karyawan_pengaturan, name='karyawan_pengaturan'),
     # Export Data
     path('export/', main.export_data, name='export_data'),
+    
+    # API
+    path('api/siswa/', admin.api_siswa, name='api_siswa'),
+    path('api/karyawan/', admin.api_karyawan, name='api_karyawan'),
+    path('api/guru/', admin.api_guru, name='api_guru'),
+    path('api/dashboard/', admin.api_dashboard, name='api_dashboard'),
+    path('api/dashboard/karyawan/', admin.api_dashboard_karyawan, name='api_dashboard_karyawan'),
+    path('api/dashboard/guru/', admin.api_dashboard_guru, name='api_dashboard_guru'),
+    path('api/dashboard/siswa/', admin.api_dashboard_siswa, name='api_dashboard_siswa'),
+    
+    # API Sakit
+    path('api/sakit/siswa/', admin.api_sakit_siswa, name='api_sakit_siswa'),
+    path('api/sakit/guru/', admin.api_sakit_guru, name='api_sakit_guru'),
+    path('api/sakit/karyawan/', admin.api_sakit_karyawan, name='api_sakit_karyawan'),
+    
+    # API Izin
+    path('api/izin/siswa/', admin.api_izin_siswa, name='api_izin_siswa'),
+    path('api/izin/guru/', admin.api_izin_guru, name='api_izin_guru'),
+    path('api/izin/karyawan/', admin.api_izin_karyawan, name='api_izin_karyawan'),
+    
+    # API Atribut
+    path('api/kelas/', admin.api_kelas, name='api_kelas'),
+    path('api/mapel/', admin.api_mapel, name='api_mapel'),
+    path('api/jabatan/', admin.api_jabatan, name='api_jabatan'),
+    path('api/jenjang/', admin.api_jenjang, name='api_jenjang'),
+    path('api/verifikasi/', admin.api_verifikasi, name='api_verifikasi'),
+    path('api/tanggal-merah/', admin.api_tanggal_merah, name='api_tanggal_merah'),
 ]

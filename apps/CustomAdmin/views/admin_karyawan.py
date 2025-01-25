@@ -5,6 +5,9 @@ from django.contrib import messages
 from django.db.models import OuterRef, Subquery
 from django.shortcuts import redirect, render
 from django.utils import timezone
+from django.http import JsonResponse
+from django.views.decorators.http import require_http_methods
+from django.urls import reverse
 
 from apps.CustomAdmin.functions import *
 
@@ -476,11 +479,10 @@ def admin_karyawan(request):
         # Memproses queryset untuk menampilkan status yang lebih detail
         table_data = []
         for karyawan_data in karyawan:
-            status = karyawan_data[-4]  # today_status
-            status_verifikasi = karyawan_data[-3]  # today_status_verifikasi
-            checktime = timezone.localtime(karyawan_data[-2])  # today_checktime
-            tipe_absensi = karyawan_data[-1]  # today_tipe_absensi
-            print(status, status_verifikasi, checktime, tipe_absensi)
+            status = karyawan_data[-4]
+            status_verifikasi = karyawan_data[-3]
+            checktime = karyawan_data[-2]
+            tipe_absensi = karyawan_data[-1]
             
             if status_verifikasi == 'menunggu':
                 display_status = "Belum Diverifikasi"
@@ -492,17 +494,15 @@ def admin_karyawan(request):
                 absensi = record_absensi.objects.filter(
                     user__karyawan__id=karyawan_data[0],
                     checktime__date=today,
-                    tipe_absensi='masuk',
-                    status_verifikasi='diterima'
+                    tipe_absensi='masuk'
                 ).first()
                 
                 if absensi and absensi.terlambat > 0:
-                    menit_terlambat = absensi.terlambat
-                    if menit_terlambat < 60:
-                        display_status = f"Hadir, terlambat {int(menit_terlambat)} menit"
+                    if absensi.terlambat < 60:
+                        display_status = f"Hadir, terlambat {absensi.terlambat} menit"
                     else:
-                        jam_terlambat = int(menit_terlambat // 60)
-                        sisa_menit = int(menit_terlambat % 60)
+                        jam_terlambat = int(absensi.terlambat // 60)
+                        sisa_menit = int(absensi.terlambat % 60)
                         display_status = f"Hadir, terlambat {jam_terlambat} jam {sisa_menit} menit"
                 else:
                     display_status = "Hadir"
@@ -510,21 +510,91 @@ def admin_karyawan(request):
                 display_status = status if status else "Belum Hadir"
             
             table_data.append(list(karyawan_data[:-4]) + [display_status])
+        
         context = get_context()
         context.update({
-            'table_columns': ['ID Karyawan', 'UserID', 'Nama', 'Jabatan', 'Alamat', 'Username', 'Status'],
-            'table_data': table_data,
-            
-            'jabatan_list': jabatan.objects.all(),
-            
-            'edit_data_karyawan': edit_data_karyawan,
-            
             'karyawan': True,
-            
+            'table_columns': ['ID', 'UserID', 'Nama', 'Jabatan', 'Alamat', 'Username', 'Status'],
+            'table_data': table_data,
+            'jabatan_list': jabatan.objects.all(),
+            'edit_data_karyawan': edit_data_karyawan,
             'total_data_table': karyawan_filter.count(),
+            'API_LINK': reverse('api_karyawan') + '?jabatan=' + request.GET.get('jabatan', ''),
             'print': True,
         })
         return render(request, 'CustomAdmin/admin_karyawan.html', context)
     except Exception as e:
         messages.error(request, f'Terjadi kesalahan pada sistem: {str(e)}')
         return redirect('admin_karyawan')
+
+@cek_instalasi
+@superuser_required
+@require_http_methods(['GET'])
+def api_karyawan(request):
+    try:
+        today = timezone.localtime(timezone.now()).date()
+        
+        # Subquery untuk status absensi
+        latest_absensi = record_absensi.objects.filter(
+            user__karyawan=OuterRef('pk'),
+            checktime__date=today
+        ).order_by('-checktime').values('status', 'status_verifikasi', 'tipe_absensi', 'checktime')[:1]
+        
+        # Base queryset
+        karyawan_list = Karyawan.objects.select_related('user', 'jabatan').annotate(
+            today_status=Subquery(latest_absensi.values('status')),
+            today_status_verifikasi=Subquery(latest_absensi.values('status_verifikasi')),
+            today_tipe_absensi=Subquery(latest_absensi.values('tipe_absensi')),
+            today_checktime=Subquery(latest_absensi.values('checktime'))
+        )
+        
+        # Terapkan filter berdasarkan parameter URL
+        jabatan_filter = request.GET.get('jabatan')
+        if jabatan_filter:
+            karyawan_list = karyawan_list.filter(jabatan__nama=jabatan_filter)
+        
+        data = []
+        for karyawan in karyawan_list:
+            status = karyawan.today_status
+            status_verifikasi = karyawan.today_status_verifikasi
+            tipe_absensi = karyawan.today_tipe_absensi
+            
+            # Logic untuk display status
+            if status_verifikasi == 'menunggu':
+                display_status = "Belum Diverifikasi"
+            elif status_verifikasi == 'ditolak':
+                display_status = "Ditolak"
+            elif tipe_absensi == 'pulang':
+                display_status = "Sudah Pulang"
+            elif status == 'hadir' and tipe_absensi == 'masuk':
+                absensi = record_absensi.objects.filter(
+                    user__karyawan__id=karyawan.id,
+                    checktime__date=today,
+                    tipe_absensi='masuk'
+                ).first()
+                
+                if absensi and absensi.terlambat > 0:
+                    if absensi.terlambat < 60:
+                        display_status = f"Hadir, terlambat {absensi.terlambat} menit"
+                    else:
+                        jam_terlambat = int(absensi.terlambat // 60)
+                        sisa_menit = int(absensi.terlambat % 60)
+                        display_status = f"Hadir, terlambat {jam_terlambat} jam {sisa_menit} menit"
+                else:
+                    display_status = "Hadir"
+            else:
+                display_status = status if status else "Belum Hadir"
+            
+            data.append({
+                'id': karyawan.id,
+                'userid': karyawan.user.userid,
+                'nama': karyawan.nama,
+                'jabatan': karyawan.jabatan.nama if karyawan.jabatan else '-',
+                'alamat': karyawan.alamat or '-',
+                'username': karyawan.user.username,
+                'status': display_status
+            })
+        
+        return JsonResponse({'karyawan': data}, safe=False)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)

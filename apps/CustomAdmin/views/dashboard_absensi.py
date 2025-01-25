@@ -16,6 +16,8 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.templatetags.static import static
 from django.urls import reverse
 from django.utils import timezone
+from django.http import JsonResponse
+from django.views.decorators.http import require_http_methods
 
 from apps.CustomAdmin.functions import *
 
@@ -165,26 +167,6 @@ def admin_dashboard(request):
                                 # if not jam_kerja:
                                 #     messages.error(request, 'Jam kerja belum diatur di sistem.')
                                 #     return redirect('admin_dashboard')
-                                    
-                                # # Hitung selisih waktu dari absen masuk
-                                # selisih_waktu = waktu_pulang - jam_masuk_record.checktime
-                                
-                                # # Validasi minimal jam kerja
-                                # if selisih_waktu < jam_kerja:
-                                #     messages.error(request, f'Waktu pulang tidak boleh kurang dari {jam_kerja} dari jam masuk.')
-                                #     return redirect('admin_dashboard')
-                                
-                                # # Validasi jam pulang tidak lebih awal dari jadwal
-                                # if jam_pulang_ref:
-                                #     waktu_pulang_min = datetime.combine(
-                                #         waktu_pulang.date(), 
-                                #         jam_pulang_ref
-                                #     )
-                                #     waktu_pulang_min = timezone.make_aware(waktu_pulang_min)
-                                    
-                                #     if waktu_pulang < waktu_pulang_min:
-                                #         messages.error(request, f'Waktu pulang tidak boleh lebih awal dari jadwal ({jam_pulang_ref.strftime("%H:%M")})')
-                                #         return redirect('admin_dashboard')
                                     
                             except record_absensi.DoesNotExist:
                                 messages.error(request, 'Tidak ada data absensi masuk untuk hari ini.')
@@ -438,9 +420,12 @@ def admin_dashboard(request):
 
         context = get_context()
         context.update({
+            # Tambahkan API_LINK ke context
+            'API_LINK': reverse('api_dashboard') + f'?start={start_date.strftime("%m/%d/%Y")}&end={end_date.strftime("%m/%d/%Y")}',
+            
             # Data Series
             'ds_title': 'Statistik Absensi',
-            'ds_percentage': str(hadir_percentage)+'%',
+            'ds_percentage': f'{hadir_percentage}%',
             'ds_name_1': 'Hadir',
             'ds_data_1': hadir_data,
             'ds_name_2': 'Sakit',
@@ -472,7 +457,7 @@ def admin_dashboard(request):
             'day_ago': (end_date - start_date).days + 1,
             
             # Table data (updated)
-            'table_columns': ['id records', 'userid', 'Username', 'Nama', 'Checktime', 'Status', 'Tipe Absensi', 'Terlambat (menit)', 'Mesin'],
+            'table_columns': ['ID', 'UserID', 'Username', 'Nama', 'Checktime', 'Status', 'Tipe Absensi', 'Terlambat', 'Mesin'],
             'table_data': absensi_records.annotate(
                 nama=Coalesce(
                     'user__siswa__nama',
@@ -480,7 +465,17 @@ def admin_dashboard(request):
                     'user__karyawan__nama',
                     'user__first_name'
                 ),
-            ).values_list('id', 'user__userid', 'user__username', 'nama', 'checktime', 'status', 'tipe_absensi', 'terlambat', 'mesin'),
+            ).values_list(
+                'id', 
+                'user__userid', 
+                'user__username', 
+                'nama', 
+                'checktime', 
+                'status', 
+                'tipe_absensi', 
+                'terlambat',
+                'mesin'
+            ),
             
             'start_date': start_date.strftime('%m/%d/%Y'),
             'end_date': end_date.strftime('%m/%d/%Y'),
@@ -507,4 +502,68 @@ def admin_dashboard(request):
     except Exception as e:
         messages.error(request, f'Terjadi kesalahan pada sistem: {str(e)}')
         return redirect('admin_dashboard')
+
+
+@cek_instalasi
+@superuser_required
+@require_http_methods(['GET'])
+def api_dashboard(request):
+    try:
+        start_date = request.GET.get('start')
+        end_date = request.GET.get('amp;end')
+        
+        if not start_date or not end_date:
+            end_date = timezone.localtime(timezone.now()).date()
+            start_date = end_date - timezone.timedelta(days=6)
+        else:
+            try:
+                start_date = datetime.strptime(start_date, '%m/%d/%Y').date()
+                end_date = datetime.strptime(end_date, '%m/%d/%Y').date()
+            except ValueError:
+                end_date = timezone.now().date()
+                start_date = end_date - timezone.timedelta(days=6)
+
+        absensi_records = record_absensi.objects.filter(
+            status_verifikasi='diterima',
+            checktime__date__gte=start_date,
+            checktime__date__lte=end_date
+        ).order_by('-checktime')
+
+        data = []
+        for record in absensi_records.annotate(
+            nama=Coalesce(
+                'user__siswa__nama',
+                'user__guru__nama',
+                'user__karyawan__nama',
+                'user__first_name'
+            )
+        ):
+            # Format keterlambatan
+            terlambat_display = '-'
+            if record.terlambat and record.terlambat > 0:
+                if record.terlambat < 60:
+                    terlambat_display = f"{record.terlambat} menit"
+                else:
+                    jam = record.terlambat // 60
+                    menit = record.terlambat % 60
+                    if menit > 0:
+                        terlambat_display = f"{jam} jam {menit} menit"
+                    else:
+                        terlambat_display = f"{jam} jam"
+
+            data.append({
+                'id': record.id,
+                'userid': record.user.userid,
+                'username': record.user.username,
+                'nama': record.nama,
+                'checktime': timezone.localtime(record.checktime).strftime('%Y-%m-%d %H:%M'),
+                'status': record.status,
+                'tipe_absensi': record.tipe_absensi,
+                'terlambat': terlambat_display,
+                'mesin': record.mesin or '-'
+            })
+
+        return JsonResponse({'absensi': data}, safe=False)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
 

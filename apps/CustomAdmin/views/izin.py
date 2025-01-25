@@ -16,6 +16,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.templatetags.static import static
 from django.urls import reverse
 from django.utils import timezone
+from django.http import JsonResponse
 
 from apps.CustomAdmin.functions import *
 
@@ -110,12 +111,12 @@ def admin_izin_siswa(request):
         
         context = get_context()
         context.update({
-            'table_columns': ['ID', 'Nama Siswa', 'Kelas - Jenjang', 'Keterangan'],
+            'table_columns': ['ID', 'Nama', 'Kelas Jenjang', 'Keterangan'],
             'table_data': table_data,
             'edit_data_izin_siswa': edit_data_izin_siswa,
             'siswa_list': Siswa.objects.all(),
             'izin': True,
-            
+            'API_LINK': reverse('api_izin_siswa'),
             'total_data_table': izin_list.count(),
         })
         return render(request, 'CustomAdmin/admin_izin_siswa.html', context)
@@ -196,12 +197,12 @@ def admin_izin_guru(request):
         
         context = get_context()
         context.update({
-            'table_columns': ['ID', 'Nama Guru', 'Mata Pelajaran', 'Kelas - Jenjang', 'Keterangan'],
+            'table_columns': ['ID', 'Nama', 'Mata Pelajaran', 'Kelas Jenjang', 'Keterangan'],
             'table_data': table_data,
             'edit_data_izin_guru': edit_data_izin_guru,
             'guru_list': Guru.objects.all(),
             'izin': True,
-            
+            'API_LINK': reverse('api_izin_guru'),
             'total_data_table': izin_list.count(),
         })
         return render(request, 'CustomAdmin/admin_izin_guru.html', context)
@@ -279,15 +280,71 @@ def admin_izin_karyawan(request):
         
         context = get_context()
         context.update({
-            'table_columns': ['ID', 'Nama Karyawan', 'Jabatan', 'Keterangan'],
+            'table_columns': ['ID', 'Nama', 'Jabatan', 'Keterangan'],
             'table_data': table_data,
             'edit_data_izin_karyawan': edit_data_izin_karyawan,
             'karyawan_list': Karyawan.objects.all(),
             'izin': True,
-            
+            'API_LINK': reverse('api_izin_karyawan'),
             'total_data_table': izin_list.count(),
         })
         return render(request, 'CustomAdmin/admin_izin_karyawan.html', context)
     except Exception as e:
         messages.error(request, f'Terjadi kesalahan pada sistem: {str(e)}')
         return redirect('admin_izin_karyawan')
+
+# API Views
+@cek_instalasi
+@superuser_required
+def api_izin_siswa(request):
+    try:
+        izin_list = izin.objects.filter(user__siswa__isnull=False)
+        data = [
+            {
+                'id': izin_obj.id,
+                'nama': Siswa.objects.get(user=izin_obj.user).nama,
+                'kelas_jenjang': f"Kelas {Siswa.objects.get(user=izin_obj.user).kelas} - {Siswa.objects.get(user=izin_obj.user).jenjang}",
+                'keterangan': izin_obj.keterangan
+            }
+            for izin_obj in izin_list
+        ]
+        return JsonResponse({'data': data})
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+@cek_instalasi
+@superuser_required
+def api_izin_guru(request):
+    try:
+        izin_list = izin.objects.filter(user__guru__isnull=False)
+        data = [
+            {
+                'id': izin_obj.id,
+                'nama': Guru.objects.get(user=izin_obj.user).nama,
+                'mata_pelajaran': str(Guru.objects.get(user=izin_obj.user).mata_pelajaran),
+                'kelas_jenjang': f"Kelas {Guru.objects.get(user=izin_obj.user).kelas} - {Guru.objects.get(user=izin_obj.user).jenjang}",
+                'keterangan': izin_obj.keterangan
+            }
+            for izin_obj in izin_list
+        ]
+        return JsonResponse({'data': data})
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+@cek_instalasi
+@superuser_required
+def api_izin_karyawan(request):
+    try:
+        izin_list = izin.objects.filter(user__karyawan__isnull=False)
+        data = [
+            {
+                'id': izin_obj.id,
+                'nama': Karyawan.objects.get(user=izin_obj.user).nama,
+                'jabatan': str(Karyawan.objects.get(user=izin_obj.user).jabatan),
+                'keterangan': izin_obj.keterangan
+            }
+            for izin_obj in izin_list
+        ]
+        return JsonResponse({'data': data})
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)

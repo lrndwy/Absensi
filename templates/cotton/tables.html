@@ -75,131 +75,23 @@
                         </th>
                     </tr>
                 </thead>
-                <tbody>
-                    {% if table_data %} {% for row in table_data %}
-                    <tr id="row-{{ row.0 }}" class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+                <tbody id="tableBody">
+                    <tr class="animate-pulse skeleton-row">
                         <td class="w-4 p-4">
-                            <div class="flex items-center">
-                                <input id="checkbox-{{ row.0 }}" type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                                    value="{{ row.0 }}" name="checkbox-selected">
-                                <label for="checkbox-{{ row.0 }}" class="sr-only">checkbox</label>
+                            <div class="h-4 w-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                        </td>
+                        {% for column in table_columns %}
+                        <td class="px-6 py-4">
+                            <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-full"></div>
+                        </td>
+                        {% endfor %}
+                        <td class="px-6 py-4">
+                            <div class="flex gap-2">
+                                <div class="h-4 w-10 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                                <div class="h-4 w-10 bg-gray-200 dark:bg-gray-700 rounded"></div>
                             </div>
                         </td>
-                        {% for cell in row %}
-                        <td class="px-6 py-4">
-                            {{ cell|default_if_none:'-' }}
-                        </td>
-                        {% endfor %} {% if verifikasi %}
-                        <td class="px-6 py-4">
-                            <a href="{{ verifikasi_url }}?id={{ row.0 }}" class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-600">
-                                Lihat
-                            </a>
-                        </td>
-                        {% else %}
-                        <td class="px-6 py-4">
-                            <a href="{{ edit_url }}?id={{ row.0 }}" class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-600 mr-2">
-                                Edit
-                            </a>
-                            {% if print %}
-                            
-                            <button onclick="showPrintModal('{{ row.0 }}')" class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-600">
-                                Cetak
-                            </button>
-
-                            <!-- Modal -->
-                            <div id="printModal{{ row.0 }}" class="hidden fixed top-0 right-0 left-0 z-50 w-full h-full flex items-center justify-center" style="background-color: rgba(0, 0, 0, 0.5);">
-                                <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white dark:bg-gray-800 dark:border-gray-700">
-                                    <div class="mt-3 text-center">
-                                        <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white">Pilih Rentang Tanggal</h3>
-                                        <div class="mt-2 px-7 py-3">
-                                            <div class="flex flex-col gap-4">
-                                                <div class="relative">
-                                                    <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
-                                                        <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                                                            <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
-                                                        </svg>
-                                                    </div>
-                                                    <input id="start-date{{ row.0 }}" type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400" placeholder="Tanggal Mulai">
-                                                </div>
-                                                <div class="relative">
-                                                    <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
-                                                        <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                                                            <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
-                                                        </svg>
-                                                    </div>
-                                                    <input id="end-date{{ row.0 }}" type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400" placeholder="Tanggal Akhir">
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="items-center px-4 py-3">
-                                            <button onclick="printReport('{{ row.0 }}')" class="px-4 py-2 bg-blue-500 text-white text-base font-medium rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-800 dark:focus:ring-blue-800">
-                                                Cetak
-                                            </button>
-                                            <button onclick="closePrintModal('{{ row.0 }}')" class="px-4 py-2 bg-gray-500 text-white text-base font-medium rounded-md shadow-sm hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-300 ml-2 dark:bg-gray-600 dark:hover:bg-gray-800 dark:focus:ring-gray-800">
-                                                Batal
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <script>
-                                // Fungsi untuk menampilkan modal
-                                function showPrintModal(id) {
-                                    const modal = document.getElementById(`printModal${id}`);
-                                    if (modal) {
-                                        modal.classList.remove('hidden');
-                                    }
-                                }
-
-                                // Fungsi untuk menutup modal
-                                function closePrintModal(id) {
-                                    const modal = document.getElementById(`printModal${id}`);
-                                    if (modal) {
-                                        modal.classList.add('hidden');
-                                    }
-                                }
-
-                                // Inisialisasi datepicker untuk setiap modal
-                                document.addEventListener('DOMContentLoaded', function() {
-                                    const rows = document.querySelectorAll('[id^="row-"]');
-                                    rows.forEach(row => {
-                                        const id = row.id.split('-')[1];
-                                        const startDate = document.getElementById(`start-date${id}`);
-                                        const endDate = document.getElementById(`end-date${id}`);
-                                        
-                                        if(startDate && endDate) {
-                                            new Datepicker(startDate, {
-                                                format: 'yyyy-mm-dd',
-                                            });
-                                            new Datepicker(endDate, {
-                                                format: 'yyyy-mm-dd',
-                                            });
-                                        }
-                                    });
-                                });
-
-                                function printReport(id) {
-                                    const startDate = document.getElementById(`start-date${id}`).value;
-                                    const endDate = document.getElementById(`end-date${id}`).value;
-                                    
-                                    if(!startDate || !endDate) {
-                                        alert('Silakan pilih tanggal mulai dan akhir');
-                                        return;
-                                    }
-                                    
-                                    window.location.href = `?print=${id}&start=${startDate}&end=${endDate}`;
-                                }
-                            </script>
-                            {% endif %}
-                        </td>
-                        {% endif %}
                     </tr>
-                    {% endfor %} {% else %}
-                    <tr>
-                        <td colspan="{{ table_columns|length|add:2 }}" class="text-center py-4">Belum ada data</td>
-                    </tr>
-                    {% endif %}
                 </tbody>
             </table>
         </div>
@@ -318,3 +210,172 @@
         document.getElementById('table_data').value = JSON.stringify(data);
     }
 </script>
+
+<script>
+    let editUrl; // Deklarasi variabel di scope global
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const apiUrl = '{{ API_LINK }}';
+        editUrl = '{{ edit_url }}'; // Assign nilai ke variabel global
+        const tableColumns = {{ table_columns|safe }};
+        
+        if (apiUrl) {
+            // Tambahkan 5 baris skeleton loading
+            const skeletonHTML = document.querySelector('.skeleton-row').outerHTML;
+            document.getElementById('tableBody').innerHTML = skeletonHTML.repeat(5);
+            
+            fetchData();
+        }
+
+        async function fetchData() {
+            try {
+                const response = await fetch(apiUrl);
+                const data = await response.json();
+                
+                // Tambahkan delay artificial 500ms untuk memperlihatkan loading
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                // Ambil key pertama dari response untuk mendapatkan array datanya
+                const key = Object.keys(data)[0];
+                const tableData = data[key];
+                
+                const tableBody = document.getElementById('tableBody');
+                tableBody.innerHTML = '';
+
+                if (tableData && tableData.length > 0) {
+                    tableData.forEach(row => {
+                        const tr = document.createElement('tr');
+                        tr.className = 'bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600';
+                        
+                        // Checkbox column
+                        tr.innerHTML = `
+                            <td class="w-4 p-4">
+                                <div class="flex items-center">
+                                    <input id="checkbox-${row.id}" type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                                        value="${row.id}" name="checkbox-selected">
+                                    <label for="checkbox-${row.id}" class="sr-only">checkbox</label>
+                                </div>
+                            </td>
+                        `;
+                        
+                        // Data columns - sesuaikan dengan table_columns
+                        tableColumns.forEach((column, index) => {
+                            const value = row[column.toLowerCase().replace(/ /g, '_')] || '-';
+                            tr.innerHTML += `
+                                <td class="px-6 py-4">
+                                    ${value}
+                                </td>
+                            `;
+                        });
+                        
+                        // Action column
+                        tr.innerHTML += `
+                            <td class="px-6 py-4 flex gap-2">
+                                <a href="${editUrl}?id=${row.id}" 
+                                   class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-600">
+                                    Edit
+                                </a>
+                                <button onclick="deleteData(${row.id})" 
+                                        class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-600">
+                                    Hapus
+                                </button>
+                            </td>
+                        `;
+                        
+                        tableBody.appendChild(tr);
+                    });
+                } else {
+                    tableBody.innerHTML = `
+                        <tr>
+                            <td colspan="${tableColumns.length + 2}" class="text-center py-4">
+                                Belum ada data
+                            </td>
+                        </tr>
+                    `;
+                }
+                
+                // Update total data
+                const totalDataElement = document.getElementById('filteredCount');
+                if (totalDataElement) {
+                    totalDataElement.textContent = tableData.length;
+                }
+                
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('tableBody').innerHTML = `
+                    <tr>
+                        <td colspan="${tableColumns.length + 2}" class="text-center py-4 text-red-500">
+                            Gagal memuat data: ${error.message}
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+    });
+</script>
+
+<script>
+    function deleteData(id) {
+        if (confirm('Apakah Anda yakin ingin menghapus data ini?')) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = editUrl;
+
+            const csrfInput = document.createElement('input');
+            csrfInput.type = 'hidden';
+            csrfInput.name = 'csrfmiddlewaretoken';
+            csrfInput.value = document.querySelector('[name=csrfmiddlewaretoken]').value;
+            
+            const actionInput = document.createElement('input');
+            actionInput.type = 'hidden';
+            actionInput.name = 'action';
+            actionInput.value = 'hapus';
+            
+            const selectedIdsInput = document.createElement('input');
+            selectedIdsInput.type = 'hidden';
+            selectedIdsInput.name = 'selectedIds';
+            selectedIdsInput.value = id;
+
+            form.appendChild(csrfInput);
+            form.appendChild(actionInput);
+            form.appendChild(selectedIdsInput);
+            
+            document.body.appendChild(form);
+            form.submit();
+        }
+    }
+</script>
+
+<style>
+    @keyframes shimmer {
+        0% {
+            background-position: -1000px 0;
+        }
+        100% {
+            background-position: 1000px 0;
+        }
+    }
+
+    .animate-pulse {
+        animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+
+    .skeleton-row td div {
+        background-image: linear-gradient(
+            90deg,
+            rgba(156, 163, 175, 0) 0,
+            rgba(156, 163, 175, 0.2) 20%,
+            rgba(156, 163, 175, 0.5) 60%,
+            rgba(156, 163, 175, 0)
+        );
+        background-size: 1000px 100%;
+        animation: shimmer 2s infinite linear;
+    }
+
+    @keyframes pulse {
+        50% {
+            opacity: .5;
+        }
+    }
+</style>
+

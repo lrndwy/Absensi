@@ -16,6 +16,8 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.templatetags.static import static
 from django.urls import reverse
 from django.utils import timezone
+from django.http import JsonResponse
+from django.views.decorators.http import require_http_methods
 
 from apps.CustomAdmin.functions import *
 
@@ -102,14 +104,52 @@ def admin_verifikasi(request):
 
         context = get_context()
         context.update({
-            'table_columns': ['ID Record', 'Username', 'Entitas', 'Nama', 'Status', 'Waktu', 'Status Verifikasi'],
+            'table_columns': ['ID', 'Username', 'Entitas', 'Nama', 'Status', 'Waktu', 'Status Verifikasi'],
             'table_data': table_data,
             'total_data_table': len(table_data),
             'verifikasi': True,
             'edit_data_verifikasi': edit_data_verifikasi,
             'status_verifikasi_list': ['menunggu', 'diterima', 'ditolak'],
+            'API_LINK': reverse('api_verifikasi'),
         })
         return render(request, 'CustomAdmin/admin_verifikasi.html', context)
     except Exception as e:
         messages.error(request, f'Terjadi kesalahan pada sistem: {str(e)}')
         return redirect('admin_verifikasi')
+
+@cek_instalasi
+@superuser_required
+@require_http_methods(['GET'])
+def api_verifikasi(request):
+    try:
+        record_absensi_list = record_absensi.objects.filter(status_verifikasi='menunggu')
+        
+        data = []
+        for record in record_absensi_list:
+            # Tentukan entitas dan nama
+            if Siswa.objects.filter(user=record.user).exists():
+                entitas = 'Siswa'
+                nama = Siswa.objects.get(user=record.user).nama
+            elif Guru.objects.filter(user=record.user).exists():
+                entitas = 'Guru'
+                nama = Guru.objects.get(user=record.user).nama
+            elif Karyawan.objects.filter(user=record.user).exists():
+                entitas = 'Karyawan'
+                nama = Karyawan.objects.get(user=record.user).nama
+            else:
+                entitas = '-'
+                nama = '-'
+
+            data.append({
+                'id': record.id,
+                'username': record.user.username,
+                'entitas': entitas,
+                'nama': nama,
+                'status': record.status,
+                'waktu': timezone.localtime(record.checktime).strftime('%Y-%m-%d %H:%M:%S'),
+                'status_verifikasi': record.status_verifikasi
+            })
+
+        return JsonResponse({'data': data})
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)

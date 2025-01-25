@@ -16,6 +16,8 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.templatetags.static import static
 from django.urls import reverse
 from django.utils import timezone
+from django.http import JsonResponse
+from django.views.decorators.http import require_http_methods
 
 from apps.CustomAdmin.functions import *
 
@@ -401,6 +403,9 @@ def admin_dashboard_absensi_siswa(request):
         context.update({
             'siswa': True,
             
+            # Tambahkan API_LINK ke context
+            'API_LINK': reverse('api_dashboard_siswa') + f'?start={start_date.strftime("%m/%d/%Y")}&end={end_date.strftime("%m/%d/%Y")}&jenjang={jenjang_selected or ""}&kelas={kelas_selected or ""}',
+            
             # Data Series
             'ds_title': 'Statistik Absensi Siswa',
             'ds_percentage': f'{hadir_percentage}%',
@@ -435,7 +440,7 @@ def admin_dashboard_absensi_siswa(request):
             'day_ago': (end_date - start_date).days + 1,
             
             # Table data
-            'table_columns': ['ID RECORD', 'NISN', 'Nama Siswa', 'Jenjang', 'Kelas', 'Checktime', 'Status', 'Tipe Absensi', 'Terlambat (menit)', 'Mesin'],
+            'table_columns': ['ID', 'NISN', 'Nama', 'Jenjang', 'Kelas', 'Checktime', 'Status', 'Tipe Absensi', 'Terlambat', 'Mesin'],
             'table_data': absensi_records.values_list(
                 'id',
                 'user__siswa__nisn',
@@ -477,3 +482,71 @@ def admin_dashboard_absensi_siswa(request):
     except Exception as e:
         messages.error(request, f'Terjadi kesalahan pada sistem: {str(e)}')
         return redirect('admin_dashboard')
+
+@cek_instalasi
+@superuser_required
+@require_http_methods(['GET'])
+def api_dashboard_siswa(request):
+    try:
+        start_date = request.GET.get('start')
+        end_date = request.GET.get('amp;end')
+        jenjang_selected = request.GET.get('amp;jenjang')
+        kelas_selected = request.GET.get('amp;kelas')
+        
+        if not start_date or not end_date:
+            end_date = timezone.localtime(timezone.now()).date()
+            start_date = end_date - timezone.timedelta(days=6)
+        else:
+            try:
+                start_date = datetime.strptime(start_date, '%m/%d/%Y').date()
+                end_date = datetime.strptime(end_date, '%m/%d/%Y').date()
+            except ValueError:
+                end_date = timezone.now().date()
+                start_date = end_date - timezone.timedelta(days=6)
+
+        absensi_records = record_absensi.objects.filter(
+            user__siswa__isnull=False,
+            status_verifikasi='diterima',
+            checktime__date__gte=start_date,
+            checktime__date__lte=end_date
+        ).order_by('-checktime')
+
+        # Filter berdasarkan jenjang
+        if jenjang_selected:
+            absensi_records = absensi_records.filter(user__siswa__jenjang__nama=jenjang_selected)
+
+        # Filter berdasarkan kelas
+        if kelas_selected:
+            absensi_records = absensi_records.filter(user__siswa__kelas__nama=kelas_selected)
+
+        data = []
+        for record in absensi_records:
+            # Format keterlambatan
+            terlambat_display = '-'
+            if record.terlambat and record.terlambat > 0:
+                if record.terlambat < 60:
+                    terlambat_display = f"{record.terlambat} menit"
+                else:
+                    jam = record.terlambat // 60
+                    menit = record.terlambat % 60
+                    if menit > 0:
+                        terlambat_display = f"{jam} jam {menit} menit"
+                    else:
+                        terlambat_display = f"{jam} jam"
+
+            data.append({
+                'id': record.id,
+                'nisn': record.user.siswa_set.first().nisn,
+                'nama': record.user.siswa_set.first().nama,
+                'jenjang': record.user.siswa_set.first().jenjang.nama,
+                'kelas': record.user.siswa_set.first().kelas.nama,
+                'checktime': timezone.localtime(record.checktime).strftime('%Y-%m-%d %H:%M'),
+                'status': record.status,
+                'tipe_absensi': record.tipe_absensi,
+                'terlambat': terlambat_display,
+                'mesin': record.mesin or '-'
+            })
+
+        return JsonResponse({'absensi': data}, safe=False)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)

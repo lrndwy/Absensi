@@ -5,6 +5,10 @@ from django.contrib import messages
 from django.db.models import OuterRef, Subquery
 from django.shortcuts import redirect, render
 from django.utils import timezone
+from django.http import JsonResponse
+from django.utils.decorators import method_decorator
+from django.views.decorators.http import require_http_methods
+from django.urls import reverse
 
 from apps.CustomAdmin.functions import *
 
@@ -219,7 +223,10 @@ def admin_guru(request):
                     'total_tepat_waktu_kerja': total_tepat_waktu_kerja,
                     'total_terlambat_kerja': total_terlambat_kerja,
                     'total_menit_terlambat_kerja': total_menit_terlambat_kerja,
-                    'tanggal_cetak': timezone.localtime(timezone.now()).strftime('%d-%m-%Y %H:%M:%S')
+                    'tanggal_cetak': timezone.localtime(timezone.now()).strftime('%d-%m-%Y %H:%M:%S'),
+                    'API_LINK': reverse('api_guru') + '?jenjang=' + request.GET.get('jenjang', '') + 
+                                '&kelas=' + request.GET.get('kelas', '') + 
+                                '&mata_pelajaran=' + request.GET.get('mata_pelajaran', ''),
                 }
                 
                 return render(request, 'CustomAdmin/print_absensi_guru.html', context)
@@ -540,7 +547,7 @@ def admin_guru(request):
             
         context = get_context()
         context.update({
-            'table_columns': ['ID Guru', 'UserID', 'Nama', 'Jenjang', 'Kelas', 'Mata Pelajaran', 'Alamat', 'Username', 'Status'],
+            'table_columns': ['ID', 'UserID', 'Nama', 'Jenjang', 'Kelas', 'Mata Pelajaran', 'Alamat', 'Username', 'Status'],
             'table_data': table_data,
             
             'jenjang_list': jenjang.objects.all(),
@@ -552,11 +559,96 @@ def admin_guru(request):
             'guru': True,
             
             'total_data_table': guru_filter.count(),
+            'API_LINK': reverse('api_guru') + '?jenjang=' + request.GET.get('jenjang', '') + 
+                        '&kelas=' + request.GET.get('kelas', '') + 
+                        '&mata_pelajaran=' + request.GET.get('mata_pelajaran', ''),
             'print': True,
         })
         return render(request, 'CustomAdmin/admin_guru.html', context)
     except Exception as e:
         messages.error(request, f'Terjadi kesalahan pada sistem: {str(e)}')
         return redirect('admin_guru')
+
+
+@cek_instalasi
+@superuser_required
+@require_http_methods(['GET'])
+def api_guru(request):
+    try:
+        today = timezone.localtime(timezone.now()).date()
+        
+        # Subquery untuk status absensi
+        latest_absensi = record_absensi.objects.filter(
+            user__guru=OuterRef('pk'),
+            checktime__date=today
+        ).order_by('-checktime').values('status', 'status_verifikasi', 'tipe_absensi', 'checktime')[:1]
+        
+        # Base queryset
+        guru_list = Guru.objects.select_related('user', 'jenjang', 'kelas', 'mata_pelajaran').annotate(
+            today_status=Subquery(latest_absensi.values('status')),
+            today_status_verifikasi=Subquery(latest_absensi.values('status_verifikasi')),
+            today_tipe_absensi=Subquery(latest_absensi.values('tipe_absensi')),
+            today_checktime=Subquery(latest_absensi.values('checktime'))
+        )
+        
+        # Terapkan filter berdasarkan parameter URL
+        jenjang_filter = request.GET.get('jenjang')
+        kelas_filter = request.GET.get('amp;kelas')
+        mata_pelajaran_filter = request.GET.get('amp;mata_pelajaran')
+        
+        if jenjang_filter:
+            guru_list = guru_list.filter(jenjang__nama=jenjang_filter)
+        if kelas_filter:
+            guru_list = guru_list.filter(kelas__nama=kelas_filter)
+        if mata_pelajaran_filter:
+            guru_list = guru_list.filter(mata_pelajaran__nama=mata_pelajaran_filter)
+        
+        data = []
+        for guru in guru_list:
+            status = guru.today_status
+            status_verifikasi = guru.today_status_verifikasi
+            tipe_absensi = guru.today_tipe_absensi
+            
+            # Logic untuk display status
+            if status_verifikasi == 'menunggu':
+                display_status = "Belum Diverifikasi"
+            elif status_verifikasi == 'ditolak':
+                display_status = "Ditolak"
+            elif tipe_absensi == 'pulang':
+                display_status = "Sudah Pulang"
+            elif status == 'hadir' and tipe_absensi == 'masuk':
+                absensi = record_absensi.objects.filter(
+                    user__guru__id=guru.id,
+                    checktime__date=today,
+                    tipe_absensi='masuk'
+                ).first()
+                
+                if absensi and absensi.terlambat > 0:
+                    if absensi.terlambat < 60:
+                        display_status = f"Hadir, terlambat {absensi.terlambat} menit"
+                    else:
+                        jam_terlambat = int(absensi.terlambat // 60)
+                        sisa_menit = int(absensi.terlambat % 60)
+                        display_status = f"Hadir, terlambat {jam_terlambat} jam {sisa_menit} menit"
+                else:
+                    display_status = "Hadir"
+            else:
+                display_status = status if status else "Belum Hadir"
+            
+            data.append({
+                'id': guru.id,
+                'userid': guru.user.userid,
+                'nama': guru.nama,
+                'jenjang': guru.jenjang.nama if guru.jenjang else '-',
+                'kelas': guru.kelas.nama if guru.kelas else '-',
+                'mata_pelajaran': guru.mata_pelajaran.nama if guru.mata_pelajaran else '-',
+                'alamat': guru.alamat or '-',
+                'username': guru.user.username,
+                'status': display_status
+            })
+        
+        return JsonResponse({'guru': data}, safe=False)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
 
 

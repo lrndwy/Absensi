@@ -6,6 +6,9 @@ from apps.main.instalasi import cek_instalasi, get_context
 from apps.main.models import tanggal_merah
 import pandas as pd
 from datetime import datetime
+from django.http import JsonResponse
+from django.views.decorators.http import require_http_methods
+from django.urls import reverse
 
 @cek_instalasi
 @superuser_required
@@ -162,6 +165,7 @@ def admin_tanggal_merah(request):
             'table_data': table_data,
             'edit_data_tanggal_merah': edit_data_tanggal_merah,
             'total_data_table': tamer_list.count(),
+            'API_LINK': reverse('api_tanggal_merah'),
         })
         
         return render(request, 'CustomAdmin/admin_tamer.html', context)
@@ -169,3 +173,24 @@ def admin_tanggal_merah(request):
     except Exception as e:
         messages.error(request, f'Terjadi kesalahan pada sistem: {str(e)}')
         return redirect('admin_tanggal_merah')
+
+@cek_instalasi
+@superuser_required
+@require_http_methods(['GET'])
+def api_tanggal_merah(request):
+    try:
+        tamer_list = tanggal_merah.objects.all().order_by('tanggal')
+        data = []
+        
+        for tamer in tamer_list:
+            data.append({
+                'id': tamer.id,
+                'nama_acara': tamer.nama_acara,
+                'tanggal': tamer.tanggal.strftime('%d-%m-%Y'),
+                'keterangan': tamer.keterangan,
+                'kategori': tamer.kategori
+            })
+            
+        return JsonResponse({'data': data})
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
