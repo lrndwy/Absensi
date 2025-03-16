@@ -23,6 +23,42 @@
     </div>
 </div>
 
+<!-- Tambahkan modal print -->
+{% if print %}
+<div id="printModal" tabindex="-1" aria-hidden="true" class="fixed top-0 left-0 right-0 z-50 hidden w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full bg-gray-900/50 backdrop-blur-sm flex items-center justify-center">
+    <div class="relative w-full max-w-2xl max-h-full">
+        <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+            <div class="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                    Cetak Laporan
+                </h3>
+                <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ml-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-hide="printModal">
+                    <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                    </svg>
+                    <span class="sr-only">Tutup modal</span>
+                </button>
+            </div>
+            <form id="printForm" method="GET" class="p-6 space-y-6">
+                <input type="hidden" name="print" id="printId">
+                <div>
+                    <label for="start" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Tanggal Awal</label>
+                    <input type="date" name="start" id="start" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" required>
+                </div>
+                <div>
+                    <label for="end" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Tanggal Akhir</label>
+                    <input type="date" name="end" id="end" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" required>
+                </div>
+                <div class="flex items-center justify-end space-x-2 border-t pt-4">
+                    <button data-modal-hide="printModal" type="button" class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-500 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-600">Batal</button>
+                    <button type="submit" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Cetak</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+
 <div class="dataseries">
     {{ dataseries }}
 </div>
@@ -279,6 +315,11 @@
                                         class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-600">
                                     Hapus
                                 </button>
+                                {% if print %}
+                                <button onclick="openPrintModal('${row.id}')" class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-600">
+                                    Cetak
+                                </button>
+                                {% endif %}
                             </td>
                         `;
                         
@@ -346,6 +387,42 @@
     }
 </script>
 
+<script>
+    function openPrintModal(id) {
+        document.getElementById('printId').value = id;
+        const modal = document.getElementById('printModal');
+        modal.classList.remove('hidden');
+    }
+
+    function closePrintModal() {
+        const modal = document.getElementById('printModal');
+        modal.classList.add('hidden');
+    }
+
+    // Event listener untuk tombol close modal
+    document.querySelectorAll('[data-modal-hide="printModal"]').forEach(button => {
+        button.addEventListener('click', closePrintModal);
+    });
+
+    // Event listener untuk form submit
+    document.getElementById('printForm').addEventListener('submit', function(e) {
+        const startDate = document.getElementById('start').value;
+        const endDate = document.getElementById('end').value;
+        
+        if (!startDate || !endDate) {
+            e.preventDefault();
+            alert('Mohon isi tanggal awal dan akhir');
+            return;
+        }
+        
+        if (new Date(startDate) > new Date(endDate)) {
+            e.preventDefault();
+            alert('Tanggal awal tidak boleh lebih besar dari tanggal akhir');
+            return;
+        }
+    });
+</script>
+
 <style>
     @keyframes shimmer {
         0% {
@@ -376,6 +453,11 @@
         50% {
             opacity: .5;
         }
+    }
+
+    /* Tambahan style untuk modal */
+    .modal-backdrop {
+        background-color: rgba(0, 0, 0, 0.5);
     }
 </style>
 
