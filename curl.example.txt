@@ -1,0 +1,8 @@
+curl -X POST \
+  http://localhost:8000/webhook/kehadiran/ \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "pin": "12345",
+    "date": "2024-03-20T08:00:00",
+    "mesin": "Mesin-01"
+}'

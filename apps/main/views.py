@@ -2,16 +2,18 @@ import json
 import time
 from datetime import date, datetime
 from threading import Thread
+import os
 
 import requests
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
-from django.http import HttpResponse
+from django.http import HttpResponse, FileResponse, Http404
 from django.shortcuts import redirect, render
 from django.templatetags.static import static
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
+from django.conf import settings
 
 from apps.Guru.models import Guru
 from apps.Karyawan.models import Karyawan
@@ -69,6 +71,38 @@ def login_view(request):
     context = get_context()
     return render(request, 'main/auth/login.html', context)
 
+@cek_instalasi
+def login_ortu_view(request):
+    try:
+        # Cek jika sudah login sebagai ortu
+        if request.user.is_authenticated and request.session.get('is_parent'):
+            return redirect('ortu_dashboard')
+            
+        if request.method == 'POST':
+            username = request.POST.get('username')
+            password = request.POST.get('password')
+            pinortu = request.POST.get('pinortu')
+            
+            user = authenticate(username=username, password=password)
+            if user:
+                siswa = Siswa.objects.get(user=user)
+                if siswa.pin_ortu == pinortu:
+                    # Set session untuk menandai bahwa ini adalah akses orang tua
+                    request.session['is_parent'] = True
+                    login(request, user)
+                    return redirect('ortu_dashboard')
+                else:
+                    messages.error(request, 'PIN Orang Tua salah.')
+            else:
+                messages.error(request, 'Username atau password salah.')
+                
+        context = get_context()
+        return render(request, 'main/auth/login_ortu.html', context)
+    except Exception as e:
+        messages.error(request, str(e))
+        return redirect('login_ortu_view')
+
+
 def logout_view(request):
     logout(request)
     messages.info(request, 'Anda telah berhasil logout.')
@@ -91,10 +125,12 @@ def instalasi(request):
             logo = request.FILES.get('logo')
             telegram_token = request.POST.get('telegram_token')
             
+            
             # Ambil status fitur
             fitur_siswa = 'fitur_siswa' in request.POST
             fitur_guru = 'fitur_guru' in request.POST
             fitur_karyawan = 'fitur_karyawan' in request.POST
+            fitur_ortu = 'fitur_ortu' in request.POST
             
             # Proses jam masuk dan pulang untuk setiap fitur
             jam_masuk_siswa = jam_pulang_siswa = None
@@ -121,6 +157,7 @@ def instalasi(request):
                 fitur_siswa=fitur_siswa,
                 fitur_guru=fitur_guru,
                 fitur_karyawan=fitur_karyawan,
+                akun_ortu=fitur_ortu,
                 telegram_token=telegram_token,
                 jam_masuk_siswa=jam_masuk_siswa,
                 jam_pulang_siswa=jam_pulang_siswa,
@@ -140,6 +177,7 @@ def instalasi(request):
                 'fitur_siswa': instalasi.fitur_siswa,
                 'fitur_guru': instalasi.fitur_guru,
                 'fitur_karyawan': instalasi.fitur_karyawan,
+                'fitur_ortu': instalasi.akun_ortu,
                 'create_super_user': True
             })
             return render(request, 'main/instalasi.html', context)
@@ -367,3 +405,30 @@ def export_data(request):
     messages.error(request, 'Permintaan tidak valid.')
     return HttpResponse('Invalid request')
 
+
+
+def download_format(request):
+    file_type = request.GET.get('file_type')
+    import_title = request.GET.get('import_title').lower().replace(' ', '_')
+    
+    # Base directory untuk file format (gunakan staticfiles)
+    base_dir = os.path.join(settings.BASE_DIR, 'static')
+    
+    if file_type == 'csv':
+        file_path = os.path.join(base_dir, 'import_format', 'csv', f'{import_title}.csv')
+        content_type = 'text/csv'
+        extension = 'csv'
+    else:
+        file_path = os.path.join(base_dir, 'import_format', 'excel', f'{import_title}.xlsx')
+        content_type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        extension = 'xlsx'
+    
+    print(f"Mencoba membuka file: {file_path}") # untuk debugging
+    
+    if os.path.exists(file_path):
+        response = FileResponse(open(file_path, 'rb'), content_type=content_type)
+        response['Content-Disposition'] = f'attachment; filename="format_{import_title}.{extension}"'
+        return response
+    else:
+        # Tampilkan pesan error yang lebih detail
+        raise Http404(f"File tidak ditemukan di lokasi: {file_path}")

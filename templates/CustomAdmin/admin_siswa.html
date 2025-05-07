@@ -75,6 +75,10 @@
                         <input type="text" id="chatid" name="chatid" value="{{ data.chatid|default_if_none:'' }}" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
                     </div>
                     <div>
+                        <label for="pinortu" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">PIN Ortu</label>
+                        <input type="text" id="pinortu" name="pinortu" value="{{ data.pinortu|default_if_none:'' }}" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                    </div>
+                    <div>
                         <label class="inline-flex items-center cursor-pointer">
                             <input type="checkbox" id="reset_password_checkbox" class="sr-only peer">
                             <div
@@ -206,6 +210,10 @@
                                     Telegram</label>
                                 <input type="text" id="chatid" name="chatid" class="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
                             </div>
+                            <div>
+                                <label for="pinortu" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">PIN Ortu</label>
+                                <input type="text" id="pinortu" name="pinortu" class="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                            </div>
                         </div>
                     </div>
                     <script>
@@ -221,6 +229,7 @@
                 </c-btn-add>
                 <c-btn-delete url="{% url 'admin_siswa' %}"></c-btn-delete>
                 <c-btn-import url="{% url 'admin_siswa' %}"></c-btn-import>
+                <c-btn-import-format import-title="Siswa"></c-btn-import-format>
                 <c-btn-export></c-btn-export>
             </c-slot>
 

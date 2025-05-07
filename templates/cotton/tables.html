@@ -78,16 +78,12 @@
                 placeholder="Cari">
         </div>
 
-
         <div class="actionsbutton">
             <div class="flex items-center flex-wrap justify-center gap-2 sm:mt-2">
                 {{ actionsbutton }}
             </div>
-
         </div>
     </div>
-
-
 
     <div style="overflow-x: auto;">
         <div style="max-height: 500px; overflow-y: auto;">
@@ -131,6 +127,58 @@
                 </tbody>
             </table>
         </div>
+    </div>
+
+    <!-- Ubah bagian pagination controls -->
+    <div class="flex flex-col mt-4 space-y-3">
+        <div class="flex items-center justify-between">
+            <!-- Select per page di sebelah kiri -->
+            <div class="flex items-center gap-2">
+                <label for="itemsPerPageSelect" class="text-sm text-gray-700 dark:text-gray-400">Tampilkan:</label>
+                <select id="itemsPerPageSelect" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                    <option value="10">10</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                    <option value="all">Semua</option>
+                </select>
+                <span class="text-sm text-gray-700 dark:text-gray-400">data</span>
+            </div>
+
+            <!-- Showing text di tengah -->
+            <span class="text-sm text-gray-700 dark:text-gray-400 hidden md:block" id="showing-text">
+                Menampilkan <span class="font-semibold" id="showing-start">0</span> sampai <span class="font-semibold" id="showing-end">0</span> dari <span class="font-semibold" id="showing-total">0</span> data
+            </span>
+
+            <!-- Pagination di sebelah kanan -->
+            <div class="inline-flex items-center -space-x-px">
+                <button id="first-button" class="flex items-center justify-center px-3 h-8 ms-0 leading-tight text-gray-500 bg-white border border-gray-300 rounded-l-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
+                    <svg class="w-4 h-4 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M18.75 19.5l-7.5-7.5 7.5-7.5m-6 15L5.25 12l7.5-7.5"/>
+                    </svg>
+                </button>
+                <button id="prev-button" class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
+                    <svg class="w-2.5 h-2.5 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 1 1 5l4 4"/>
+                    </svg>
+                </button>
+                <div id="page-numbers" class="flex"></div>
+                <button id="next-button" class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
+                    <svg class="w-2.5 h-2.5 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
+                    </svg>
+                </button>
+                <button id="last-button" class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 rounded-r-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
+                    <svg class="w-4 h-4 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 19.5l7.5-7.5-7.5-7.5m6 15l7.5-7.5-7.5-7.5"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Showing text untuk mobile -->
+        <span class="text-sm text-gray-700 dark:text-gray-400 md:hidden text-center" id="showing-text-mobile">
+            Menampilkan <span class="font-semibold" id="showing-start-mobile">0</span> sampai <span class="font-semibold" id="showing-end-mobile">0</span> dari <span class="font-semibold" id="showing-total-mobile">0</span> data
+        </span>
     </div>
 </div>
 
@@ -248,98 +296,81 @@
 </script>
 
 <script>
-    let editUrl; // Deklarasi variabel di scope global
-
+    let editUrl;
+    let allData = [];
+    let filteredData = [];
+    let currentPage = 1;
+    let itemsPerPage = 10; // Ubah menjadi variabel yang dapat diubah
+    let tableColumns = [];
+    
     document.addEventListener('DOMContentLoaded', function() {
         const apiUrl = '{{ API_LINK }}';
-        editUrl = '{{ edit_url }}'; // Assign nilai ke variabel global
-        const tableColumns = {{ table_columns|safe }};
+        editUrl = '{{ edit_url }}';
+        tableColumns = {{ table_columns|safe }};
         
         if (apiUrl) {
-            // Tambahkan 5 baris skeleton loading
             const skeletonHTML = document.querySelector('.skeleton-row').outerHTML;
             document.getElementById('tableBody').innerHTML = skeletonHTML.repeat(5);
             
             fetchData();
         }
 
+        document.getElementById('first-button').addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage = 1;
+                renderTable();
+            }
+        });
+
+        document.getElementById('prev-button').addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage--;
+                renderTable();
+            }
+        });
+
+        document.getElementById('next-button').addEventListener('click', () => {
+            const maxPage = Math.ceil(allData.length / itemsPerPage);
+            if (currentPage < maxPage) {
+                currentPage++;
+                renderTable();
+            }
+        });
+
+        document.getElementById('last-button').addEventListener('click', () => {
+            const maxPage = Math.ceil(allData.length / itemsPerPage);
+            if (currentPage < maxPage) {
+                currentPage = maxPage;
+                renderTable();
+            }
+        });
+
+        const searchInput = document.getElementById('table-search');
+        searchInput.addEventListener('keyup', function() {
+            currentPage = 1;
+            updateSearch();
+        });
+
+        // Tambahkan event listener untuk dropdown itemsPerPage
+        document.getElementById('itemsPerPageSelect').addEventListener('change', function(e) {
+            const value = e.target.value;
+            itemsPerPage = value === 'all' ? Number.MAX_SAFE_INTEGER : parseInt(value);
+            currentPage = 1;
+            renderTable();
+        });
+
         async function fetchData() {
             try {
                 const response = await fetch(apiUrl);
                 const data = await response.json();
                 
-                // Tambahkan delay artificial 500ms untuk memperlihatkan loading
                 await new Promise(resolve => setTimeout(resolve, 500));
                 
-                // Ambil key pertama dari response untuk mendapatkan array datanya
                 const key = Object.keys(data)[0];
-                const tableData = data[key];
+                allData = data[key];
+                filteredData = allData;
                 
-                const tableBody = document.getElementById('tableBody');
-                tableBody.innerHTML = '';
-
-                if (tableData && tableData.length > 0) {
-                    tableData.forEach(row => {
-                        const tr = document.createElement('tr');
-                        tr.className = 'bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600';
-                        
-                        // Checkbox column
-                        tr.innerHTML = `
-                            <td class="w-4 p-4">
-                                <div class="flex items-center">
-                                    <input id="checkbox-${row.id}" type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                                        value="${row.id}" name="checkbox-selected">
-                                    <label for="checkbox-${row.id}" class="sr-only">checkbox</label>
-                                </div>
-                            </td>
-                        `;
-                        
-                        // Data columns - sesuaikan dengan table_columns
-                        tableColumns.forEach((column, index) => {
-                            const value = row[column.toLowerCase().replace(/ /g, '_')] || '-';
-                            tr.innerHTML += `
-                                <td class="px-6 py-4">
-                                    ${value}
-                                </td>
-                            `;
-                        });
-                        
-                        // Action column
-                        tr.innerHTML += `
-                            <td class="px-6 py-4 flex gap-2">
-                                <a href="${editUrl}?id=${row.id}" 
-                                   class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-600">
-                                    Edit
-                                </a>
-                                <button onclick="deleteData(${row.id})" 
-                                        class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-600">
-                                    Hapus
-                                </button>
-                                {% if print %}
-                                <button onclick="openPrintModal('${row.id}')" class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-600">
-                                    Cetak
-                                </button>
-                                {% endif %}
-                            </td>
-                        `;
-                        
-                        tableBody.appendChild(tr);
-                    });
-                } else {
-                    tableBody.innerHTML = `
-                        <tr>
-                            <td colspan="${tableColumns.length + 2}" class="text-center py-4">
-                                Belum ada data
-                            </td>
-                        </tr>
-                    `;
-                }
-                
-                // Update total data
-                const totalDataElement = document.getElementById('filteredCount');
-                if (totalDataElement) {
-                    totalDataElement.textContent = tableData.length;
-                }
+                renderTable();
                 
             } catch (error) {
                 console.error('Error:', error);
@@ -353,6 +384,154 @@
             }
         }
     });
+
+    function renderTable() {
+        const tableBody = document.getElementById('tableBody');
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const endIndex = startIndex + (itemsPerPage === Number.MAX_SAFE_INTEGER ? filteredData.length : itemsPerPage);
+        const paginatedData = filteredData.slice(startIndex, endIndex);
+        
+        tableBody.innerHTML = '';
+        
+        if (paginatedData.length > 0) {
+            paginatedData.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.className = 'bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600';
+                
+                tr.innerHTML = `
+                    <td class="w-4 p-4">
+                        <div class="flex items-center">
+                            <input id="checkbox-${row.id}" type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                                value="${row.id}" name="checkbox-selected">
+                            <label for="checkbox-${row.id}" class="sr-only">checkbox</label>
+                        </div>
+                    </td>
+                `;
+                
+                tableColumns.forEach((column, index) => {
+                    const value = row[column.toLowerCase().replace(/ /g, '_')] || '-';
+                    tr.innerHTML += `
+                        <td class="px-6 py-4">
+                            ${value}
+                        </td>
+                    `;
+                });
+                
+                tr.innerHTML += `
+                
+                    <td class="px-6 py-4 flex gap-2">
+                        {% if not user_is_guru or user_is_guru == False %}
+                        <a href="${editUrl}?id=${row.id}" 
+                           class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-600">
+                            Edit
+                        </a>
+                        <button onclick="deleteData(${row.id})" 
+                                class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-600">
+                            Hapus
+                        </button>
+                        {% endif %}
+                        {% if verifikasi == True %}
+                            <a href="${editUrl}?id=${row.id}" 
+                            class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-600">
+                                Verifikasi
+                            </a>
+                        {% endif %}
+                        {% if print %}
+                        <button onclick="openPrintModal('${row.id}')" class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-600">
+                            Cetak
+                        </button>
+                        {% endif %}
+                    </td>
+                `;
+                
+                tableBody.appendChild(tr);
+            });
+        } else {
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="${tableColumns.length + 2}" class="text-center py-4">
+                        Tidak ada data yang sesuai
+                    </td>
+                </tr>
+            `;
+        }
+
+        document.getElementById('showing-start').textContent = filteredData.length > 0 ? startIndex + 1 : 0;
+        document.getElementById('showing-end').textContent = Math.min(endIndex, filteredData.length);
+        document.getElementById('showing-total').textContent = filteredData.length;
+        
+        const maxPage = Math.ceil(filteredData.length / itemsPerPage);
+        document.getElementById('first-button').disabled = currentPage === 1;
+        document.getElementById('prev-button').disabled = currentPage === 1;
+        document.getElementById('next-button').disabled = currentPage === maxPage || itemsPerPage === Number.MAX_SAFE_INTEGER;
+        document.getElementById('last-button').disabled = currentPage === maxPage || itemsPerPage === Number.MAX_SAFE_INTEGER;
+        
+        document.getElementById('filteredCount').textContent = filteredData.length;
+
+        updatePagination();
+    }
+
+    function updateSearch() {
+        const searchTerm = document.getElementById('table-search').value.toLowerCase();
+        
+        if (searchTerm === '') {
+            filteredData = allData;
+        } else {
+            filteredData = allData.filter(row => {
+                return Object.values(row).some(value => 
+                    String(value).toLowerCase().includes(searchTerm)
+                );
+            });
+        }
+
+        renderTable();
+        
+        document.getElementById('filteredCount').textContent = filteredData.length;
+    }
+
+    function updatePagination() {
+        const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+        const pageNumbers = document.getElementById('page-numbers');
+        pageNumbers.innerHTML = '';
+
+        // Tentukan range halaman yang akan ditampilkan
+        let startPage = Math.max(1, currentPage - 2);
+        let endPage = Math.min(totalPages, startPage + 4);
+        
+        if (endPage - startPage < 4) {
+            startPage = Math.max(1, endPage - 4);
+        }
+
+        // Tambahkan tombol halaman
+        for (let i = startPage; i <= endPage; i++) {
+            const button = document.createElement('button');
+            button.className = `flex items-center justify-center px-3 h-8 leading-tight ${
+                i === currentPage
+                    ? 'text-blue-600 border border-blue-300 bg-blue-50 hover:bg-blue-100 hover:text-blue-700 dark:border-gray-700 dark:bg-gray-700 dark:text-white'
+                    : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white'
+            }`;
+            button.textContent = i;
+            button.addEventListener('click', () => {
+                currentPage = i;
+                renderTable();
+            });
+            pageNumbers.appendChild(button);
+        }
+
+        // Update status tombol navigasi
+        document.getElementById('first-button').disabled = currentPage === 1;
+        document.getElementById('prev-button').disabled = currentPage === 1;
+        document.getElementById('next-button').disabled = currentPage === totalPages;
+        document.getElementById('last-button').disabled = currentPage === totalPages;
+
+        // Perbaikan: Hanya sembunyikan pagination controls, bukan mengubah display flex
+        const paginationContainer = document.querySelector('.inline-flex');
+        if (itemsPerPage === Number.MAX_SAFE_INTEGER) {
+            paginationContainer.classList.add('hidden');
+        } else {
+            paginationContainer.classList.remove('hidden');
+        }
+    }
 </script>
 
 <script>
@@ -399,12 +578,10 @@
         modal.classList.add('hidden');
     }
 
-    // Event listener untuk tombol close modal
     document.querySelectorAll('[data-modal-hide="printModal"]').forEach(button => {
         button.addEventListener('click', closePrintModal);
     });
 
-    // Event listener untuk form submit
     document.getElementById('printForm').addEventListener('submit', function(e) {
         const startDate = document.getElementById('start').value;
         const endDate = document.getElementById('end').value;
@@ -455,9 +632,20 @@
         }
     }
 
-    /* Tambahan style untuk modal */
     .modal-backdrop {
         background-color: rgba(0, 0, 0, 0.5);
+    }
+
+    /* Tambahkan style untuk tombol pagination yang disabled */
+    button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    /* Tambahkan hover effect untuk tombol pagination */
+    .page-number:hover:not(:disabled) {
+        background-color: #f3f4f6;
+        color: #1f2937;
     }
 </style>
 

@@ -1,0 +1,317 @@
+{% extends 'base.html' %} {% load static %} {% block content %}
+<c-dashboard title="Dashboard Absensi" logo="{{ logoimage }}">
+    {% if edit_data_absensi_siswa %} {% for data in edit_data_absensi_siswa %}
+    <div class="flex flex-col mt-14 gap-4 dark:bg-gray-700">
+    {% include 'notification.html' %}
+        <c-heading title="Edit Data Absensi Siswa" subtitle="Perbarui informasi absensi siswa">
+            <img src="{{ logoimage }}" alt="logo" class="w-10 h-10">
+        </c-heading>
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <form method="POST" action="{% url 'admin_dashboard_absensi_siswa_kepsek' %}">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="edit">
+                <input type="hidden" name="id" value="{{ data.id }}">
+                <div class="flex flex-col gap-4">
+                    <div>
+                        <label for="siswa" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nama
+                            Siswa</label>
+                        <input type="text" id="siswa" name="siswa" value="{{ data.siswa }}" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                            readonly>
+                    </div>
+                    <div>
+                        <label for="tanggal_waktu" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Tanggal dan
+                            Waktu</label>
+                        <input type="datetime-local" id="tanggal_waktu" name="tanggal_waktu" value="{{ data.checktime }}" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                            required>
+                    </div>
+                    <div>
+                        <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Status</label>
+                        <select id="status" name="status" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                            required onchange="toggleInputs(this.value)">
+                            <option value="{{ data.status }}" selected>{{ data.status }}</option>
+                            {% for status in status_list %}
+                            {% if status != data.status %}
+                            <option value="{{ status }}">{{ status }}</option>
+                            {% endif %}
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div id="tipe_absensi_container_edit" style="display: none;">
+                        <label for="tipe_absensi" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Tipe Absensi</label>
+                        <select id="tipe_absensi" name="tipe_absensi" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required>
+                            <option value="{{ data.tipe_absensi }}" selected>{{ data.tipe_absensi }}</option>
+                            {% for tipe in tipe_absensi_list %}
+                            {% if tipe != data.tipe_absensi %}
+                            <option value="{{ tipe }}">{{ tipe }}</option>
+                            {% endif %}
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div id="id_izin_container_edit" style="display: none;">
+                        <label for="id_izin" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">ID
+                            Izin</label>
+                        <select id="id_izin" name="id_izin" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                            <option value="{{ data.id_izin }}" selected>{{ data.id_izin }}</option>
+                            {% for izin in id_izin %}
+                            {% if izin.id != data.id_izin %}
+                            <option value="{{ izin.id }}">{{ izin.id }}</option>
+                            {% endif %}
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div id="id_sakit_container_edit" style="display: none;">
+                        <label for="id_sakit" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">ID
+                            Sakit</label>
+                        <select id="id_sakit" name="id_sakit" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                            <option value="{{ data.id_sakit }}" selected>{{ data.id_sakit }}</option>
+                            {% for sakit in id_sakit %}
+                            {% if sakit.id != data.id_sakit %}
+                            <option value="{{ sakit.id }}">{{ sakit.id }}</option>
+                            {% endif %}
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label for="status_verifikasi" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Status Verifikasi</label>
+                        <select id="status_verifikasi" name="status_verifikasi" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required>
+                            <option value="{{ data.status_verifikasi }}" selected>{{ data.status_verifikasi }}</option>
+                            {% for status in status_verifikasi_list %}
+                                {% if status != data.status_verifikasi %}
+                                    <option value="{{ status }}">{{ status }}</option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Perbarui
+                        Data</button>
+                </div>
+            </form>
+            <script>
+                function toggleInputs(status) {
+                    const idIzinContainerEdit = document.getElementById('id_izin_container_edit');
+                    const idSakitContainerEdit = document.getElementById('id_sakit_container_edit');
+                    const tipeAbsensiContainerEdit = document.getElementById('tipe_absensi_container_edit');
+                    const tipeAbsensiEdit = document.getElementById('tipe_absensi_edit');
+
+                    if (status.toLowerCase() === 'izin') {
+                        idIzinContainerEdit.style.display = 'block';
+                        idSakitContainerEdit.style.display = 'none';
+                        tipeAbsensiContainerEdit.style.display = 'none';
+                        tipeAbsensiEdit.value = null;
+                    } else if (status.toLowerCase() === 'sakit') {
+                        idIzinContainerEdit.style.display = 'none';
+                        idSakitContainerEdit.style.display = 'block';
+                        tipeAbsensiContainerEdit.style.display = 'none';
+                        tipeAbsensiEdit.value = null;
+                    } else if (status.toLowerCase() === 'hadir') {
+                        idIzinContainerEdit.style.display = 'none';
+                        idSakitContainerEdit.style.display = 'none';
+                        tipeAbsensiContainerEdit.style.display = 'block';
+                        tipeAbsensiEdit.value = null;
+                    } else {
+                        idIzinContainerEdit.style.display = 'none';
+                        idSakitContainerEdit.style.display = 'none';
+                        tipeAbsensiContainerEdit.style.display = 'none';
+                        tipeAbsensiEdit.value = null;
+                    }
+                }
+
+                // Panggil fungsi saat halaman dimuat untuk mengatur tampilan awal
+                document.addEventListener('DOMContentLoaded', function() {
+                    toggleInputs(document.getElementById('status').value);
+                });
+            </script>
+        </div>
+        <div class="flex justify-start p-2">
+            <a href="{% url 'admin_dashboard_absensi_siswa_kepsek' %}" class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-gray-700 bg-transparent border border-gray-700 rounded-lg hover:bg-gray-50 focus:ring-2 focus:outline-none focus:ring-gray-300 dark:text-gray-400 dark:border-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-800">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg> Kembali
+            </a>
+        </div>
+    </div>
+    {% endfor %} {% else %}
+    <div class="flex flex-col mt-14 gap-4 dark:bg-gray-700">
+    {% include 'notification.html' %}
+        <c-heading title="Selamat Datang Admin" subtitle="Website Absensi  {{ nama_sekolah }}">
+            <img src="{{ logoimage }}" alt="logo" class="w-10 h-10">
+        </c-heading>
+
+        <div class="flex items-start justify-between gap-4 bg-white shadow dark:bg-gray-800 p-6 rounded-lg">
+            <div class="flex flex-col items-start justify-start">
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Pilih Absensi</h1>
+            </div>
+            <div class="flex flex-wrap items-center justify-end gap-4">
+                <a href="{% url 'admin_dashboard_absensi_siswa_kepsek' %}" class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-black dark:text-white bg-transparent border border-gray-300 rounded-lg hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 focus:outline-none dark:focus:ring-gray-700">
+                    <img src="https://img.icons8.com/?size=100&id=2HnyYObAxn8V&format=png&color=808080" alt="Siswa Icon" class="w-5 h-5 mr-2"> Siswa
+                </a>
+                <a href="{% url 'admin_dashboard_absensi_guru_kepsek' %}" class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-black dark:text-white bg-transparent border border-gray-300 rounded-lg hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 focus:outline-none dark:focus:ring-gray-700">
+                    <img src="https://img.icons8.com/?size=100&id=DUi0tw0LJ06n&format=png&color=808080" alt="Guru Icon" class="w-5 h-5 mr-2"> Guru
+                </a>
+            </div>
+        </div>
+
+        <c-tables title="Record Absensi Siswa" subtitle="Data Absensi Siswa" total-data-table="{{ total_data_table }}" url="{% url 'admin_dashboard_absensi_siswa_kepsek' %}" edit-url="{% url 'admin_dashboard_absensi_siswa_kepsek' %}">
+            <c-slot name="dataseries">
+                <c-data-series ds-title="{{ ds_title }}" ds-subtitle="Website Absensi  {{ nama_sekolah }}" ds-percentage="{{ ds_percentage }}" ds-name-1="{{ ds_name_1 }}" ds-data-1="{{ ds_data_1 }}" ds-name-2="{{ ds_name_2 }}" ds-data-2="{{ ds_data_2 }}" ds-name-3="{{ ds_name_3 }}"
+                    ds-data-3="{{ ds_data_3 }}" ds-categories-json="{{ ds_categories_json|escapejs }}" ds-month="{{ ds_month }}" day-ago="{{ day_ago }}"></c-data-series>
+            </c-slot>
+
+            <c-slot name="actionsbutton">
+                <c-btn-add modal-title="Tambah Data Absensi Siswa" url="{% url 'admin_dashboard_absensi_siswa_kepsek' %}" button-title="Tambah Data" button-modal-title="Tambah">
+                    <div class="flex flex-col gap-4">
+                        <div>
+                            <label for="siswa" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nama
+                                Siswa</label>
+                            <select id="siswa" name="siswa" class="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                required>
+                                <option value="">Pilih Siswa</option>
+                                {% for siswa in siswa_list %}
+                                <option value="{{ siswa.user.id }}">{{ siswa.nama }} - {{ siswa.kelas}} - {{ siswa.jenjang }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div>
+                            <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Status</label>
+                            <select id="status" name="status" class="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                required onchange="toggleInputs(this.value)">
+                                <option value="" selected>Pilih Status</option>
+                                {% for status in status_list %}
+                                <option value="{{ status }}">{{ status }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div id="tipe_absensi_container" style="display: none;">
+                            <label for="tipe_absensi" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Tipe Absensi</label>
+                            <select id="tipe_absensi" name="tipe_absensi" class="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                                <option value="">Pilih Tipe Absensi</option>
+                                <option value="masuk">Masuk</option>
+                                <option value="pulang">Pulang</option>
+                            </select>
+                        </div>
+                        <div id="id_izin_container" style="display: none;">
+                            <label for="id_izin" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">ID
+                                Izin</label>
+                            <select id="id_izin" name="id_izin" class="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                                <option value="">Pilih ID Izin</option>
+                                {% for izin in id_izin %}
+                                <option value="{{ izin.id }}">{{ izin.id }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div id="id_sakit_container" style="display: none;">
+                            <label for="id_sakit" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">ID Sakit</label>
+                            <select id="id_sakit" name="id_sakit" class="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                                <option value="">Pilih ID Sakit</option>
+                                {% for sakit in id_sakit %}
+                                <option value="{{ sakit.id }}">{{ sakit.id }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div>
+                            <label for="checktime" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Tanggal dan
+                                Waktu</label>
+                            <input type="datetime-local" id="checktime" name="checktime" class="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                required>
+                        </div>
+                    </div>
+                    <script>
+                        function toggleInputs(status) {
+                            var idIzinContainer = document.getElementById('id_izin_container');
+                            var idSakitContainer = document.getElementById('id_sakit_container');
+                            var tipeAbsensiContainer = document.getElementById('tipe_absensi_container');
+                            var tipeAbsensi = document.getElementById('tipe_absensi');
+
+                            if (status.toLowerCase() === 'izin') {
+                                idIzinContainer.style.display = 'block';
+                                idSakitContainer.style.display = 'none';
+                                tipeAbsensiContainer.style.display = 'none';
+                                tipeAbsensi.removeAttribute('required');
+                            } else if (status.toLowerCase() === 'sakit') {
+                                idIzinContainer.style.display = 'none';
+                                idSakitContainer.style.display = 'block';
+                                tipeAbsensiContainer.style.display = 'none';
+                                tipeAbsensi.removeAttribute('required');
+                            } else if (status.toLowerCase() === 'hadir') {
+                                idIzinContainer.style.display = 'none';
+                                idSakitContainer.style.display = 'none';
+                                tipeAbsensiContainer.style.display = 'block';
+                                tipeAbsensi.setAttribute('required', '');
+                            } else {
+                                idIzinContainer.style.display = 'none';
+                                idSakitContainer.style.display = 'none';
+                                tipeAbsensiContainer.style.display = 'none';
+                                tipeAbsensi.removeAttribute('required');
+                            }
+                        }
+
+                        document.addEventListener('DOMContentLoaded', function() {
+                            toggleInputs(document.getElementById('status').value);
+                        });
+                    </script>
+                </c-btn-add>
+                <c-btn-delete url="{% url 'admin_dashboard_absensi_siswa_kepsek' %}"></c-btn-delete>
+                <c-btn-export></c-btn-export>
+            </c-slot>
+
+            <div id="date-range-picker" date-rangepicker class="flex items-center gap-2">
+                <form id="date-range-form" class="flex flex-wrap items-center justify-center gap-2">
+                    <div class="relative">
+                        <select id="jenjang" name="jenjang" type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                            <option value="" selected>Pilih Jenjang</option>
+                            {% for jenjang in jenjang_list %}
+                            <option value="{{ jenjang.nama }}">{{ jenjang.nama }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="relative">
+                        <select id="kelas" name="kelas" type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                            <option value="" selected>Pilih Kelas</option>
+                            {% for kelas in kelas_list %}
+                            <option value="{{ kelas.nama }}">{{ kelas.nama }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                            <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                                <path
+                                    d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
+                            </svg>
+                        </div>
+                        <input id="datepicker-range-start" name="start" type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                            placeholder="Pilih tanggal mulai">
+                    </div>
+                    <span class="text-gray-500">sampai</span>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                            <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                                <path
+                                    d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
+                            </svg>
+                        </div>
+                        <input id="datepicker-range-end" name="end" type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                            placeholder="Pilih tanggal akhir">
+                    </div>
+                    <button type="submit" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                        Filter
+                    </button>
+                </form>
+            </div>
+        </c-tables>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <c-pie-charts pc-title="{{ pc_title }}" pc-month="{{ pc_month }}" pc-data="{{ pc_data|escapejs }}" pc-labels="{{ pc_labels|escapejs }}" day-ago="{{ day_ago }}"></c-pie-charts>
+            </div>
+            <div>
+                <c-radial-charts rc-title="{{ rc_title }}" rc-data-percentage-1="{{ rc_data_percentage_1 }}" rc-data-total-1="{{ rc_data_total_1 }}" rc-name-1="{{ rc_name_1 }}" rc-data-percentage-2="{{ rc_data_percentage_2 }}" rc-data-total-2="{{ rc_data_total_2 }}"
+                    rc-name-2="{{ rc_name_2 }}" rc-data-percentage-3="{{ rc_data_percentage_3 }}" rc-data-total-3="{{ rc_data_total_3 }}" rc-name-3="{{ rc_name_3 }}" day-ago="{{ day_ago }}"></c-radial-charts>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</c-dashboard>
+
+{% endblock %}

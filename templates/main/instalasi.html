@@ -116,6 +116,15 @@
                             </div>
                         </div>
                     </div>
+
+                    <div class="flex flex-row gap-4">
+                        <label class="inline-flex items-center cursor-pointer">
+                            <input type="checkbox" name="fitur_ortu" value="ortu" class="sr-only peer" id="fitur_ortu_checkbox">
+                            <div
+                                class="relative w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                            <span class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">Orang Tua Siswa</span>
+                        </label>
+                    </div>
                 </div>
             </div>
             <div class="mb-6 relative">
@@ -142,15 +151,78 @@
 
 <script>
 document.getElementById('fitur_siswa_checkbox').addEventListener('change', function() {
-    document.getElementById('jam_siswa').classList.toggle('hidden', !this.checked);
+    const jamSiswaDiv = document.getElementById('jam_siswa');
+    jamSiswaDiv.classList.toggle('hidden', !this.checked);
+    
+    // Mengatur required attribute berdasarkan checkbox
+    const jamMasukSiswa = document.querySelector('input[name="jam_masuk_siswa"]');
+    const jamPulangSiswa = document.querySelector('input[name="jam_pulang_siswa"]');
+    jamMasukSiswa.required = this.checked;
+    jamPulangSiswa.required = this.checked;
 });
 
 document.getElementById('fitur_guru_checkbox').addEventListener('change', function() {
-    document.getElementById('jam_guru').classList.toggle('hidden', !this.checked);
+    const jamGuruDiv = document.getElementById('jam_guru');
+    jamGuruDiv.classList.toggle('hidden', !this.checked);
+    
+    // Mengatur required attribute berdasarkan checkbox
+    const jamMasukGuru = document.querySelector('input[name="jam_masuk_guru"]');
+    const jamPulangGuru = document.querySelector('input[name="jam_pulang_guru"]');
+    jamMasukGuru.required = this.checked;
+    jamPulangGuru.required = this.checked;
 });
 
 document.getElementById('fitur_karyawan_checkbox').addEventListener('change', function() {
-    document.getElementById('jam_karyawan').classList.toggle('hidden', !this.checked);
+    const jamKaryawanDiv = document.getElementById('jam_karyawan');
+    jamKaryawanDiv.classList.toggle('hidden', !this.checked);
+    
+    // Mengatur required attribute berdasarkan checkbox
+    const jamMasukKaryawan = document.querySelector('input[name="jam_masuk_karyawan"]');
+    const jamPulangKaryawan = document.querySelector('input[name="jam_pulang_karyawan"]');
+    jamMasukKaryawan.required = this.checked;
+    jamPulangKaryawan.required = this.checked;
+});
+
+// Tambahkan validasi form sebelum submit
+document.querySelector('form[name="instalasi"]').addEventListener('submit', function(e) {
+    const fiturSiswa = document.getElementById('fitur_siswa_checkbox');
+    const fiturGuru = document.getElementById('fitur_guru_checkbox');
+    const fiturKaryawan = document.getElementById('fitur_karyawan_checkbox');
+    
+    let isValid = true;
+    let message = '';
+
+    if (fiturSiswa.checked) {
+        const jamMasukSiswa = document.querySelector('input[name="jam_masuk_siswa"]').value;
+        const jamPulangSiswa = document.querySelector('input[name="jam_pulang_siswa"]').value;
+        if (!jamMasukSiswa || !jamPulangSiswa) {
+            isValid = false;
+            message += 'Mohon isi jam masuk dan pulang untuk Siswa\n';
+        }
+    }
+
+    if (fiturGuru.checked) {
+        const jamMasukGuru = document.querySelector('input[name="jam_masuk_guru"]').value;
+        const jamPulangGuru = document.querySelector('input[name="jam_pulang_guru"]').value;
+        if (!jamMasukGuru || !jamPulangGuru) {
+            isValid = false;
+            message += 'Mohon isi jam masuk dan pulang untuk Guru\n';
+        }
+    }
+
+    if (fiturKaryawan.checked) {
+        const jamMasukKaryawan = document.querySelector('input[name="jam_masuk_karyawan"]').value;
+        const jamPulangKaryawan = document.querySelector('input[name="jam_pulang_karyawan"]').value;
+        if (!jamMasukKaryawan || !jamPulangKaryawan) {
+            isValid = false;
+            message += 'Mohon isi jam masuk dan pulang untuk Karyawan\n';
+        }
+    }
+
+    if (!isValid) {
+        e.preventDefault();
+        alert(message);
+    }
 });
 </script>
 

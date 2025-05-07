@@ -67,11 +67,15 @@
         </div>
     </div>
 
-    <div class="mb-6 text-gray-800 dark:text-gray-200">
-        <p class="mb-2"><span class="font-semibold">Nama:</span> {{ siswa.nama }}</p>
-        <p class="mb-2"><span class="font-semibold">NISN:</span> {{ siswa.nisn }}</p>
-        <p class="mb-2"><span class="font-semibold">Kelas:</span> {{ siswa.kelas.nama }}</p>
-        <p class="mb-2"><span class="font-semibold">Jenjang:</span> {{ siswa.jenjang.nama }}</p>
+    <div class="mb-6 text-gray-800 dark:text-gray-200 text-xl flex flex-col-2 gap-4">
+        <div class="relative">
+            <p class="mb-2"><span class="font-semibold">Nama:</span> {{ siswa_data.nama }}</p>
+            <p class="mb-2"><span class="font-semibold">NISN:</span> {{ siswa_data.nisn }}</p>
+        </div>
+        <div class="relative">
+            <p class="mb-2"><span class="font-semibold">Kelas:</span> {{ siswa_data.kelas.nama }}</p>
+            <p class="mb-2"><span class="font-semibold">Jenjang:</span> {{ siswa_data.jenjang.nama }}</p>    
+        </div>
     </div>
 
     <div class="overflow-x-auto relative sm:rounded-lg mb-6">

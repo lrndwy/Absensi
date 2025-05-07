@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<c-dashboard title="Dashboard Absensi" logo="{{ logoimage }}">
+    <div class="flex flex-col mt-14 gap-4 dark:bg-gray-700">
+    {% include 'notification.html' %}
+        {% if edit_data_verifikasi %}
+        <c-heading title="Verifikasi Absensi" subtitle="Verifikasi absensi pengguna">
+            <img src="https://img.icons8.com/?size=100&id=pIPl8tqh3igN&format=png&color=000000" alt="logo" class="w-10 h-10">
+        </c-heading>
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <h2 class="text-xl font-bold mb-4 dark:text-white">Form Verifikasi Absensi</h2>
+            <form method="POST" action="{% url 'guru_verifikasi' %}" class="dark:bg-gray-800 flex flex-col gap-4">
+                {% csrf_token %}
+                <input type="hidden" name="id" value="{{ edit_data_verifikasi.id }}">
+                <input type="hidden" name="action" value="verifikasi">
+                <div class="flex flex-col gap-4">
+                    <div class="">
+                        <label class="block text-gray-700 dark:text-gray-300 font-bold mb-2" for="username">Username</label>
+                        <p class="appearance-none rounded w-full py-2 px-3 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700" id="username">{{ edit_data_verifikasi.username }}</p>
+                    </div>
+                    <div class="">
+                        <label class="block text-gray-700 dark:text-gray-300 font-bold mb-2" for="entitas">Entitas</label>
+                        <p class="appearance-none rounded w-full py-2 px-3 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700" id="entitas">{{ edit_data_verifikasi.entitas }}</p>
+                    </div>
+                    <div class="">
+                        <label class="block text-gray-700 dark:text-gray-300 font-bold mb-2" for="nama">Nama</label>
+                        <p class="appearance-none rounded w-full py-2 px-3 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700" id="nama">{{ edit_data_verifikasi.nama }}</p>
+                    </div>
+                    <div class="">
+                        <label class="block text-gray-700 dark:text-gray-300 font-bold mb-2" for="status">Status</label>
+                        <p class="appearance-none rounded w-full py-2 px-3 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700" id="status">{{ edit_data_verifikasi.status }}</p>
+                    </div>
+                    <div class="">
+                        <label class="block text-gray-700 dark:text-gray-300 font-bold mb-2" for="checktime">Waktu Absensi</label>
+                        <p class="appearance-none rounded w-full py-2 px-3 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700" id="checktime">{{ edit_data_verifikasi.checktime }}</p>
+                    </div>
+                    
+                    {% if edit_data_verifikasi.status == 'sakit' %}
+                        <div>
+                            <label class="block text-gray-700 dark:text-gray-300 font-bold mb-2" for="surat_sakit">Surat Sakit</label>
+                            {% if edit_data_verifikasi.surat_sakit %}
+                                <img src="{{ edit_data_verifikasi.surat_sakit }}" alt="Surat Sakit" class="max-w-full h-auto rounded-lg">
+                            {% else %}
+                                <p class="text-gray-500 dark:text-gray-400">Tidak ada surat sakit yang diunggah.</p>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 dark:text-gray-300 font-bold mb-2" for="keterangan">Keterangan</label>
+                            <p class="appearance-none rounded w-full py-2 px-3 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700" id="keterangan">{{ edit_data_verifikasi.keterangan }}</p>
+                        </div>
+                    {% elif edit_data_verifikasi.status == 'izin' %}
+                        <div class="">
+                            <label class="block text-gray-700 dark:text-gray-300 font-bold mb-2" for="keterangan">Keterangan</label>
+                            <p class="appearance-none rounded w-full py-2 px-3 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700" id="keterangan">{{ edit_data_verifikasi.keterangan }}</p>
+                        </div>
+                    {% endif %}
+                </div>
+                <div>
+                    <label for="status_verifikasi" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Status Verifikasi</label>
+                    <select id="status_verifikasi" name="status_verifikasi" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                        {% for status in status_verifikasi_list %}
+                            <option value="{{ status }}" {% if status == edit_data_verifikasi.status_verifikasi %}selected{% endif %}>{{ status|title }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit">
+                    Verifikasi
+                </button>
+            </form>
+        </div>
+        <div class="flex justify-start p-2">
+            <a href="{% url 'admin_verifikasi' %}" class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-gray-700 bg-transparent border border-gray-700 rounded-lg hover:bg-gray-50 focus:ring-2 focus:outline-none focus:ring-gray-300 dark:text-gray-400 dark:border-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-800">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg> Kembali
+            </a>
+        </div>
+        {% else %}
+        <c-heading title="Verifikasi Absensi" subtitle="Verifikasi absensi pengguna">
+            <img src="https://img.icons8.com/?size=100&id=pIPl8tqh3igN&format=png&color=000000" alt="logo" class="w-10 h-10">
+        </c-heading>
+        <c-tables title="Data Record belum diverifikasi" subtitle="Data Record belum diverifikasi">
+        </c-tables>
+        {% endif %}
+    </div>
+</c-dashboard>
+{% endblock %}

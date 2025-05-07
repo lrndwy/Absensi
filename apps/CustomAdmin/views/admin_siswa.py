@@ -44,7 +44,8 @@ def admin_siswa(request):
                     'kelas': data_siswa.kelas.nama if data_siswa.kelas else None,
                     'alamat': data_siswa.alamat if data_siswa else None,
                     'chatid': data_siswa.telegram_chat_id if data_siswa else None,
-                    'userid': data_siswa.user.userid if data_siswa.user else None
+                    'userid': data_siswa.user.userid if data_siswa.user else None,
+                    'pinortu': data_siswa.pin_ortu if data_siswa else None
                 }
                 edit_data_siswa.append(data_edit)
                 
@@ -183,7 +184,7 @@ def admin_siswa(request):
                 )
 
                 context = {
-                    'siswa': siswa,
+                    'siswa_data': siswa,
                     'periode': f"{tanggal_awal.strftime('%d %B %Y')} - {tanggal_akhir.strftime('%d %B %Y')}",
                     'hari_records': semua_hari,
                     'jam_masuk_siswa': instalasi.jam_masuk_siswa.strftime('%H:%M') if instalasi.jam_masuk_siswa else '-',
@@ -232,6 +233,8 @@ def admin_siswa(request):
             except Exception as e:
                 messages.error(request, f'Gagal mencetak record: {str(e)}')
                 return redirect('admin_siswa')
+            
+
         if request.method == 'POST':
             action = request.POST.get('action')
             if action == 'tambah':
@@ -252,6 +255,7 @@ def admin_siswa(request):
                     kelas_siswa = request.POST.get('kelas')
                     alamat = request.POST.get('alamat')
                     telegram_chat_id = request.POST.get('chatid')
+                    pinortu = request.POST.get('pinortu')
                     
                     
                     # Buat siswa baru dengan user yang telah dibuat
@@ -264,6 +268,7 @@ def admin_siswa(request):
                         kelas_id=kelas_siswa,
                         alamat=alamat,
                         telegram_chat_id=telegram_chat_id,
+                        pin_ortu=pinortu
                     )
                     messages.success(request, 'Data siswa berhasil ditambahkan.')
                 except Exception as e:
@@ -284,6 +289,7 @@ def admin_siswa(request):
                     alamat = request.POST.get('alamat')
                     chatid = request.POST.get('chatid')
                     password = request.POST.get('new_password')
+                    pinortu = request.POST.get('pinortu')
 
                     # Update user details
                     user = CustomUser.objects.get(id=id_user)
@@ -312,6 +318,7 @@ def admin_siswa(request):
                     siswa.tanggal_lahir = tanggal_lahir
                     siswa.alamat = alamat
                     siswa.telegram_chat_id = chatid
+                    siswa.pin_ortu = pinortu
                     siswa.save()
                     
                     messages.success(request, 'Data siswa berhasil diperbarui.')
@@ -362,7 +369,7 @@ def admin_siswa(request):
                     
                     # Periksa kolom yang diperlukan
                     required_columns = ['username', 'email', 'password', 'userid', 'nisn', 'nama', 
-                                      'tanggal_lahir', 'jenjang', 'kelas', 'alamat', 'telegram_chat_id']
+                                      'tanggal_lahir', 'jenjang', 'kelas', 'alamat', 'telegram_chat_id', 'pin_ortu']
                     
                     missing_columns = [col for col in required_columns if col not in df.columns]
                     if missing_columns:
@@ -449,7 +456,8 @@ def admin_siswa(request):
                                 jenjang=jenjang_obj,
                                 kelas=kelas_obj,
                                 alamat=str(row['alamat']).strip(),
-                                telegram_chat_id=str(row['telegram_chat_id']).strip()
+                                telegram_chat_id=str(row['telegram_chat_id']).strip(),
+                                pin_ortu=str(row['pin_ortu']).strip()
                             )
                             success_count += 1
                         except Exception as e:

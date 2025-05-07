@@ -9,6 +9,7 @@ from django.http import JsonResponse
 from django.utils.decorators import method_decorator
 from django.views.decorators.http import require_http_methods
 from django.urls import reverse
+from django.db.models.functions import Coalesce, TruncDate
 
 from apps.CustomAdmin.functions import *
 
@@ -47,6 +48,8 @@ def admin_guru(request):
                     'alamat': data_guru.alamat if data_guru else None,
                     'userid': data_guru.user.userid if data_guru.user else None,
                     'telegram_chat_id': data_guru.telegram_chat_id if data_guru else None,
+                    'is_wali_kelas': data_guru.wali_kelas if data_guru else False,
+                    'is_kepsek': data_guru.kepala_sekolah if data_guru else False,
                 }
                 edit_data_guru.append(data_edit)
                 
@@ -258,7 +261,17 @@ def admin_guru(request):
                 mata_pelajaran_selected = request.POST.get('mata_pelajaran')
                 alamat = request.POST.get('alamat')
                 telegram_chat_id = request.POST.get('chatid')
-                
+                walas = request.POST.get('is_wali_kelas')
+                if walas:
+                    wali_kelas = True
+                else:
+                    wali_kelas = False
+                    
+                kepsek = request.POST.get('is_kepsek')
+                if kepsek:
+                    kepala_sekolah = True
+                else:
+                    kepala_sekolah = False
                 guru = Guru.objects.create(
                     user=user,
                     nama=nama,
@@ -268,7 +281,9 @@ def admin_guru(request):
                     kelas_id=kelas_selected,
                     mata_pelajaran_id=mata_pelajaran_selected,
                     alamat=alamat,
-                    telegram_chat_id=telegram_chat_id
+                    telegram_chat_id=telegram_chat_id,
+                    wali_kelas=wali_kelas,
+                    kepala_sekolah=kepala_sekolah
                 )
                 messages.success(request, f'Data guru {nama} berhasil ditambahkan.')
                 
@@ -287,7 +302,16 @@ def admin_guru(request):
                 alamat = request.POST.get('alamat')
                 password = request.POST.get('new_password')
                 telegram_chat_id = request.POST.get('chatid')
-                
+                walas = request.POST.get('is_wali_kelas')
+                if walas:
+                    wali_kelas = True
+                else:
+                    wali_kelas = False
+                kepsek = request.POST.get('is_kepsek')
+                if kepsek:
+                    kepala_sekolah = True
+                else:
+                    kepala_sekolah = False                
                 user = CustomUser.objects.get(id=id_user)
                 user.username = username
                 user.email = email
@@ -318,6 +342,8 @@ def admin_guru(request):
                 
                 guru.alamat = alamat
                 guru.telegram_chat_id = telegram_chat_id
+                guru.wali_kelas = wali_kelas
+                guru.kepala_sekolah = kepala_sekolah
                 guru.save()
                 
                 messages.success(request, f'Data guru {nama} berhasil diperbarui.')
@@ -364,7 +390,8 @@ def admin_guru(request):
                     
                     # Periksa kolom yang diperlukan
                     required_columns = ['username', 'email', 'password', 'userid', 'nuptk', 'nama', 
-                                      'tanggal_lahir', 'jenjang', 'kelas', 'mata_pelajaran', 'alamat', 'telegram_chat_id']
+                                      'tanggal_lahir', 'jenjang', 'kelas', 'mata_pelajaran', 'alamat', 'telegram_chat_id',
+                                      'wali_kelas', 'kepala_sekolah']
                     
                     missing_columns = [col for col in required_columns if col not in df.columns]
                     if missing_columns:
@@ -444,6 +471,10 @@ def admin_guru(request):
                             kelas_obj, _ = kelas.objects.get_or_create(nama=str(row['kelas']).strip())
                             mata_pelajaran_obj, _ = mata_pelajaran.objects.get_or_create(nama=str(row['mata_pelajaran']).strip())
                             
+                            # Konversi nilai wali_kelas dan kepala_sekolah ke boolean
+                            wali_kelas = str(row['wali_kelas']).strip().lower() in ['true', '1', 'yes', 'ya']
+                            kepala_sekolah = str(row['kepala_sekolah']).strip().lower() in ['true', '1', 'yes', 'ya']
+                            
                             Guru.objects.create(
                                 user=user,
                                 nuptk=str(row['nuptk']).strip(),
@@ -453,7 +484,9 @@ def admin_guru(request):
                                 kelas=kelas_obj,
                                 mata_pelajaran=mata_pelajaran_obj,
                                 alamat=str(row['alamat']).strip(),
-                                telegram_chat_id=str(row['telegram_chat_id']).strip()
+                                telegram_chat_id=str(row['telegram_chat_id']).strip(),
+                                wali_kelas=wali_kelas,
+                                kepala_sekolah=kepala_sekolah
                             )
                             success_count += 1
                         except Exception as e:
@@ -505,7 +538,8 @@ def admin_guru(request):
             'today_status',
             'today_status_verifikasi',
             'today_checktime',
-            'today_tipe_absensi'
+            'today_tipe_absensi',
+            'wali_kelas'
         )
 
         # Memproses queryset untuk menampilkan status yang lebih detail
@@ -515,7 +549,8 @@ def admin_guru(request):
             status_verifikasi = guru_data[-3]  # today_status_verifikasi
             checktime = timezone.localtime(guru_data[-2]) if guru_data[-2] else None  # today_checktime
             tipe_absensi = guru_data[-1]  # today_tipe_absensi
-
+            
+            
             if status_verifikasi == 'menunggu':
                 display_status = "Belum Diverifikasi"
             elif status_verifikasi == 'ditolak':
@@ -543,11 +578,13 @@ def admin_guru(request):
             else:
                 display_status = status if status else "Belum Hadir"
             
+            
+            
             table_data.append(list(guru_data[:-4]) + [display_status])
             
         context = get_context()
         context.update({
-            'table_columns': ['ID', 'UserID', 'Nama', 'Jenjang', 'Kelas', 'Mata Pelajaran', 'Alamat', 'Username', 'Status'],
+            'table_columns': ['ID', 'UserID', 'Nama', 'Jenjang', 'Kelas', 'Mata Pelajaran', 'Alamat', 'Username', 'Status', 'Wali Kelas'],
             'table_data': table_data,
             
             'jenjang_list': jenjang.objects.all(),
@@ -644,7 +681,8 @@ def api_guru(request):
                 'mata_pelajaran': guru.mata_pelajaran.nama if guru.mata_pelajaran else '-',
                 'alamat': guru.alamat or '-',
                 'username': guru.user.username,
-                'status': display_status
+                'status': display_status,
+                'wali_kelas': 'Ya' if guru.wali_kelas else 'Tidak'
             })
         
         return JsonResponse({'guru': data}, safe=False)

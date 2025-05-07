@@ -5,11 +5,13 @@ from apps.Guru import views as guru
 from apps.Karyawan import views as karyawan
 from apps.main import views as main
 from apps.Siswa import views as siswa
+from apps.Ortu import views as ortu
 
 urlpatterns = [
     # Main
     path('', main.instalasi, name='instalasi'),
     path('login/', main.login_view, name='login_view'),
+    path('login/ortu/', main.login_ortu_view, name='login_ortu_view'),
     path('logout/', main.logout_view, name='logout_view'),
     path('webhook/kehadiran/', main.webhook_kehadiran, name='webhook_kehadiran'),
     
@@ -46,10 +48,26 @@ urlpatterns = [
     path('siswa/statistik/', siswa.siswa_statistik, name='siswa_statistik'),
     path('siswa/pengaturan/', siswa.siswa_pengaturan, name='siswa_pengaturan'),
     
+    # Ortu
+    path('ortu/', ortu.ortu_dashboard, name='ortu_dashboard'),
+    path('ortu/statistik/', ortu.ortu_statistik, name='ortu_statistik'),
+    path('ortu/pengaturan/', ortu.ortu_pengaturan, name='ortu_pengaturan'),
+    
     # Guru
     path('guru/', guru.guru_dashboard, name='guru_dashboard'),
     path('guru/statistik/', guru.guru_statistik, name='guru_statistik'),
     path('guru/pengaturan/', guru.guru_pengaturan, name='guru_pengaturan'),
+    path('guru/verifikasi/', guru.guru_verifikasi, name='guru_verifikasi'),
+    path('guru/verifikasi/api/', guru.api_verifikasi_guru, name='api_verifikasi_guru'),
+    path('guru/siswa/', guru.guru_siswa, name='guru_siswa'),
+    path('guru/siswa/api/', guru.api_siswa_guru, name='api_siswa_guru'),
+    path('guru/absensi/siswa/', guru.admin_dashboard_absensi_siswa_kepsek, name='admin_dashboard_absensi_siswa_kepsek'),
+    path('guru/absensi/guru/', guru.admin_dashboard_absensi_guru_kepsek , name='admin_dashboard_absensi_guru_kepsek'),
+    path('guru/absensi/siswa/api/', guru.api_dashboard_siswa_kepsek, name='api_dashboard_siswa_kepsek'),
+    path('guru/absensi/guru/api/', guru.api_dashboard_guru_kepsek, name='api_dashboard_guru_kepsek'),
+    
+    
+    
     # Karyawan
     path('karyawan/', karyawan.karyawan_dashboard, name='karyawan_dashboard'),
     path('karyawan/statistik/', karyawan.karyawan_statistik, name='karyawan_statistik'),
@@ -83,4 +101,6 @@ urlpatterns = [
     path('api/jenjang/', admin.api_jenjang, name='api_jenjang'),
     path('api/verifikasi/', admin.api_verifikasi, name='api_verifikasi'),
     path('api/tanggal-merah/', admin.api_tanggal_merah, name='api_tanggal_merah'),
+    
+    path('download-format/', main.download_format, name='download_format'),
 ]

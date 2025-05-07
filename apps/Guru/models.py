@@ -17,6 +17,8 @@ class Guru(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, blank=True)
     telegram_chat_id = models.CharField(max_length=20, null=True, blank=True)
     notifikasi_telegram = models.BooleanField(default=False)
+    wali_kelas = models.BooleanField(default=False)
+    kepala_sekolah = models.BooleanField(default=False)
 
     
     def __str__(self):

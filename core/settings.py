@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'apps.Karyawan',
     'apps.Siswa',
     'apps.main',
+    'apps.Ortu',
     
     
     # Third Party

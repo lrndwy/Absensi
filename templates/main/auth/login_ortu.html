@@ -1,0 +1,39 @@
+{% extends 'base.html' %} {% block content %}
+  <div class="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-800">
+    <div class="w-full max-w-md mx-auto h-screen flex flex-col justify-center">
+      <div class="flex justify-center mb-6">
+        <img src="{{ logoimage }}" alt="Logo" class="w-24 h-24 object-contain" />
+      </div>
+
+      <div>
+        <h3 class="text-2xl text-center mb-6 dark:text-white">Presensi {{ nama_sekolah }}</h3>
+      </div>
+      <div class="mb-6">
+        {% include 'notification.html' %}
+      </div>
+      <form class="bg-white dark:bg-gray-800 shadow border border-gray-300 rounded-lg px-8 pt-6 pb-8 dark:shadow-none dark:border-gray-700 dark:text-white" method="POST">
+        {% csrf_token %}
+        <h1 class="text-2xl font-bold text-center mb-6">Login</h1>
+        <div class="mb-4 relative">
+          <input type="text" id="username" name="username" class="block rounded-t-lg px-2.5 pb-2.5 pt-5 w-full text-sm text-gray-900 bg-gray-50 dark:bg-gray-700 border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " />
+          <label for="username" class="absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-4 z-10 origin-[0] start-2.5 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto">Username</label>
+        </div>
+        <div class="mb-6 relative">
+          <input type="password" id="password" name="password" class="block rounded-t-lg px-2.5 pb-2.5 pt-5 w-full text-sm text-gray-900 bg-gray-50 dark:bg-gray-700 border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " />
+          <label for="password" class="absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-4 z-10 origin-[0] start-2.5 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto">Password</label>
+        </div>
+        <div class="mb-6 relative">
+          <input type="pinortu" id="pinortu" name="pinortu" class="block rounded-t-lg px-2.5 pb-2.5 pt-5 w-full text-sm text-gray-900 bg-gray-50 dark:bg-gray-700 border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " />
+          <label for="pinortu" class="absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-4 z-10 origin-[0] start-2.5 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto">PIN Ortu</label>
+        </div>
+        <div class="flex items-center justify-center">
+          <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-full w-full focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:scale-105">Masuk</button>
+        </div>
+      </form>
+      <div class="flex items-center justify-center my-4 px-8">
+        <button onclick="window.location.href='{% url 'login_view' %}'" class="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2 px-4 rounded-full w-full focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:scale-105">Kembali</button>
+      </div>
+      <div class="mt-8 text-center text-sm text-gray-600 dark:text-gray-400">&copy; 2024 {{ nama_sekolah }}. Hak Cipta Dilindungi.</div>
+    </div>
+  </div>
+{% endblock %}

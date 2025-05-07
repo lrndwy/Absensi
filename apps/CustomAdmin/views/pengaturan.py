@@ -84,6 +84,7 @@ def admin_pengaturan(request):
                     fitur_siswa = request.POST.get('fitur_siswa') == 'on'
                     fitur_guru = request.POST.get('fitur_guru') == 'on'
                     fitur_karyawan = request.POST.get('fitur_karyawan') == 'on'
+                    fitur_ortu = request.POST.get('fitur_ortu') == 'on'
                     
                     if instalasi:
                         instalasi.nama_sekolah = nama_sekolah
@@ -95,6 +96,7 @@ def admin_pengaturan(request):
                         instalasi.fitur_siswa = fitur_siswa
                         instalasi.fitur_guru = fitur_guru
                         instalasi.fitur_karyawan = fitur_karyawan
+                        instalasi.akun_ortu = fitur_ortu
                         instalasi.telegram_token = telegram_token
                         
                         # Update jam untuk siswa
@@ -147,6 +149,11 @@ def admin_pengaturan(request):
                             messages.info(request, 'Fitur karyawan diaktifkan.')
                         else:
                             messages.info(request, 'Fitur karyawan dinonaktifkan.')
+                        
+                        if fitur_ortu:
+                            messages.info(request, 'Fitur akun orang tua diaktifkan.')
+                        else:
+                            messages.info(request, 'Fitur akun orang tua dinonaktifkan.')
                     else:
                         messages.error(request, 'Data instalasi tidak ditemukan.')
                 except Exception as e:
@@ -164,6 +171,7 @@ def admin_pengaturan(request):
             'fitur_siswa': instalasi.fitur_siswa,
             'fitur_guru': instalasi.fitur_guru,
             'fitur_karyawan': instalasi.fitur_karyawan,
+            'fitur_ortu': instalasi.akun_ortu,
             'telegram_token': instalasi.telegram_token,
             'jam_masuk_siswa': instalasi.jam_masuk_siswa.strftime('%H:%M') if instalasi.jam_masuk_siswa else '',
             'jam_pulang_siswa': instalasi.jam_pulang_siswa.strftime('%H:%M') if instalasi.jam_pulang_siswa else '',

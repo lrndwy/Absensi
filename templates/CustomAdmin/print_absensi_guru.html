@@ -67,12 +67,20 @@
             
         </div>
     </div>
-        <div class="mb-6 text-gray-800 dark:text-gray-200">
-        <p class="mb-2"><span class="font-semibold">Nama:</span> {{ guru.nama }}</p>
-        <p class="mb-2"><span class="font-semibold">NUPTK:</span> {{ guru.nuptk }}</p>
-        <p class="mb-2"><span class="font-semibold">Mata Pelajaran:</span> {{ guru.mata_pelajaran.nama }}</p>
-        <p class="mb-2"><span class="font-semibold">Kelas:</span> {{ guru.kelas.nama }}</p>
-        <p class="mb-2"><span class="font-semibold">Jenjang:</span> {{ guru.jenjang.nama }}</p>
+    <div class="mb-6 text-gray-800 dark:text-gray-200 flex flex-col-2 gap-4 text-xl">
+        <div class="relative">
+            <p class="mb-2"><span class="font-semibold">Nama:</span> {{ guru.nama }}</p>
+            <p class="mb-2"><span class="font-semibold">NUPTK:</span> {{ guru.nuptk }}</p>
+            
+        </div>
+        <div class="relative">
+            <p class="mb-2"><span class="font-semibold">Kelas:</span> {{ guru.kelas.nama }}</p>
+            <p class="mb-2"><span class="font-semibold">Jenjang:</span> {{ guru.jenjang.nama }}</p>
+        </div>
+        <div class="relative">
+            <p class="mb-2"><span class="font-semibold">Mata Pelajaran:</span> {{ guru.mata_pelajaran.nama }}</p>
+        </div>
+   
     </div>
 
     <div class="overflow-x-auto relative sm:rounded-lg mb-6">

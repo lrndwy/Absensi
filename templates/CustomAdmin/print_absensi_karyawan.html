@@ -67,11 +67,15 @@
         </div>
     </div>
 
-    <div class="mb-6 text-gray-800 dark:text-gray-200">
-        <p class="mb-2"><span class="font-semibold">Nama:</span> {{ karyawan.nama }}</p>
-        <p class="mb-2"><span class="font-semibold">NIP:</span> {{ karyawan.nip }}</p>
-        <p class="mb-2"><span class="font-semibold">Jabatan:</span> {{ karyawan.jabatan.nama }}</p>
-        <p class="mb-2"><span class="font-semibold">Alamat:</span> {{ karyawan.alamat }}</p>
+    <div class="mb-6 text-gray-800 dark:text-gray-200 flex flex-col-2 gap-4 text-xl">
+        <div class="relative">
+            <p class="mb-2"><span class="font-semibold">Nama:</span> {{ karyawan.nama }}</p>
+            <p class="mb-2"><span class="font-semibold">NIP:</span> {{ karyawan.nip }}</p>
+        </div>
+        <div class="relative">
+            <p class="mb-2"><span class="font-semibold">Jabatan:</span> {{ karyawan.jabatan.nama }}</p>
+            <p class="mb-2"><span class="font-semibold">Alamat:</span> {{ karyawan.alamat }}</p>
+        </div>
     </div>
 
     <div class="overflow-x-auto relative sm:rounded-lg mb-6">

@@ -24,6 +24,7 @@ class Instalasi(models.Model):
     jam_kerja_karyawan = models.DurationField(null=True, blank=True)
     jam_kerja_guru = models.DurationField(null=True, blank=True)
     jam_sekolah_siswa = models.DurationField(null=True, blank=True)
+    akun_ortu = models.BooleanField(default=False)
     
     def save(self, *args, **kwargs):
         if self.jam_masuk_siswa and self.jam_pulang_siswa:

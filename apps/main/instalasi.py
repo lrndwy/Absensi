@@ -17,6 +17,7 @@ def get_context():
             'fitur_siswa': data_instalasi.fitur_siswa,
             'fitur_guru': data_instalasi.fitur_guru,
             'fitur_karyawan': data_instalasi.fitur_karyawan,
+            'fitur_ortu': data_instalasi.akun_ortu,
         })
     return context
 
@@ -34,6 +35,7 @@ def cek_instalasi(view_func):
                     'fitur_siswa': data_instalasi.fitur_siswa,
                     'fitur_guru': data_instalasi.fitur_guru,
                     'fitur_karyawan': data_instalasi.fitur_karyawan,
+                    'fitur_ortu': data_instalasi.akun_ortu,
                 })
                 return view_func(request, *args, **kwargs)
             else:

@@ -79,6 +79,25 @@
         <span class="ms-3">Pengaturan</span>
     </a>
 </li>
+{% elif user_is_ortu == True %}
+<li>
+    <a href="{% url 'ortu_dashboard' %}" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group {% if 'siswa_dashboard' in request.resolver_match.url_name %}bg-gray-100 dark:bg-gray-700{% endif %}">
+        <img src="https://img.icons8.com/?size=100&id=wFfu6zXx15Yk&format=png&color=000000" alt="Dashboard Icon" class="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white">
+        <span class="ms-3">Dashboard</span>
+    </a>
+</li>
+<li>
+    <a href="{% url 'ortu_statistik' %}" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group {% if 'siswa_statistik' in request.resolver_match.url_name %}bg-gray-100 dark:bg-gray-700{% endif %}">
+        <img src="https://img.icons8.com/?size=100&id=mOCU2P4rcj4p&format=png&color=000000" alt="Dashboard Icon" class="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white">
+        <span class="ms-3">Statistik</span>
+    </a>
+</li>
+<li>
+    <a href="{% url 'ortu_pengaturan' %}" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group {% if 'siswa_pengaturan' in request.resolver_match.url_name %}bg-gray-100 dark:bg-gray-700{% endif %}">
+        <img src="https://img.icons8.com/?size=100&id=xsg8DrPwYfql&format=png&color=000000" alt="Pengaturan Icon" class="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white">
+        <span class="ms-3">Pengaturan</span>
+    </a>
+</li>
 {% elif user_is_guru == True %}
 <li>
     <a href="{% url 'guru_dashboard' %}" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group {% if 'guru_dashboard' in request.resolver_match.url_name %}bg-gray-100 dark:bg-gray-700{% endif %}">
@@ -98,6 +117,32 @@
         <span class="ms-3">Pengaturan</span>
     </a>
 </li>
+{% if walas == True %}
+<li>
+    <a href="{% url 'guru_siswa' %}" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group {% if 'admin_siswa' in request.resolver_match.url_name %}bg-gray-100 dark:bg-gray-700{% endif %}">
+        <img src="https://img.icons8.com/?size=100&id=2HnyYObAxn8V&format=png&color=000000" alt="Siswa Icon" class="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white">
+        <span class="ms-3">Siswa</span>
+    </a>
+</li>
+
+<li>
+    <a href="{% url 'guru_verifikasi' %}" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group {% if 'admin_verifikasi' in request.resolver_match.url_name %}bg-gray-100 dark:bg-gray-700{% endif %}">
+        <img src="https://img.icons8.com/?size=100&id=pIPl8tqh3igN&format=png&color=000000" alt="Izin Icon" class="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white">
+        <span class="ms-3">Verifikasi</span>
+    </a>
+</li>
+{% if kepsek == True %}
+<li>
+    <a href="{% url 'admin_dashboard_absensi_siswa_kepsek' %}" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group {% if 'admin_dashboard' in request.resolver_match.url_name %}bg-gray-100 dark:bg-gray-700{% endif %}">
+        <img src="https://img.icons8.com/?size=100&id=wFfu6zXx15Yk&format=png&color=000000" alt="Dashboard Icon" class="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white">
+        <span class="ms-3">Dashboard Kepsek</span>
+    </a>
+</li>
+{% endif %}
+
+{% endif %}
+
+
 {% elif user_is_karyawan == True %}
 <li>
     <a href="{% url 'karyawan_dashboard' %}" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group {% if 'karyawan_dashboard' in request.resolver_match.url_name %}bg-gray-100 dark:bg-gray-700{% endif %}">
