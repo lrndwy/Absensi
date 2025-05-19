@@ -420,7 +420,7 @@ def guru_verifikasi(request):
             'verifikasi': True,
             'kepsek': kepsek,
         })
-        return render(request, 'guru/guru_verifikasi.html', context)
+        return render(request, 'Guru/guru_verifikasi.html', context)
     except Exception as e:
         messages.error(request, f'Terjadi kesalahan pada sistem: {str(e)}')
         return redirect('guru_verifikasi')
@@ -1004,7 +1004,7 @@ def guru_siswa(request):
             'walas': walas,
             'kepsek': kepsek
         })
-        return render(request, 'guru/guru_siswa.html', context)
+        return render(request, 'Guru/guru_siswa.html', context)
     except Exception as e:
         messages.error(request, f'Terjadi kesalahan pada sistem: {str(e)}')
         return redirect('guru_siswa')

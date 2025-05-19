@@ -131,6 +131,7 @@
         <span class="ms-3">Verifikasi</span>
     </a>
 </li>
+{% endif %}
 {% if kepsek == True %}
 <li>
     <a href="{% url 'admin_dashboard_absensi_siswa_kepsek' %}" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group {% if 'admin_dashboard' in request.resolver_match.url_name %}bg-gray-100 dark:bg-gray-700{% endif %}">
@@ -138,7 +139,7 @@
         <span class="ms-3">Dashboard Kepsek</span>
     </a>
 </li>
-{% endif %}
+
 
 {% endif %}
 
